@@ -2,7 +2,9 @@
 REmote Sensing and Image Processing in PYthon
 
 Tools to perform image processing with a focus on overhead and spectral remote sensing applications.  Some features include:
-Navigation from world coordinate to camera pixel coordinates and vice versa.
+Navigation from world coordinate to camera pixel coordinates
+Navigation from pixel coordinates to world coordinates
+Orthorectification
 Spectral matched filters
 Reading spectral libraries
 
