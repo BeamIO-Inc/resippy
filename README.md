@@ -22,6 +22,7 @@ A few notes on installation.  There are 2 dependencies that can be tricky.  Thos
 
 
 conda install gdal
+
 conda install pyproj
 
 
