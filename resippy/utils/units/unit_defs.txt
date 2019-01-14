@@ -1,0 +1,3 @@
+micron = micrometer
+flick = watt/cm**2/steradian/micrometer
+reflectance_zero_to_one = zero_to_one
