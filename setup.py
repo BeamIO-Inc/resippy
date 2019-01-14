@@ -19,4 +19,14 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     license="BSD (3 clause)",
+    install_requires=[
+        'GDAL',
+        'pyproj',
+        'numpy<1.16.0',
+        'scipy',
+        'scikit-image',
+        'shapely',
+        'pint==0.9',
+        'imageio',
+    ]
 )
