@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ce52d927-e6bc-481d-bd93-2582e9317766" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resippy/image_objects/earth_overhead/abstract_earth_overhead_point_calc.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/image_objects/earth_overhead/abstract_earth_overhead_point_calc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resippy/image_recognition/neural_net_model_training/keras_model_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/image_recognition/neural_net_model_training/keras_model_training.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resippy/utils/file_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/utils/file_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resippy/utils/image_utils/image_chipper.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/utils/image_utils/image_chipper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resippy/utils/numpy_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/utils/numpy_and_array_utils.py" afterDir="false" />
-    </list>
+    <list default="true" id="ce52d927-e6bc-481d-bd93-2582e9317766" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,7 +12,7 @@
     <session id="-301548943">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="2" />
+          <entry key="project.closed" value="3" />
           <entry key="project.open.time.0" value="2" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.opened" value="3" />
@@ -90,7 +82,11 @@
       </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/resippy/utils/string_utils.py">
-          <provider selected="true" editor-type-id="text-editor" />
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="272">
+              <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
+            </state>
+          </provider>
         </entry>
       </file>
     </leaf>
@@ -156,12 +152,6 @@
               <item name="resippy" type="b2602c69:ProjectViewProjectNode" />
               <item name="resippy" type="462c0819:PsiDirectoryNode" />
               <item name="resippy" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="resippy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -348,7 +338,11 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/resippy/utils/string_utils.py">
-      <provider selected="true" editor-type-id="text-editor" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
+        </state>
+      </provider>
     </entry>
   </component>
 </project>
