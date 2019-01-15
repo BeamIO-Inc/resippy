@@ -12,6 +12,7 @@ def get_nchips(image_chips,     # type: ndarray
                ): # type: (...) -> int
     return image_chips.shape[0]
 
+
 def chip_entire_image_to_memory(input_image,                    # type: ndarray
                                 chip_ny_pixels=256,             # type: int
                                 chip_nx_pixels=256,             # type: int
@@ -51,7 +52,8 @@ def chip_entire_image_to_memory(input_image,                    # type: ndarray
                                             keep_within_image_bounds=keep_within_image_bounds)
 
 
-# TODO support for chipping outside of image bounds is not yet supported.  Indices will be adjusted to keep within image bounds.
+# TODO support for chipping outside of image bounds is not yet supported.
+# TODO Indices will be adjusted to keep within image bounds.
 def chip_images_by_pixel_upper_lefts(input_image,                   # type: ndarray
                                      pixel_y_ul_list,               # type: list
                                      pixel_x_ul_list,               # type: list
@@ -125,6 +127,7 @@ def chip_images_by_pixel_centers(input_image,                   # type: ndarray
 def write_chips_to_disk(image_chips,            # type: ndarray
                         output_dir,             # type: str
                         base_chip_fname=None,   # type: str
+                        fnames_list=None,       # type: list
                         output_chip_ny=None,    # type: int
                         output_chip_nx=None,    # type: int
                         remove_alpha=True,      # type: bool
@@ -139,6 +142,9 @@ def write_chips_to_disk(image_chips,            # type: ndarray
             chip = scipy_misc.imresize(chip, (output_chip_ny, output_chip_nx))
         if remove_alpha is True and chip.shape[-1] == 4:
             chip = chip[:, :, 0:3]
-        chip_fname = base_chip_fname + "_" + str(i).zfill(8) + "." + output_format.replace(".", "")
+        chip_fname = base_chip_fname + "_" + str(i).zfill(8)
+        if fnames_list is not None:
+            chip_fname = fnames_list[i]
+        chip_fname = chip_fname + "." + output_format.replace(".", "")
         chip_fullpath = os.path.join(output_dir, chip_fname)
         imageio.imsave(chip_fullpath, chip)

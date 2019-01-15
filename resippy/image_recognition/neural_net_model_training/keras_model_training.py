@@ -10,6 +10,7 @@ from time import time
 import tensorflow as tf
 from tensorflow import Tensor
 import os
+import resippy.utils.file_utils as file_utils
 
 # Do the following to allow our GPU memory to grow, otherwise we might run out of memory on the GPU
 from keras.backend.tensorflow_backend import set_session
@@ -107,6 +108,12 @@ def train_model(base_model,                                 # type: Model
     tensorboard = TensorBoard(log_dir=tensorboard_log_dir)
 
     filepath = os.path.join(output_dir, model_output_fname)
+
+    labels_fname = os.path.join(output_dir, "labels.txt")
+    sorted_class_labels = sorted(list(training_generator.class_indices.keys()))
+    class_labels_fname = os.path.join(output_dir, "labels.txt")
+    file_utils.write_text_list_to_file(sorted_class_labels, class_labels_fname)
+
     checkpoint = ModelCheckpoint(filepath,
                                  monitor='val_loss',
                                  verbose=1,
@@ -137,3 +144,8 @@ def train_model(base_model,                                 # type: Model
             validation_data=validation_generator,
             validation_steps=validation_steps
             )
+
+
+def get_class_indices(training_generator,       # type: DirectoryIterator
+                      ):                        # type: (...) -> dict
+    return training_generator.class_indices

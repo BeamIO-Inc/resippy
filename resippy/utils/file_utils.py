@@ -43,3 +43,19 @@ def get_path_from_subdirs(base_dir,     # type: str
     paths_list.extend(subdirs)
     abs_path = reduce(os.path.join, paths_list)
     return abs_path
+
+
+def write_text_list_to_file(text_list,  # type: list
+                            output_fname,  # type: str
+                            ):              # type: (...) -> None
+    text_list_with_newlines = [entry + '\n' for entry in text_list]
+    text_list_with_newlines[-1] = text_list[-1]
+    with open(output_fname, 'w') as f:
+        f.writelines(text_list_with_newlines)
+
+
+def read_text_list_from_file(text_file_fname,   # type: str
+                             ):                 # type: (...) -> list
+    with open(text_file_fname, 'r') as f:
+        text_list = f.readlines()
+    return text_list
