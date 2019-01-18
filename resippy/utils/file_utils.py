@@ -2,6 +2,8 @@ import os
 from functools import reduce
 from typing import Union
 import glob
+import resippy.utils.string_utils as string_utils
+import json
 
 
 def make_dir_if_not_exists(dir_to_create    # type: str
@@ -58,4 +60,6 @@ def read_text_list_from_file(text_file_fname,   # type: str
                              ):                 # type: (...) -> list
     with open(text_file_fname, 'r') as f:
         text_list = f.readlines()
+    for i in range(len(text_list)):
+        text_list[i] = string_utils.remove_newlines(text_list[i])
     return text_list

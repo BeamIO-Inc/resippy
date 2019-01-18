@@ -6,6 +6,9 @@ from typing import Union
 from skimage import transform as sktransform
 import gdal
 import ogr
+import seaborn
+from seaborn.palettes import _ColorPalette
+import resippy.utils.numpy_and_array_utils as numpy_utils
 
 
 def create_uniform_image_data(nx,               # type: int
@@ -136,3 +139,84 @@ def get_image_ny_nx_nbands(image_2d     # type: ndarray
         nbands = image_2d.shape[2]
     return ny, nx, nbands
 
+
+def create_detection_image_from_scores(score_values, upper_left_yx_tuples, chip_size_x, chip_size_y):
+    ny = upper_left_yx_tuples[:, 0].max() + chip_size_y
+    nx = upper_left_yx_tuples[:, 1].max() + chip_size_x
+    detection_image = np.zeros((ny, nx))
+    score_sorted_indices = np.argsort(score_values)
+    for score_index in score_sorted_indices:
+        ul_yx = upper_left_yx_tuples[score_index]
+        score = score_values[score_index]
+        detection_image[ul_yx[0]:ul_yx[0] + chip_size_y, ul_yx[1]:ul_yx[1] + chip_size_x] = score
+    return detection_image
+
+
+# TODO: add support for discrete color steps, rather than just continous
+def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
+                                      color_palette=None,  # type: Union[_ColorPalette, ndarray]
+                                      continuous=True,      # type: bool
+                                      n_bins=None,          # type: int
+                                      min_value=None,       # type: float
+                                      max_value=None        # type: float
+                                      ):                # type: (...) -> ndarray
+    if color_palette is None:
+        color_palette = seaborn.color_palette("GnBu_r")
+    if min_value is None:
+        min_value = np.min(grayscale_image)
+    if max_value is None:
+        max_value = np.max(grayscale_image)
+    color_palette = np.asarray(color_palette)
+    if n_bins is None:
+        n_bins = np.shape(color_palette)[0]
+    palette_indices = numpy_utils.ndarray_n_to_m(min_value, max_value, n_bins)
+    image_low_index_map = np.zeros(grayscale_image.shape, dtype=np.int8)
+    image_high_index_map = np.zeros(grayscale_image.shape, dtype=np.int8)
+    image_low_palette_index = np.zeros(grayscale_image.shape)
+    image_high_palette_index = np.zeros(grayscale_image.shape)
+
+    palette_reds_low = np.zeros(grayscale_image.shape)
+    palette_reds_high = np.zeros(grayscale_image.shape)
+    palette_greens_low = np.zeros(grayscale_image.shape)
+    palette_greens_high = np.zeros(grayscale_image.shape)
+    palette_blues_low = np.zeros(grayscale_image.shape)
+    palette_blues_high = np.zeros(grayscale_image.shape)
+
+    for i in range(n_bins - 1):
+        bin_indices = np.logical_and(grayscale_image >= palette_indices[i], grayscale_image <= palette_indices[i+1])
+        image_low_index_map[bin_indices] = i
+        image_high_index_map[bin_indices] = i+1
+        image_low_palette_index[bin_indices] = palette_indices[i]
+        image_high_palette_index[bin_indices] = palette_indices[i+1]
+    stop = 1
+    palette_index_weights_high = (grayscale_image - image_low_palette_index) / \
+                                 (image_high_palette_index - image_low_palette_index)
+    palette_index_weights_low = 1.0 - palette_index_weights_high
+
+    for i in range(n_bins - 1):
+        palette_reds_low[np.where(image_low_index_map == i)] = color_palette[i, 0]
+        palette_reds_high[np.where(image_low_index_map ==i)] = color_palette[i+1, 0]
+        palette_greens_low[np.where(image_low_index_map == i)] = color_palette[i, 1]
+        palette_greens_high[np.where(image_low_index_map == i)] = color_palette[i+1, 1]
+        palette_blues_low[np.where(image_low_index_map == i)] = color_palette[i, 2]
+        palette_blues_high[np.where(image_low_index_map == i)] = color_palette[i+1, 2]
+
+    ny, nx, bands = get_image_ny_nx_nbands(grayscale_image)
+    colormapped_image = np.zeros((ny, nx, 3))
+    colormapped_image[:, :, 0] = palette_reds_low * palette_index_weights_low + \
+                                 palette_reds_high * palette_index_weights_high
+    colormapped_image[:, :, 1] = palette_greens_low * palette_index_weights_low + \
+                                 palette_greens_high * palette_index_weights_high
+    colormapped_image[:, :, 2] = palette_blues_low * palette_index_weights_low + \
+                                 palette_blues_high * palette_index_weights_high
+    colormapped_image = colormapped_image * 255
+    colormapped_image = np.asarray(colormapped_image, dtype=np.uint8)
+    return colormapped_image
+
+
+def blend_images(image_1,               # type: ndarray
+                 image_2,               # type: ndarray
+                 image_1_percent=0.5    # type: float
+                 ):                     # type: (...) -> ndarray
+    ny, nx, nbands = get_image_ny_nx_nbands()
+    stop = 1
