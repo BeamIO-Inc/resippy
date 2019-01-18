@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ce52d927-e6bc-481d-bd93-2582e9317766" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/resippy/utils/file_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/utils/file_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resippy/utils/image_utils/image_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/utils/image_utils/image_utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,7 +14,7 @@
     <session id="-301548943">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="3" />
+          <entry key="project.closed" value="4" />
           <entry key="project.open.time.0" value="3" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.opened" value="4" />
@@ -89,13 +88,12 @@
         <entry file="file://$PROJECT_DIR$/resippy/utils/image_utils/image_utils.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="612">
-              <caret line="213" column="4" selection-start-line="213" selection-start-column="4" selection-end-line="213" selection-end-column="4" />
+              <caret line="218" column="4" selection-start-line="218" selection-start-column="4" selection-end-line="218" selection-end-column="4" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
-                <marker date="1547789752944" expanded="true" signature="5463:5468" ph="..." />
-                <marker date="1547789752944" expanded="true" signature="6068:6108" ph="..." />
-                <marker date="1547789752944" expanded="true" signature="6068:6113" ph="..." />
-                <marker date="1547789752944" expanded="true" signature="9285:9290" ph="..." />
+                <marker date="1547791108648" expanded="true" signature="5463:5468" ph="..." />
+                <marker date="1547791108648" expanded="true" signature="6068:6108" ph="..." />
+                <marker date="1547791108648" expanded="true" signature="6068:6113" ph="..." />
               </folding>
             </state>
           </provider>
@@ -287,7 +285,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/resippy/utils/image_utils/image_utils.py</url>
-          <line>213</line>
+          <line>218</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
@@ -386,13 +384,12 @@
     <entry file="file://$PROJECT_DIR$/resippy/utils/image_utils/image_utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="612">
-          <caret line="213" column="4" selection-start-line="213" selection-start-column="4" selection-end-line="213" selection-end-column="4" />
+          <caret line="218" column="4" selection-start-line="218" selection-start-column="4" selection-end-line="218" selection-end-column="4" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
-            <marker date="1547789752944" expanded="true" signature="5463:5468" ph="..." />
-            <marker date="1547789752944" expanded="true" signature="6068:6108" ph="..." />
-            <marker date="1547789752944" expanded="true" signature="6068:6113" ph="..." />
-            <marker date="1547789752944" expanded="true" signature="9285:9290" ph="..." />
+            <marker date="1547791108648" expanded="true" signature="5463:5468" ph="..." />
+            <marker date="1547791108648" expanded="true" signature="6068:6108" ph="..." />
+            <marker date="1547791108648" expanded="true" signature="6068:6113" ph="..." />
           </folding>
         </state>
       </provider>

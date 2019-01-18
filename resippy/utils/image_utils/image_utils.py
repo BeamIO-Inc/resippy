@@ -209,8 +209,13 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
                                  palette_greens_high * palette_index_weights_high
     colormapped_image[:, :, 2] = palette_blues_low * palette_index_weights_low + \
                                  palette_blues_high * palette_index_weights_high
+
+    colormapped_image[grayscale_image < min_value, :] = color_palette[0, :]
+    colormapped_image[grayscale_image > max_value, :] = color_palette[-1, :]
+
     colormapped_image = colormapped_image * 255
     colormapped_image = np.asarray(colormapped_image, dtype=np.uint8)
+
     return colormapped_image
 
 
@@ -218,5 +223,4 @@ def blend_images(image_1,               # type: ndarray
                  image_2,               # type: ndarray
                  image_1_percent=0.5    # type: float
                  ):                     # type: (...) -> ndarray
-    ny, nx, nbands = get_image_ny_nx_nbands()
-    stop = 1
+    return image_1 * image_1_percent + image_2 * (1 - image_1_percent)
