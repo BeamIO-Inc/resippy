@@ -156,22 +156,25 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
                                       color_palette=None,  # type: Union[_ColorPalette, ndarray]
                                       continuous=True,  # type: bool
                                       n_bins=None,  # type: int
-                                      min_value=None,  # type: float
-                                      max_value=None,  # type: float
+                                      min_clip=None,  # type: float
+                                      max_clip=None,  # type: float
                                       output_dtype=np.uint8
                                       ):  # type: (...) -> ndarray
     if color_palette is None:
         color_palette = seaborn.color_palette("GnBu_r")
-    if min_value is None:
-        min_value = np.min(grayscale_image)
-    if max_value is None:
-        max_value = np.max(grayscale_image)
+    if min_clip is None:
+        min_clip = np.min(grayscale_image)
+    if max_clip is None:
+        max_clip = np.max(grayscale_image)
     color_palette = np.asarray(color_palette)
 
     if n_bins is not None:
-        tmp_grayscale_image = numpy_utils.ndarray_n_to_m(min_value, max_value, n_bins)
+        tmp_grayscale_image = numpy_utils.ndarray_n_to_m(min_clip, max_clip, n_bins)
         tmp_grayscale_image = np.expand_dims(tmp_grayscale_image, 0)
-        new_color_palette = apply_colormap_to_grayscale_image(tmp_grayscale_image, color_palette, continuous=True, output_dtype=np.float64)
+        new_color_palette = apply_colormap_to_grayscale_image(tmp_grayscale_image,
+                                                              color_palette,
+                                                              continuous=True,
+                                                              output_dtype=np.float64)
         new_color_palette = np.squeeze(new_color_palette / 255.0)
         color_palette = new_color_palette
 
@@ -179,9 +182,9 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
         n_bins = np.shape(color_palette)[0]
 
     if continuous is not True:
-        max_value = min_value + (max_value - min_value) * (n_bins - 1) / n_bins
+        max_clip = min_clip + (max_clip - min_clip) * (n_bins - 1) / n_bins
 
-    palette_indices = numpy_utils.ndarray_n_to_m(min_value, max_value, n_bins)
+    palette_indices = numpy_utils.ndarray_n_to_m(min_clip, max_clip, n_bins)
     image_low_index_map = np.zeros(grayscale_image.shape, dtype=np.int8)
     image_high_index_map = np.zeros(grayscale_image.shape, dtype=np.int8)
     image_low_palette_index = np.zeros(grayscale_image.shape)
@@ -227,9 +230,8 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
         colormapped_image[:, :, 1] = palette_greens_low
         colormapped_image[:, :, 2] = palette_blues_low
 
-    if not continuous:
-        colormapped_image[grayscale_image < min_value, :] = color_palette[0, :]
-        colormapped_image[grayscale_image > max_value, :] = color_palette[-1, :]
+    colormapped_image[grayscale_image < min_clip, :] = color_palette[0, :]
+    colormapped_image[grayscale_image > max_clip, :] = color_palette[-1, :]
 
     colormapped_image = colormapped_image * 255.0
     colormapped_image = np.asarray(colormapped_image, dtype=output_dtype)
