@@ -11,12 +11,12 @@ from seaborn.palettes import _ColorPalette
 import resippy.utils.numpy_and_array_utils as numpy_utils
 
 
-def create_uniform_image_data(nx,               # type: int
-                              ny,               # type: int
-                              nbands=1,         # type: int
-                              values=128,       # type: Union[int, list]
-                              dtype=np.uint8    # type: np.dtype
-                              ):                # type: (...) -> ndarray
+def create_uniform_image_data(nx,  # type: int
+                              ny,  # type: int
+                              nbands=1,  # type: int
+                              values=128,  # type: Union[int, list]
+                              dtype=np.uint8  # type: np.dtype
+                              ):  # type: (...) -> ndarray
     image_data = np.zeros((ny, nx, nbands))
     if type(values) is int:
         image_data[:, :, :] = values
@@ -26,12 +26,12 @@ def create_uniform_image_data(nx,               # type: int
     return image_data.astype(dtype)
 
 
-def grid_warp_image_band(image_to_warp,             # type: ndarray
-                         image_x_coords,            # type: ndarray
-                         image_y_coords,            # type: ndarray
-                         nodata_val=0,              # type: int
-                         interpolation='nearest'    # type: str
-                         ):                         # type: (...) -> ndarray
+def grid_warp_image_band(image_to_warp,  # type: ndarray
+                         image_x_coords,  # type: ndarray
+                         image_y_coords,  # type: ndarray
+                         nodata_val=0,  # type: int
+                         interpolation='nearest'  # type: str
+                         ):  # type: (...) -> ndarray
     coords = np.array([image_y_coords, image_x_coords])
     if interpolation == 'nearest':
         order = 0
@@ -53,25 +53,25 @@ def grid_warp_image_band(image_to_warp,             # type: ndarray
     return warped_image
 
 
-def flatten_image_band(image_band       # type: ndarray
-                       ):               # type: (...) -> ndarray
+def flatten_image_band(image_band  # type: ndarray
+                       ):  # type: (...) -> ndarray
     ny = image_band.shape[0]
     nx = image_band.shape[1]
     image_band_1d = np.reshape(image_band, (ny * nx))
     return image_band_1d
 
 
-def unflatten_image_band(image_band,        # type: ndarray
-                         nx,                # type: int
-                         ny                 # type: int
-                         ):                 # type: (...) -> ndarray
+def unflatten_image_band(image_band,  # type: ndarray
+                         nx,  # type: int
+                         ny  # type: int
+                         ):  # type: (...) -> ndarray
     return np.reshape(image_band, (ny, nx))
 
 
-def create_pixel_grid(nx_pixels,        # type: int
-                      ny_pixels,        # type: int
-                      scale_factor=1    # type: float
-                      ):                # type: (...) -> (ndarray, ndarray)
+def create_pixel_grid(nx_pixels,  # type: int
+                      ny_pixels,  # type: int
+                      scale_factor=1  # type: float
+                      ):  # type: (...) -> (ndarray, ndarray)
     x = np.arange(0, nx_pixels, (1.0 / scale_factor))
     y = np.arange(0, ny_pixels, (1.0 / scale_factor))
     xx, yy = np.meshgrid(x, y, sparse=False)
@@ -79,15 +79,15 @@ def create_pixel_grid(nx_pixels,        # type: int
 
 
 # TODO needs testing
-def gdal_grid_image_band(image_to_warp,     # type: ndarray
-                         output_fname,      # type: str
-                         image_x_coords,    # type: ndarray
-                         image_y_coords,    # type: ndarray
-                         npix_x,            # type: int
-                         npix_y,            # type: int
-                         projection_wkt,    # type: str
-                         nodata_val=0       # type: int
-                         ):                 # type:
+def gdal_grid_image_band(image_to_warp,  # type: ndarray
+                         output_fname,  # type: str
+                         image_x_coords,  # type: ndarray
+                         image_y_coords,  # type: ndarray
+                         npix_x,  # type: int
+                         npix_y,  # type: int
+                         projection_wkt,  # type: str
+                         nodata_val=0  # type: int
+                         ):  # type:
 
     fileformat = "MEMORY"
     driver = ogr.GetDriverByName(fileformat)
@@ -101,13 +101,12 @@ def gdal_grid_image_band(image_to_warp,     # type: ndarray
 
     for i in range(xs):
         for j in range(ys):
-
             feature = ogr.Feature(layer.GetLayerDefn())
             point = ogr.Geometry(ogr.wkbPoint)
-            point.AddPoint(image_x_coords[j,i], image_y_coords[j,i])
+            point.AddPoint(image_x_coords[j, i], image_y_coords[j, i])
             feature.SetGeometry(point)
 
-            feature.SetField("Z", image_to_warp[j,i])
+            feature.SetField("Z", image_to_warp[j, i])
 
             layer.CreateFeature(feature)
             feature = None
@@ -123,13 +122,13 @@ def gdal_grid_image_band(image_to_warp,     # type: ndarray
     print("done")
 
 
-def is_grayscale(image_2d       # type: ndarray
-                 ):             # type: (...) -> bool
+def is_grayscale(image_2d  # type: ndarray
+                 ):  # type: (...) -> bool
     return len(image_2d.shape) == 2
 
 
-def get_image_ny_nx_nbands(image_2d     # type: ndarray
-                           ):           # type: (...) -> (int, int, int)
+def get_image_ny_nx_nbands(image_2d  # type: ndarray
+                           ):  # type: (...) -> (int, int, int)
     is_input_grayscale = is_grayscale(image_2d)
     ny = image_2d.shape[0]
     nx = image_2d.shape[1]
@@ -155,11 +154,12 @@ def create_detection_image_from_scores(score_values, upper_left_yx_tuples, chip_
 # TODO: add support for discrete color steps, rather than just continous
 def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
                                       color_palette=None,  # type: Union[_ColorPalette, ndarray]
-                                      continuous=True,      # type: bool
-                                      n_bins=None,          # type: int
-                                      min_value=None,       # type: float
-                                      max_value=None        # type: float
-                                      ):                # type: (...) -> ndarray
+                                      continuous=True,  # type: bool
+                                      n_bins=None,  # type: int
+                                      min_value=None,  # type: float
+                                      max_value=None,  # type: float
+                                      output_dtype=np.uint8
+                                      ):  # type: (...) -> ndarray
     if color_palette is None:
         color_palette = seaborn.color_palette("GnBu_r")
     if min_value is None:
@@ -167,8 +167,20 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
     if max_value is None:
         max_value = np.max(grayscale_image)
     color_palette = np.asarray(color_palette)
+
+    if n_bins is not None:
+        tmp_grayscale_image = numpy_utils.ndarray_n_to_m(min_value, max_value, n_bins)
+        tmp_grayscale_image = np.expand_dims(tmp_grayscale_image, 0)
+        new_color_palette = apply_colormap_to_grayscale_image(tmp_grayscale_image, color_palette, continuous=True, output_dtype=np.float64)
+        new_color_palette = np.squeeze(new_color_palette / 255.0)
+        color_palette = new_color_palette
+
     if n_bins is None:
         n_bins = np.shape(color_palette)[0]
+
+    if continuous is not True:
+        max_value = min_value + (max_value - min_value) * (n_bins - 1) / n_bins
+
     palette_indices = numpy_utils.ndarray_n_to_m(min_value, max_value, n_bins)
     image_low_index_map = np.zeros(grayscale_image.shape, dtype=np.int8)
     image_high_index_map = np.zeros(grayscale_image.shape, dtype=np.int8)
@@ -183,44 +195,50 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
     palette_blues_high = np.zeros(grayscale_image.shape)
 
     for i in range(n_bins - 1):
-        bin_indices = np.logical_and(grayscale_image >= palette_indices[i], grayscale_image <= palette_indices[i+1])
+        bin_indices = np.logical_and(grayscale_image >= palette_indices[i], grayscale_image <= palette_indices[i + 1])
         image_low_index_map[bin_indices] = i
-        image_high_index_map[bin_indices] = i+1
+        image_high_index_map[bin_indices] = i + 1
         image_low_palette_index[bin_indices] = palette_indices[i]
-        image_high_palette_index[bin_indices] = palette_indices[i+1]
-    stop = 1
+        image_high_palette_index[bin_indices] = palette_indices[i + 1]
     palette_index_weights_high = (grayscale_image - image_low_palette_index) / \
                                  (image_high_palette_index - image_low_palette_index)
     palette_index_weights_low = 1.0 - palette_index_weights_high
 
     for i in range(n_bins - 1):
         palette_reds_low[np.where(image_low_index_map == i)] = color_palette[i, 0]
-        palette_reds_high[np.where(image_low_index_map ==i)] = color_palette[i+1, 0]
+        palette_reds_high[np.where(image_low_index_map == i)] = color_palette[i + 1, 0]
         palette_greens_low[np.where(image_low_index_map == i)] = color_palette[i, 1]
-        palette_greens_high[np.where(image_low_index_map == i)] = color_palette[i+1, 1]
+        palette_greens_high[np.where(image_low_index_map == i)] = color_palette[i + 1, 1]
         palette_blues_low[np.where(image_low_index_map == i)] = color_palette[i, 2]
-        palette_blues_high[np.where(image_low_index_map == i)] = color_palette[i+1, 2]
+        palette_blues_high[np.where(image_low_index_map == i)] = color_palette[i + 1, 2]
 
     ny, nx, bands = get_image_ny_nx_nbands(grayscale_image)
     colormapped_image = np.zeros((ny, nx, 3))
-    colormapped_image[:, :, 0] = palette_reds_low * palette_index_weights_low + \
-                                 palette_reds_high * palette_index_weights_high
-    colormapped_image[:, :, 1] = palette_greens_low * palette_index_weights_low + \
-                                 palette_greens_high * palette_index_weights_high
-    colormapped_image[:, :, 2] = palette_blues_low * palette_index_weights_low + \
-                                 palette_blues_high * palette_index_weights_high
 
-    colormapped_image[grayscale_image < min_value, :] = color_palette[0, :]
-    colormapped_image[grayscale_image > max_value, :] = color_palette[-1, :]
+    if continuous is True:
+        colormapped_image[:, :, 0] = palette_reds_low * palette_index_weights_low + \
+                                     palette_reds_high * palette_index_weights_high
+        colormapped_image[:, :, 1] = palette_greens_low * palette_index_weights_low + \
+                                     palette_greens_high * palette_index_weights_high
+        colormapped_image[:, :, 2] = palette_blues_low * palette_index_weights_low + \
+                                     palette_blues_high * palette_index_weights_high
+    else:
+        colormapped_image[:, :, 0] = palette_reds_low
+        colormapped_image[:, :, 1] = palette_greens_low
+        colormapped_image[:, :, 2] = palette_blues_low
 
-    colormapped_image = colormapped_image * 255
-    colormapped_image = np.asarray(colormapped_image, dtype=np.uint8)
+    if not continuous:
+        colormapped_image[grayscale_image < min_value, :] = color_palette[0, :]
+        colormapped_image[grayscale_image > max_value, :] = color_palette[-1, :]
+
+    colormapped_image = colormapped_image * 255.0
+    colormapped_image = np.asarray(colormapped_image, dtype=output_dtype)
 
     return colormapped_image
 
 
-def blend_images(image_1,               # type: ndarray
-                 image_2,               # type: ndarray
-                 image_1_percent=0.5    # type: float
-                 ):                     # type: (...) -> ndarray
+def blend_images(image_1,  # type: ndarray
+                 image_2,  # type: ndarray
+                 image_1_percent=0.5  # type: float
+                 ):  # type: (...) -> ndarray
     return image_1 * image_1_percent + image_2 * (1 - image_1_percent)
