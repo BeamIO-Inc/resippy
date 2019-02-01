@@ -175,6 +175,9 @@ class TestSpectralTools(unittest.TestCase):
 
         assert detection_max_y == y_loc
         assert detection_max_x == x_loc
+        assert len(detection_result.shape) == 1
+        assert detection_result.shape[0] == nx*ny
+
         print(
             "location of highest detection return matches x/y "
             "location of embedded signal"
@@ -243,6 +246,8 @@ class TestSpectralTools(unittest.TestCase):
 
         assert detection_max_y == y_loc
         assert detection_max_x == x_loc
+        assert len(detection_result.shape) == 1
+        assert detection_result.shape[0] == nx*ny
         print(
             "location of highest detection return matches x/y "
             "location of embedded signal"
