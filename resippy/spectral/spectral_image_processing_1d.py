@@ -61,7 +61,7 @@ def rx_anomaly_detector(spectral_image,             # type: ndarray
 
     rx_left_side = np.multiply(demeaned_image, rx_rt_side.transpose())
     rx_image = np.sum(rx_left_side, axis=1)
-    return np.reshape(rx_image, (1, len(rx_image)))
+    return rx_image
 
 
 # as described in
