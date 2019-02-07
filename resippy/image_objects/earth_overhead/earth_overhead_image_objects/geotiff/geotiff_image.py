@@ -1,6 +1,7 @@
 from __future__ import division
 
 import gdal
+import gdal2tiles
 import numpy as np
 import osr
 from numpy import ndarray
@@ -134,39 +135,46 @@ class GeotiffImage(AbstractEarthOverheadImage):
         dataset.FlushCache()
         dataset = None
 
+    def gdalwarp_geotiff_image(image,  # type: GeotiffImage
+                               warp_ops,  # type: gdal.WarpOptions
+                               dst_fname=None,  # type: str
+                               ):            # type: (...) -> GeotiffImage
+        src_dataset = image.get_dset()
+        if src_dataset is None:
+            src_dataset = image.get_gdal_mem_datset()
+
+        if dst_fname is None:
+            dst_fname="/vsimem/tmp_gdalwarp_geotiff.vrt"
+
+        dst_dataset = gdal.Warp(dst_fname, src_dataset, options=warp_ops)
+        src_dataset = None
+        dst_dataset = None
+
+        return GeotiffImage.init_from_file(dst_fname)
+
+    # for a comprehensive list see: https://vdatum.noaa.gov/docs/datums.html#verticaldatum
+    def reproject_vertical_datum(geotiff_image,     # type: GeotiffImage
+                                 dst_fname,         # type: str
+                                 datum_epsg_code    # type: str
+                                 ):                 # type: (...) -> GeotiffImage
+        proj4_srs = geotiff_image.get_point_calculator().get_projection().srs
+        srs = osr.SpatialReference()
+        srs.ImportFromProj4(proj4_srs)
+        srs.AutoIdentifyEPSG()
+        dst_epsg = 'EPSG:' + str(srs.GetAuthorityCode(None)) + "+" + str(datum_epsg_code)
+
+        ops = gdal.WarpOptions(dstSRS=dst_epsg)
+        return gdalwarp_geoTiffImage(geotiff_image, dst_fname, ops)
+
+    def create_map_tiles(self, out_dir, gdalwarp_ops=None):
+        tmp_filename = "/tmp/tmp_gdalwarp.tif"
+        gdal_warp_options = gdal.WarpOptions(dstSRS="EPSG:3857")
+        mem_fname = "/vsimem/tmp_gdalwarp_geotiff.vrt"
+        gtiff_3857 = self.gdalwarp_geotiff_image(gdal_warp_options, dst_fname=mem_fname) # type: GeotiffImage
+        gdal2tiles.generate_tiles(mem_fname, out_dir)
+
     def close_image(self):  # type: (...) -> None
         self._dset = None
 
     def __del__(self):
         self._dset = None
-
-
-def gdalwarp_geoTiffImage(image,        # type: GeotiffImage
-                          dst_fname,    # type: str
-                          warp_ops      # type: gdal.WarpOptions
-                          ):            # type: (...) -> GeotiffImage
-
-    src_dataset = image.get_dset()
-    if src_dataset is None:
-        src_dataset = image.get_gdal_mem_datset()
-
-    dst_dataset = gdal.Warp(dst_fname, src_dataset, options=warp_ops)
-    src_dataset = None
-    dst_dataset = None
-
-    return GeotiffImage.init_from_file(dst_fname)
-
-
-# for a comprehensive list see: https://vdatum.noaa.gov/docs/datums.html#verticaldatum
-def reproject_vertical_datum(geotiff_image,     # type: GeotiffImage
-                             dst_fname,         # type: str
-                             datum_epsg_code    # type: str
-                             ):                 # type: (...) -> GeotiffImage
-    proj4_srs = geotiff_image.get_point_calculator().get_projection().srs
-    srs = osr.SpatialReference()
-    srs.ImportFromProj4(proj4_srs)
-    srs.AutoIdentifyEPSG()
-    dst_epsg = 'EPSG:' + str(srs.GetAuthorityCode(None)) + "+" + str(datum_epsg_code)
-
-    ops = gdal.WarpOptions(dstSRS=dst_epsg)
-    return gdalwarp_geoTiffImage(geotiff_image, dst_fname, ops)
