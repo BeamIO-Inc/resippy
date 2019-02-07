@@ -10,7 +10,7 @@ __pycache__/
 *.DS_Store
 
 # Pycharm stuff
-#.idea
+*.idea
 
 # Distribution / packaging
 .Python
@@ -108,3 +108,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+*.xml

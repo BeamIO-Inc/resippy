@@ -8,7 +8,7 @@ import numpy as np
 import numbers
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 import resippy.utils.image_utils.image_utils as image_utils
-import resippy.utils.numpy_utils as numpy_utils
+import resippy.utils.numpy_and_array_utils as numpy_utils
 from six import add_metaclass
 
 
