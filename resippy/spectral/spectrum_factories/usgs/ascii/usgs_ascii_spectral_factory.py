@@ -13,7 +13,7 @@ WAVELENGTH_UNITS = ureg.microns
 SPECTRUM_UNITS = unit_constants.reflectance_zero_to_one
 
 
-class UsgsAsciiAvirisSpectralFactory:
+class UsgsAsciiSpectralFactory:
     @classmethod
     def from_ascii_file(cls, filename   # type: str
                         ):              # type: (...) -> Spectrum
