@@ -6,6 +6,7 @@ from typing import Union
 import os
 import imageio
 import scipy.misc as scipy_misc
+from algorithm_toolkit import AlgorithmChain
 
 
 def get_nchips(image_chips,     # type: ndarray
@@ -60,7 +61,8 @@ def chip_images_by_pixel_upper_lefts(input_image,                   # type: ndar
                                      chip_ny_pixels=256,            # type: int
                                      chip_nx_pixels=256,            # type: int
                                      bands=None,                    # type: Union[list, int]
-                                     keep_within_image_bounds=True  # type: bool
+                                     keep_within_image_bounds=True,  # type: bool
+                                     atk_chain_ledger=None
                                      ):                             # type: (...) -> (ndarray, list)
 
     if type(bands) is type(0):
@@ -94,11 +96,17 @@ def chip_images_by_pixel_upper_lefts(input_image,                   # type: ndar
 
     chip_counter = 0
     upper_lefts = []
-    for y, x in zip(pixel_y_ul_list, pixel_x_ul_list):
+    n_pix = len(pixel_x_ul_list)
+    for cnt, dat in enumerate(zip(pixel_y_ul_list, pixel_x_ul_list)):
+        y, x = dat
         all_chips[chip_counter, :, :, :] = \
             input_image[y: y + chip_ny_pixels, x: x + chip_nx_pixels, bands]
         chip_counter += 1
         upper_lefts.append((y, x))
+        per = round(float(cnt) / float(n_pix) * 100.0)
+        if per % 5 == 0:
+            if atk_chain_ledger is not None:
+                atk_chain_ledger.set_status('generating chips', per)
 
     if is_output_grayscale:
         all_chips = np.reshape(all_chips, (n_chips, chip_ny_pixels, chip_nx_pixels))
@@ -112,7 +120,8 @@ def chip_images_by_pixel_centers(input_image,                   # type: ndarray
                                  chip_ny_pixels=256,            # type: int
                                  chip_nx_pixels=256,            # type: int
                                  bands=None,                    # type: Union[list, int]
-                                 keep_within_image_bounds=True  # type: bool
+                                 keep_within_image_bounds=True,  # type: bool
+                                 atk_chain_ledger=None,         #  type: AlgorithmChain.ChainLedger
                                  ):                             # type: (...) -> (ndarray, list)
     pixel_x_center_list = np.array(pixel_x_center_list)
     pixel_y_center_list = np.array(pixel_y_center_list)
@@ -121,7 +130,7 @@ def chip_images_by_pixel_centers(input_image,                   # type: ndarray
     return chip_images_by_pixel_upper_lefts(
         input_image, pixel_y_ul_list=pixel_y_ul_list, pixel_x_ul_list=pixel_x_ul_list,
         chip_ny_pixels=chip_ny_pixels, chip_nx_pixels=chip_nx_pixels,
-        bands=bands, keep_within_image_bounds=keep_within_image_bounds)
+        bands=bands, keep_within_image_bounds=keep_within_image_bounds, atk_chain_ledger=atk_chain_ledger)
 
 
 def write_chips_to_disk(image_chips,            # type: ndarray
@@ -131,7 +140,8 @@ def write_chips_to_disk(image_chips,            # type: ndarray
                         output_chip_ny=None,    # type: int
                         output_chip_nx=None,    # type: int
                         remove_alpha=True,      # type: bool
-                        output_format="png"     # type: str
+                        output_format="png",     # type: str
+                        atk_chain_ledger=None
                         ):  # type: (...) -> None
     if base_chip_fname is None:
         base_chip_fname = os.path.basename(output_dir)
@@ -148,3 +158,8 @@ def write_chips_to_disk(image_chips,            # type: ndarray
         chip_fname = chip_fname + "." + output_format.replace(".", "")
         chip_fullpath = os.path.join(output_dir, chip_fname)
         imageio.imsave(chip_fullpath, chip)
+
+        per = round(float(i) / float(n_chips) * 100.0)
+        if per % 5 == 0:
+            if atk_chain_ledger is not None:
+                atk_chain_ledger.set_status('writing: ' + chip_fullpath, per)
