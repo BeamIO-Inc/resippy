@@ -1,1 +1,1 @@
-from . import aviris
+from .usgs_ascii_spectral_factory import UsgsAsciiSpectralFactory

@@ -26,9 +26,10 @@ class MicasenseImageFactory:
                              metadata,  # type: MicasenseMetadata
                              point_calculator,  # type: MicasensePix4dPointCalc
                              working_dir=None,  # type: str
+                             band_basenames=None,  # type: list
                              ):  # type: (...) -> MicasenseImage
 
-        def write_tmp_band(band_data, working_dir=None):
+        def write_tmp_band(band_data, working_dir=None, band_basename=None):
             uname = os.path.basename(os.getenv("HOME"))
 
             if working_dir is None:
@@ -37,7 +38,9 @@ class MicasenseImageFactory:
             else:
                 output_dir = working_dir
 
-            output_fname = os.path.join(output_dir, str(uuid4()) + ".tif")
+            if band_basename is None:
+                band_basename = str(uuid4().hex) + ".tif"
+            output_fname = os.path.join(output_dir, band_basename)
             out_img = Image.fromarray(band_data)
             out_img.save(output_fname)
 
@@ -48,7 +51,11 @@ class MicasenseImageFactory:
         ny_nx_nbands = np.shape(image_data)
         nbands = ny_nx_nbands[2]
         for band in range(nbands):
-            fn = write_tmp_band(np.squeeze(image_data[:,:,band]), working_dir)
+            if band_basenames is not None:
+                band_basename = band_basenames[band]
+            else:
+                band_basename = None
+            fn = write_tmp_band(np.squeeze(image_data[:,:,band]), working_dir, band_basename)
             micasense_image.band_fnames.append(fn)
 
         micasense_image.set_metadata(metadata)

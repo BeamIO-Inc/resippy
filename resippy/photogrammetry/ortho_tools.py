@@ -77,9 +77,9 @@ def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEa
         bands = list(range(overhead_image.get_metadata().get_n_bands()))
 
     images = []
-    for i, band in enumerate(bands):
+    for band in bands:
         pixels_x, pixels_y = overhead_image.get_point_calculator(). \
-            lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=i, world_proj=world_proj)
+            lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=band, world_proj=world_proj)
         image_data = overhead_image.read_band_from_disk(band)
         im_tp = image_data.dtype
 

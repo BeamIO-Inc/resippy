@@ -2,8 +2,7 @@ from __future__ import division
 
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.geotiff_image import GeotiffImage, \
-    reproject_vertical_datum
+from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.geotiff_image import GeotiffImage
 import numpy as np
 from numpy import ndarray
 
@@ -28,7 +27,7 @@ class GeotiffDem(AbstractDem):
                           dst_fname,  # type: str
                           dst_epsg_code  # type: int
                           ):  # type: (...) -> None
-        new_gtiff = reproject_vertical_datum(self.gtiff, dst_fname, dst_epsg_code)
+        new_gtiff = GeotiffImage.reproject_vertical_datum(self.gtiff, dst_fname, dst_epsg_code)
         self.gtiff.close_image()
         self.set_geotiff_image(new_gtiff)
 
