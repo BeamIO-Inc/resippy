@@ -153,6 +153,7 @@ class GeotiffImage(AbstractEarthOverheadImage):
         return GeotiffImage.init_from_file(dst_fname)
 
     # for a comprehensive list see: https://vdatum.noaa.gov/docs/datums.html#verticaldatum
+    @ staticmethod
     def reproject_vertical_datum(geotiff_image,     # type: GeotiffImage
                                  dst_fname,         # type: str
                                  datum_epsg_code    # type: str

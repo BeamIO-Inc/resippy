@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ce52d927-e6bc-481d-bd93-2582e9317766" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/resippy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/resippy.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resippy/image_objects/earth_overhead/earth_overhead_image_objects/geotiff/geotiff_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/image_objects/earth_overhead/earth_overhead_image_objects/geotiff/geotiff_image.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resippy/photogrammetry/dem/geotiff_dem.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/photogrammetry/dem/geotiff_dem.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -64,8 +67,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/resippy/image_objects/earth_overhead/earth_overhead_image_objects/geotiff/geotiff_image.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" column="11" selection-start-line="2" selection-start-column="11" selection-end-line="2" selection-end-column="11" />
+            <state relative-caret-position="150">
+              <caret line="10" column="52" selection-start-line="10" selection-start-column="52" selection-end-line="10" selection-end-column="52" />
             </state>
           </provider>
         </entry>
@@ -74,7 +77,7 @@
         <entry file="file://$PROJECT_DIR$/resippy/photogrammetry/ortho_tools.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="865">
-              <caret line="64" lean-forward="true" selection-start-line="64" selection-end-line="64" />
+              <caret line="64" selection-start-line="64" selection-end-line="64" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -97,6 +100,7 @@
       <find>json</find>
       <find>gdal2tiles</find>
       <find>arguments</find>
+      <find>Generating ov</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -155,24 +159,6 @@
               <item name="resippy" type="b2602c69:ProjectViewProjectNode" />
               <item name="resippy" type="462c0819:PsiDirectoryNode" />
               <item name="resippy" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="resippy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="image_objects" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="resippy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="photogrammetry" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="resippy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -240,14 +226,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="13" y="23" width="1402" height="839" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2744388" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18754525" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32931727" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32967034" />
+      <window_info active="true" anchor="bottom" id="Find" order="1" visible="true" weight="0.32931727" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.4605087" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -360,24 +345,18 @@
     <entry file="file://$PROJECT_DIR$/resippy/photogrammetry/ortho_tools.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="865">
-          <caret line="64" lean-forward="true" selection-start-line="64" selection-end-line="64" />
+          <caret line="64" selection-start-line="64" selection-end-line="64" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/resippy/utils/gdal_utils/gdal2tiles.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="544" column="25" lean-forward="true" selection-start-line="544" selection-start-column="25" selection-end-line="544" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/resippy/utils/gdal_utils/gdal2tiles.py" />
     <entry file="file://$PROJECT_DIR$/resippy/image_objects/earth_overhead/earth_overhead_image_objects/geotiff/geotiff_image.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="11" selection-start-line="2" selection-start-column="11" selection-end-line="2" selection-end-column="11" />
+        <state relative-caret-position="150">
+          <caret line="10" column="52" selection-start-line="10" selection-start-column="52" selection-end-line="10" selection-end-column="52" />
         </state>
       </provider>
     </entry>
