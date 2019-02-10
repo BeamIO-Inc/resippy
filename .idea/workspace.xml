@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ce52d927-e6bc-481d-bd93-2582e9317766" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resippy/utils/image_utils/image_chipper.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/utils/image_utils/image_chipper.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,10 +16,10 @@
         <entry file="file://$PROJECT_DIR$/resippy/utils/image_utils/image_chipper.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="816">
-              <caret line="56" column="60" selection-start-line="56" selection-start-column="60" selection-end-line="56" selection-end-column="60" />
+              <caret line="55" column="60" selection-start-line="55" selection-start-column="60" selection-end-line="55" selection-end-column="60" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
-                <marker date="1549748314539" expanded="true" signature="272:328" ph="..." />
+                <marker date="1549751902190" expanded="true" signature="227:283" ph="..." />
               </folding>
             </state>
           </provider>
@@ -213,6 +212,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="13" y="5" width="1402" height="862" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20381232" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -285,10 +285,10 @@
     <entry file="file://$PROJECT_DIR$/resippy/utils/image_utils/image_chipper.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="816">
-          <caret line="56" column="60" selection-start-line="56" selection-start-column="60" selection-end-line="56" selection-end-column="60" />
+          <caret line="55" column="60" selection-start-line="55" selection-start-column="60" selection-end-line="55" selection-end-column="60" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
-            <marker date="1549748314539" expanded="true" signature="272:328" ph="..." />
+            <marker date="1549751902190" expanded="true" signature="227:283" ph="..." />
           </folding>
         </state>
       </provider>

@@ -6,7 +6,6 @@ from typing import Union
 import os
 import imageio
 import scipy.misc as scipy_misc
-from algorithm_toolkit import AlgorithmChain
 
 
 def get_nchips(image_chips,     # type: ndarray
