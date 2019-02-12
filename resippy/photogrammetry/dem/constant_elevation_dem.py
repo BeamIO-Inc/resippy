@@ -22,6 +22,9 @@ class ConstantElevationDem(AbstractDem):
     def get_lowest_alt(self):  # type: (...) -> float
         return self.elevation
 
+    def get_mean_alt(self):  # type: (...) -> float
+        return self.elevation
+
     # TODO MAYBE USE PROJ4 HERE?
     def convert_reference(self,
                           dst_fname,  # type: str

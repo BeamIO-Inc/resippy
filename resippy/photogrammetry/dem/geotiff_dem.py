@@ -117,3 +117,6 @@ class GeotiffDem(AbstractDem):
 
     def get_lowest_alt(self):  # type: (...) -> float
         return float(np.nanmin(self.dem_data))
+
+    def get_mean_alt(self):  # type: (...) -> float
+        return float(np.nanmean(self.dem_data))
