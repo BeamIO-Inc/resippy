@@ -14,6 +14,9 @@ class AbstractImageMetadata():
         self.metadata_dict = {}
         self.set_nodata_val(None)
 
+    def get_image_name(self):
+        return self.metadata_dict['img_name']
+
     def get_npix_x(self):   # type: (...) -> int
         return self.metadata_dict['npix_x']
 
@@ -22,6 +25,11 @@ class AbstractImageMetadata():
 
     def get_n_bands(self):   # type: (...) -> int
         return self.metadata_dict['n_bands']
+
+    def set_image_name(self,
+                       name  # type: str
+                       ):  # type: (...) -> None
+        self.metadata_dict['img_name'] = name
 
     def set_npix_x(self,
                    npix_x   # type: int

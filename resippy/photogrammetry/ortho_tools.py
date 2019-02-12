@@ -28,6 +28,7 @@ def get_pixel_values(image_object,  # type: AbstractEarthOverheadImage
                      window=8  # type: int
                      ):  # type: (...) -> ndarray
 
+    nodata = image_object.get_metadata().get_nodata_val()
     wh = np.round(window/2.0).astype(np.int)
     pix_vals = []
     for band in range(image_object.get_metadata().get_n_bands()):
@@ -42,7 +43,8 @@ def get_pixel_values(image_object,  # type: AbstractEarthOverheadImage
                 ymin = item[1] - wh
                 ymax = item[1] + wh
                 pix_win = img[ymin:ymax, xmin:xmax]
-                val = np.mean(pix_win)
+                good_inds = pix_win != nodata
+                val = np.mean(pix_win[good_inds])
             except IndexError:
                 val = np.NaN
             vals.append(val)
