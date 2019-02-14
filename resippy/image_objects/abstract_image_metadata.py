@@ -2,6 +2,7 @@ from __future__ import division
 
 import abc
 from six import add_metaclass
+from typing import Union
 
 
 @add_metaclass(abc.ABCMeta)
@@ -47,9 +48,9 @@ class AbstractImageMetadata():
         self.metadata_dict['n_bands'] = n_bands
 
     def set_nodata_val(self,
-                       nodata_val   # type: int
+                       nodata_val   # type: Union[int, float]
                        ):           # type: (...) -> None
         self.metadata_dict['nodata_val'] = nodata_val
 
-    def get_nodata_val(self):   # type: (...) -> int
+    def get_nodata_val(self):   # type: (...) -> Union[int, float]
         return self.metadata_dict['nodata_val']

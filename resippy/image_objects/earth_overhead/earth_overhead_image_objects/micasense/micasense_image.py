@@ -48,6 +48,7 @@ class MicasenseImage(AbstractEarthOverheadImage):
         fparts.pop()
         name = "_".join(fparts)
         metadata.set_image_name(name)
+        metadata.set_nodata_val(0)
         micasense_image.set_metadata(metadata)
         micasense_image.set_point_calculator(point_calc)
 
