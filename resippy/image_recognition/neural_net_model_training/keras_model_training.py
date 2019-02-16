@@ -105,6 +105,7 @@ def train_model(base_model,                                 # type: Model
                 ):                                          # type: (...) -> None
     tensorboard_log_dir = os.path.join(output_dir, "logs")
     tensorboard_log_dir = os.path.join(tensorboard_log_dir, "{}".format(time()))
+    file_utils.make_dir_if_not_exists(tensorboard_log_dir)
     tensorboard = TensorBoard(log_dir=tensorboard_log_dir)
 
     filepath = os.path.join(output_dir, model_output_fname)
