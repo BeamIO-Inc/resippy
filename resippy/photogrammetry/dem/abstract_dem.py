@@ -7,7 +7,7 @@ from six import add_metaclass
 
 
 @add_metaclass(abc.ABCMeta)
-class AbstractDem():
+class AbstractDem:
     """Concrete implementations should initialize an image for reading/writing
     and should also set the image's metadata object and point calculator object"""
 
@@ -56,4 +56,8 @@ class AbstractDem():
 
     @abc.abstractmethod
     def get_lowest_alt(self):  # type: (...) -> float
+        pass
+
+    @abc.abstractmethod
+    def get_mean_alt(self):  # type: (...) -> float
         pass

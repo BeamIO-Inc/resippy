@@ -41,12 +41,18 @@ class GeotiffImage(AbstractEarthOverheadImage):
                               nodata_val=None  # type: int
                               ):  # type: (...) -> GeotiffImage
         geotiff_image = cls()
-        geotiff_image.set_image_data(image_data)
 
         image_shape = image_data.shape
         nx = image_shape[1]
         ny = image_shape[0]
-        nbands = image_shape[2]
+        if len(image_shape) == 3:
+            nbands = image_shape[2]
+        else:
+            nbands = 1
+            image_data = np.expand_dims(image_data, axis=2)
+
+        geotiff_image.set_image_data(image_data)
+
         gdal_dtype = gdal_array.NumericTypeCodeToGDALTypeCode(image_data.dtype)
         metadata = GeotiffMetadata()
         metadata.set_npix_x(nx)
@@ -54,13 +60,16 @@ class GeotiffImage(AbstractEarthOverheadImage):
         metadata.set_n_bands(nbands)
         metadata.set_gdal_datatype(gdal_dtype)
         metadata.set_nodata_val(nodata_val)
+
         point_calc = GeotiffPointCalc()
         point_calc.set_npix_x(nx)
         point_calc.set_npix_y(ny)
         point_calc.set_geot(geo_t)
         point_calc.set_projection(projection)
+
         geotiff_image.set_metadata(metadata)
         geotiff_image.set_point_calculator(point_calc)
+
         return geotiff_image
 
     def get_metadata(self):  # type: (...) -> GeotiffMetadata

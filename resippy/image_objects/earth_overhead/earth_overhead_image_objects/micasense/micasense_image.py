@@ -9,7 +9,7 @@ from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import A
 from numpy import ndarray
 import numpy as np
 import scipy.misc as misc
-
+import os
 
 class MicasenseImage(AbstractEarthOverheadImage):
     def __init__(self):
@@ -43,6 +43,12 @@ class MicasenseImage(AbstractEarthOverheadImage):
         micasense_image.band_fnames.append(band_fname_dict['band5'])
 
         metadata = MicasenseMetadata()
+        basename, _ = os.path.splitext(band_fname_dict['band1'])
+        fparts = basename.split('_')
+        fparts.pop()
+        name = "_".join(fparts)
+        metadata.set_image_name(name)
+        metadata.set_nodata_val(0)
         micasense_image.set_metadata(metadata)
         micasense_image.set_point_calculator(point_calc)
 

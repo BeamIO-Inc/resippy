@@ -28,5 +28,8 @@ setuptools.setup(
         'shapely',
         'pint==0.9',
         'imageio',
+        'seaborne',
+        'colorutils',
+        'gdal2tiles'
     ]
 )

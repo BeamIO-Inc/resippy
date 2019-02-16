@@ -90,3 +90,36 @@ class Spectrum:
                              units      # type: str
                              ):         # type: (...) -> None
         self._wavelength_units = units
+
+    # TODO convert wavelength units if needed
+    def resample_spectrum_direct(self,
+                                 rsr_spectrums,     # type: List[Spectrum]
+                                 rsr_band_centers   # type: ndarray
+                                 ):                 # type: (...) -> Spectrum
+
+        spectra = []
+        for rsr_spectrum in rsr_spectrums:
+            rsr_wave = rsr_spectrum.get_wavelengths()
+            rsr_data = rsr_spectrum.get_spectral_data()
+
+            rsr_data_resamp = np.interp(self.get_wavelengths(), rsr_wave, rsr_data, left=0, right=0)
+            normed = self.get_spectral_data() * rsr_data_resamp
+
+            # import matplotlib.pyplot as plt
+            # # plt.plot(self.get_wavelengths(), rsr_data_resamp)
+            #
+            #
+            # plt.plot(self.get_wavelengths(), self.get_spectral_data())
+            # plt.plot(self.get_wavelengths(), normed)
+
+            b_center = np.trapz(normed, self.get_wavelengths())
+            b_width = np.trapz(rsr_data_resamp, self.get_wavelengths())
+
+            spectra.append(b_center/b_width)
+
+        new_spec = Spectrum()
+        new_spec.set_wavelengths(rsr_band_centers)
+        new_spec.set_spectral_data(np.array(spectra))
+        new_spec.set_spectrum_units(self.get_spectrum_units())
+
+        return new_spec

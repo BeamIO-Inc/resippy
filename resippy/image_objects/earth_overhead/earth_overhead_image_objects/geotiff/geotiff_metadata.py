@@ -2,6 +2,7 @@ from __future__ import division
 
 from resippy.image_objects.abstract_image_metadata import AbstractImageMetadata
 import gdal
+import os
 
 
 class GeotiffMetadata(AbstractImageMetadata):
@@ -10,6 +11,7 @@ class GeotiffMetadata(AbstractImageMetadata):
                    fname  # type: str
                    ):  # type: (...) -> GeotiffMetadata
         geotiff_metadata = cls()
+        geotiff_metadata.set_image_name(os.path.splitext(fname)[0])
         dset = gdal.Open(fname)
         geotiff_metadata.set_npix_x(dset.RasterXSize)
         geotiff_metadata.set_npix_y(dset.RasterYSize)
