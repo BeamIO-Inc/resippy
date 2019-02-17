@@ -1,4 +1,5 @@
 from keras.applications.vgg16 import VGG16
+from keras.applications.vgg19 import VGG19
 from keras.preprocessing import image
 from keras.preprocessing.image import DirectoryIterator
 from keras.layers import GlobalAveragePooling2D, Dense, Dropout
@@ -62,6 +63,12 @@ def load_vgg16_model(weights_path,      # type: str
                      include_top=True,  # type: bool
                      ):                 # type:(...) -> Model
     vgg_pretrained_model = VGG16(weights=weights_path, include_top=include_top)
+    return vgg_pretrained_model
+
+def load_vgg19_model(weights_path,      # type: str
+                     include_top=True,  # type: bool
+                     ):                 # type:(...) -> Model
+    vgg_pretrained_model = VGG19(weights=weights_path, include_top=include_top)
     return vgg_pretrained_model
 
 
