@@ -1,5 +1,9 @@
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg19 import VGG19
+from keras.applications.resnet50 import ResNet50
+from keras_applications.inception_v3 import InceptionV3
+from keras_applications.mobilenet import MobileNet
+from keras_applications.mobilenet_v2 import MobileNetV2
 from keras.preprocessing import image
 from keras.preprocessing.image import DirectoryIterator
 from keras.layers import GlobalAveragePooling2D, Dense, Dropout
@@ -62,14 +66,22 @@ def setup_train_and_val_image_generators(
 def load_vgg16_model(weights_path,      # type: str
                      include_top=True,  # type: bool
                      ):                 # type:(...) -> Model
-    vgg_pretrained_model = VGG16(weights=weights_path, include_top=include_top)
-    return vgg_pretrained_model
+    cnn_model = VGG16(weights=weights_path, include_top=include_top)
+    return cnn_model
+
 
 def load_vgg19_model(weights_path,      # type: str
                      include_top=True,  # type: bool
                      ):                 # type:(...) -> Model
-    vgg_pretrained_model = VGG19(weights=weights_path, include_top=include_top)
-    return vgg_pretrained_model
+    cnn_model = VGG19(weights=weights_path, include_top=include_top)
+    return cnn_model
+
+
+def load_resnet50_model(weights_path,      # type: str
+                     include_top=True,  # type: bool
+                     ):                 # type:(...) -> Model
+    cnn_model = ResNet50(weights=weights_path, include_top=include_top)
+    return cnn_model
 
 
 def freeze_model_layers(model_to_freeze     # type: Model
