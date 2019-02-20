@@ -158,9 +158,10 @@ def get_extent(overhead_image,  # type: AbstractEarthOverheadImage
     if type(bands) == (type(1)):
         bands = [bands]
 
-    if bands is None and not overhead_image.get_point_calculator().bands_coregistered():
+    if bands is None or not overhead_image.get_point_calculator().bands_coregistered():
         bands = np.arange(overhead_image.get_metadata().get_n_bands())
-        warnings.warn("the bands for this image aren't co-registered.  Getting the full image extent using all bands.")
+        if not overhead_image.get_point_calculator().bands_coregistered():
+            warnings.warn("the bands for this image aren't co-registered.  Getting the full image extent using all bands.")
 
     all_band_lons = np.array([])
     all_band_lats = np.array([])

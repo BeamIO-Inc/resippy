@@ -16,6 +16,7 @@ class GeotiffPointCalc(AbstractEarthOverheadPointCalc):
         self._inv_geo_t = None
         self._npix_x = None
         self._npix_y = None
+        self._bands_coregistered = True
 
     @classmethod
     def init_from_file(cls,
