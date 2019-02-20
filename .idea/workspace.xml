@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ce52d927-e6bc-481d-bd93-2582e9317766" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/resippy/image_recognition/neural_net_model_scoring/keras_image_scoring.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resippy/image_recognition/neural_net_model_training/keras_model_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/resippy/image_recognition/neural_net_model_training/keras_model_training.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -15,9 +14,11 @@
     <session id="-301548943">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="6" />
           <entry key="project.open.time.0" value="1" />
-          <entry key="project.opened" value="1" />
+          <entry key="project.open.time.3" value="3" />
+          <entry key="project.open.time.4" value="1" />
+          <entry key="project.opened" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -47,8 +48,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resippy/utils/image_utils/image_chipper.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1272">
-              <caret line="163" column="16" lean-forward="true" selection-start-line="163" selection-start-column="16" selection-end-line="163" selection-end-column="77" />
+            <state relative-caret-position="2652">
+              <caret line="163" column="16" selection-start-line="163" selection-start-column="16" selection-end-line="163" selection-end-column="77" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
                 <marker date="1549751902190" expanded="true" signature="227:283" ph="..." />
@@ -57,10 +58,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/resippy/image_recognition/neural_net_model_training/keras_model_training.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1156">
+            <state relative-caret-position="442">
               <caret line="83" column="20" selection-start-line="83" selection-start-column="20" selection-end-line="83" selection-end-column="20" />
               <folding>
                 <element signature="e#0#42#0" expanded="true" />
@@ -69,11 +70,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resippy/image_recognition/neural_net_model_scoring/keras_image_scoring.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="25" column="63" lean-forward="true" selection-start-line="25" selection-start-column="63" selection-end-line="25" selection-end-column="63" />
+            <state relative-caret-position="255">
+              <caret line="19" column="89" selection-start-line="19" selection-start-column="89" selection-end-line="19" selection-end-column="89" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -101,6 +102,7 @@
       <find>Algorithm</find>
       <find>algorith</find>
       <find>chips</find>
+      <find>write_chips_to_</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -157,11 +159,6 @@
               <item name="resippy" type="b2602c69:ProjectViewProjectNode" />
               <item name="resippy" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="resippy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-              <item name="resippy" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -170,7 +167,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../integration_tests_machine_learning" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -228,9 +225,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="13" y="23" width="1402" height="839" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20381232" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2346041" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -313,9 +309,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="425">
           <caret line="25" selection-start-line="25" selection-end-line="25" />
-          <folding>
-            <element signature="e#0#59#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -331,8 +324,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/resippy/utils/image_utils/image_chipper.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1272">
-          <caret line="163" column="16" lean-forward="true" selection-start-line="163" selection-start-column="16" selection-end-line="163" selection-end-column="77" />
+        <state relative-caret-position="2652">
+          <caret line="163" column="16" selection-start-line="163" selection-start-column="16" selection-end-line="163" selection-end-column="77" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
             <marker date="1549751902190" expanded="true" signature="227:283" ph="..." />
@@ -340,22 +333,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/resippy/image_recognition/neural_net_model_training/keras_model_training.py">
+    <entry file="file://$PROJECT_DIR$/resippy/image_recognition/neural_net_model_scoring/keras_image_scoring.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1156">
-          <caret line="83" column="20" selection-start-line="83" selection-start-column="20" selection-end-line="83" selection-end-column="20" />
+        <state relative-caret-position="255">
+          <caret line="19" column="89" selection-start-line="19" selection-start-column="89" selection-end-line="19" selection-end-column="89" />
           <folding>
-            <element signature="e#0#42#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/resippy/image_recognition/neural_net_model_scoring/keras_image_scoring.py">
+    <entry file="file://$PROJECT_DIR$/resippy/image_recognition/neural_net_model_training/keras_model_training.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" column="63" lean-forward="true" selection-start-line="25" selection-start-column="63" selection-end-line="25" selection-end-column="63" />
+        <state relative-caret-position="442">
+          <caret line="83" column="20" selection-start-line="83" selection-start-column="20" selection-end-line="83" selection-end-column="20" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#0#42#0" expanded="true" />
           </folding>
         </state>
       </provider>
