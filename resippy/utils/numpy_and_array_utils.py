@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import ndarray
+from typing import Any
 
 
 def ndarray_zero_to_one(length  # type: int
@@ -25,3 +26,8 @@ def separate_lists_to_list_of_tuples(lists,         # type: list
     for entry in np.transpose(lists):
         list_of_tuples.append(tuple(entry))
     return list_of_tuples
+
+def remove_all_entries_from_list(input_list,        # type: list
+                                 value_to_remove    # type: Any
+                                 ):                 # type: (...) -> list
+    return [x for x in input_list if x != value_to_remove]
