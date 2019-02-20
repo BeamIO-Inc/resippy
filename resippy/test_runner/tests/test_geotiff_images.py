@@ -52,6 +52,10 @@ class TestGeotiffImages(unittest.TestCase):
         gtiff_data = gtiff_image.get_image_data()
         gtiff_image.write_to_disk(output_fname)
         gtiff_image_from_file = ImageFactory.geotiff.from_file(output_fname)
+
+        # set the fields that are expected to be missing from the memory-generated gtiff
+        gtiff_image.get_metadata().metadata_dict['img_name'] = gtiff_image_from_file.get_metadata().metadata_dict['img_name']
+
         assert gtiff_image.get_metadata().metadata_dict == gtiff_image_from_file.get_metadata().metadata_dict
         assert (gtiff_data == gtiff_image_from_file.read_all_image_data_from_disk()).all()
 
