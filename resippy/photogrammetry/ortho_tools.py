@@ -21,6 +21,38 @@ from resippy.photogrammetry.dem.dem_factory import DemFactory
 from resippy.utils.image_utils import image_utils as image_utils
 
 
+def get_pixel_values(image_object,  # type: AbstractEarthOverheadImage
+                     lons,  # type: ndarray
+                     lats,  # type: ndarray
+                     alts,  # type: ndarray
+                     window=8  # type: int
+                     ):  # type: (...) -> ndarray
+
+    nodata = image_object.get_metadata().get_nodata_val()
+    wh = np.round(window/2.0).astype(np.int)
+    pix_vals = []
+    for band in range(image_object.get_metadata().get_n_bands()):
+        img = image_object.read_band_from_disk(band)
+        x,y = image_object.get_point_calculator().lon_lat_alt_to_pixel_x_y(lons, lats, alts, band=band)
+        locs = zip(np.round(x).astype(np.int), np.round(y).astype(np.int))
+        vals = []
+        for item in locs:
+            try:
+                xmin = item[0] - wh
+                xmax = item[0] + wh
+                ymin = item[1] - wh
+                ymax = item[1] + wh
+                pix_win = img[ymin:ymax, xmin:xmax]
+                good_inds = pix_win != nodata
+                val = np.mean(pix_win[good_inds])
+            except IndexError:
+                val = np.NaN
+            vals.append(val)
+        pix_vals.append(vals)
+
+    return np.array(pix_vals)
+
+
 # TODO this needs a lot of work, it is very rough and approximate right now
 def get_pixel_lon_lats(overhead_image,  # type: AbstractEarthOverheadImage
                        dem=None,  # type: AbstractDem
@@ -126,9 +158,10 @@ def get_extent(overhead_image,  # type: AbstractEarthOverheadImage
     if type(bands) == (type(1)):
         bands = [bands]
 
-    if bands is None and not overhead_image.get_point_calculator().bands_coregistered():
+    if bands is None or not overhead_image.get_point_calculator().bands_coregistered():
         bands = np.arange(overhead_image.get_metadata().get_n_bands())
-        warnings.warn("the bands for this image aren't co-registered.  Getting the full image extent using all bands.")
+        if not overhead_image.get_point_calculator().bands_coregistered():
+            warnings.warn("the bands for this image aren't co-registered.  Getting the full image extent using all bands.")
 
     all_band_lons = np.array([])
     all_band_lats = np.array([])

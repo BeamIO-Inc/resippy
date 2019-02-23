@@ -158,14 +158,23 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
                                       n_bins=None,  # type: int
                                       min_clip=None,  # type: float
                                       max_clip=None,  # type: float
-                                      output_dtype=np.uint8
+                                      output_dtype=np.uint8,
+                                      nodata=None  # type: Union[int, float]
                                       ):  # type: (...) -> ndarray
+    if nodata is not None:
+        good_inds = grayscale_image != nodata
     if color_palette is None:
         color_palette = seaborn.color_palette("GnBu_r")
     if min_clip is None:
-        min_clip = np.min(grayscale_image)
+        if nodata is not None:
+            min_clip = np.nanmin(grayscale_image[good_inds])
+        else:
+            min_clip = np.nanmin(grayscale_image)
     if max_clip is None:
-        max_clip = np.max(grayscale_image)
+        if nodata is not None:
+            max_clip = np.nanmax(grayscale_image[good_inds])
+        else:
+            max_clip = np.nanmax(grayscale_image)
     color_palette = np.asarray(color_palette)
 
     if n_bins is not None:
