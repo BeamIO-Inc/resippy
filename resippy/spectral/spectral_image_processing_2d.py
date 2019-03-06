@@ -4,6 +4,15 @@ from numpy import ndarray
 from resippy.utils import spectral_utils as spectral_tools
 from resippy.spectral import spectral_image_processing_1d
 import resippy.utils.image_utils.image_utils as image_utils
+from sklearn.decomposition import PCA
+
+
+def compute_image_cube_pca(spectral_image,      # type: ndarray
+                           n_components=None,   # type: int
+                           svd_solver='auto'    # type: str
+                           ):
+    pca = PCA(n_components=n_components, svd_solver=svd_solver)
+    return pca.fit_transform(spectral_image)
 
 
 def compute_image_cube_spectral_mean(spectral_image,    # type: ndarray
