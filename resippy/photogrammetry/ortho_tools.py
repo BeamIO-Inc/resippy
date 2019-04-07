@@ -63,6 +63,8 @@ def get_pixel_lon_lats(overhead_image,  # type: AbstractEarthOverheadImage
                        max_iter=1000  # type: int
                        ):  # type: (...) -> (ndarray, ndarray)
 
+    if dem is None:
+        dem = DemFactory.constant_elevation(0)
     point_calc = overhead_image.get_point_calculator()
     if pixels_x is None or pixels_y is None:
         pixels_x, pixels_y = image_utils.create_pixel_grid(overhead_image.get_metadata().get_npix_x(),
@@ -109,16 +111,27 @@ def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEa
         bands = list(range(overhead_image.get_metadata().get_n_bands()))
 
     images = []
-    for band in bands:
-        pixels_x, pixels_y = overhead_image.get_point_calculator(). \
-            lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=band, world_proj=world_proj)
-        image_data = overhead_image.read_band_from_disk(band)
-        im_tp = image_data.dtype
+    if overhead_image.get_point_calculator().bands_coregistered() is not True:
+        for band in bands:
+            pixels_x, pixels_y = overhead_image.get_point_calculator(). \
+                lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=band, world_proj=world_proj)
+            image_data = overhead_image.read_band_from_disk(band)
+            im_tp = image_data.dtype
 
-        regridded = image_utils.grid_warp_image_band(image_data, pixels_x, pixels_y,
-                                                     nodata_val=nodata_val, interpolation=interpolation)
-        regridded = regridded.astype(im_tp)
-        images.append(regridded)
+            regridded = image_utils.grid_warp_image_band(image_data, pixels_x, pixels_y,
+                                                         nodata_val=nodata_val, interpolation=interpolation)
+            regridded = regridded.astype(im_tp)
+            images.append(regridded)
+    else:
+        pixels_x, pixels_y = overhead_image.get_point_calculator(). \
+            lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=0, world_proj=world_proj)
+        for band in bands:
+            image_data = overhead_image.read_band_from_disk(band)
+            im_tp = image_data.dtype
+            regridded = image_utils.grid_warp_image_band(image_data, pixels_x, pixels_y,
+                                                         nodata_val=nodata_val, interpolation=interpolation)
+            regridded = regridded.astype(im_tp)
+            images.append(regridded)
 
     orthorectified_image = np.stack(images, axis=2)
     gtiff_image = GeotiffImageFactory.from_numpy_array(orthorectified_image, geo_t, world_proj)
