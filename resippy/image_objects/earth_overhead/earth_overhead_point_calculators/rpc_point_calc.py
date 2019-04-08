@@ -177,8 +177,8 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
         x_norm = p1/p2
         y_norm = p3/p4
 
-        x = (x_norm + 1)*self._npix_x
-        y = (y_norm + 1)*(self._npix_y)
+        x = x_norm * self._samp_scale + self._samp_off + 0.5
+        y = y_norm * self._line_scale + self._line_off + 0.5
 
         return x, y
 
