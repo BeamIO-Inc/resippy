@@ -171,18 +171,26 @@ def get_extent(overhead_image,  # type: AbstractEarthOverheadImage
     if type(bands) == (type(1)):
         bands = [bands]
 
-    if bands is None or not overhead_image.get_point_calculator().bands_coregistered():
+    if bands is None:
         bands = np.arange(overhead_image.get_metadata().get_n_bands())
-        if not overhead_image.get_point_calculator().bands_coregistered():
-            warnings.warn("the bands for this image aren't co-registered.  Getting the full image extent using all bands.")
 
     all_band_lons = np.array([])
     all_band_lats = np.array([])
-    for band in bands:
+
+    if not overhead_image.get_point_calculator().bands_coregistered():
+        warnings.warn("the bands for this image aren't co-registered.  Getting the full image extent using all bands.")
+        for band in bands:
+            lons, lats = get_pixel_lon_lats(overhead_image, pixels_x=x_border, pixels_y=y_border, dem=dem,
+                                            pixel_error_threshold=pixel_error_threshold,
+                                            max_iter=max_iter,
+                                            band=band)
+            all_band_lons = np.append(all_band_lons, lons)
+            all_band_lats = np.append(all_band_lats, lats)
+    else:
         lons, lats = get_pixel_lon_lats(overhead_image, pixels_x=x_border, pixels_y=y_border, dem=dem,
                                         pixel_error_threshold=pixel_error_threshold,
                                         max_iter=max_iter,
-                                        band=band)
+                                        band=0)
         all_band_lons = np.append(all_band_lons, lons)
         all_band_lats = np.append(all_band_lats, lats)
 
