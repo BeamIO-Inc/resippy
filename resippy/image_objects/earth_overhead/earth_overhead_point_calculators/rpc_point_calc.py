@@ -156,8 +156,6 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
             a15*y_squared*x + a16*x_cubed + a17*x*z_squared + a18*y_squared*z + a19*x_squared*y + a20*z_cubed
         return p
 
-
-
     def _lon_lat_alt_to_pixel_x_y_native(self,
                                          lons,  # type: ndarray
                                          lats,  # type: ndarray
