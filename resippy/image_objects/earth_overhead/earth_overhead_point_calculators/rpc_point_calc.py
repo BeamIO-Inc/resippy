@@ -29,9 +29,6 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
         self._height_scale = None        # type: float
         self._height_off = None          # type: float
 
-        self._npix_x = None     # type: int
-        self._npix_y = None     # type: int
-
         self.set_projection(crs_defs.PROJ_4326)
         self._bands_coregistered = True
 
@@ -40,8 +37,6 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
                        fname  # type: str
                        ):
         dset = gdal.Open(fname)
-        npix_x = dset.RasterXSize
-        npix_y = dset.RasterYSize
         rpcs = dset.GetMetadata("RPC")
         dset = None
 
@@ -68,8 +63,7 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
                                     line_num_coeff, line_den_coeff, line_scale, line_off,
                                     lat_scale, lat_off,
                                     long_scale, long_off,
-                                    height_scale, height_off,
-                                    npix_x, npix_y)
+                                    height_scale, height_off)
 
     @classmethod
     def init_from_coeffs(cls,
@@ -87,8 +81,6 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
                          lon_off,               # type: float
                          height_scale,          # type: float
                          height_off,            # type: float
-                         npix_x,                # type: int
-                         npix_y,                # type: int
                          ):
         point_calc = cls()
         point_calc._samp_num_coeff = samp_num_coeff
@@ -105,13 +97,12 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
         point_calc._lon_off = lon_off
         point_calc._height_scale = height_scale
         point_calc._height_off = height_off
-        point_calc._npix_x = npix_x
-        point_calc._npix_y = npix_y
         point_calc.set_approximate_lon_lat_center(lon_off, lat_off)
 
         return point_calc
 
-    def compute_p(self,
+    @classmethod
+    def compute_p(cls,
                   coeffs,       # type: ndarray
                   x,            # type: ndarray
                   y,            # type: ndarray
