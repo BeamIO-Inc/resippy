@@ -11,6 +11,7 @@ import numpy as np
 import scipy.misc as misc
 import os
 
+
 class MicasenseImage(AbstractEarthOverheadImage):
     def __init__(self):
         super(MicasenseImage, self).__init__()
