@@ -53,7 +53,7 @@ def get_pixel_values(image_object,  # type: AbstractEarthOverheadImage
     return np.array(pix_vals)
 
 
-# TODO this needs a lot of work, it is very rough and approximate right now
+# TODO replace this with the ray caster once it is tested and more robust.  This is a total hack right now.
 def get_pixel_lon_lats(overhead_image,  # type: AbstractEarthOverheadImage
                        dem=None,  # type: AbstractDem
                        band=None,  # type: list
@@ -63,6 +63,8 @@ def get_pixel_lon_lats(overhead_image,  # type: AbstractEarthOverheadImage
                        max_iter=1000  # type: int
                        ):  # type: (...) -> (ndarray, ndarray)
 
+    if dem is None:
+        dem = DemFactory.constant_elevation(0)
     point_calc = overhead_image.get_point_calculator()
     if pixels_x is None or pixels_y is None:
         pixels_x, pixels_y = image_utils.create_pixel_grid(overhead_image.get_metadata().get_npix_x(),
@@ -109,16 +111,27 @@ def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEa
         bands = list(range(overhead_image.get_metadata().get_n_bands()))
 
     images = []
-    for band in bands:
-        pixels_x, pixels_y = overhead_image.get_point_calculator(). \
-            lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=band, world_proj=world_proj)
-        image_data = overhead_image.read_band_from_disk(band)
-        im_tp = image_data.dtype
+    if overhead_image.get_point_calculator().bands_coregistered() is not True:
+        for band in bands:
+            pixels_x, pixels_y = overhead_image.get_point_calculator(). \
+                lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=band, world_proj=world_proj)
+            image_data = overhead_image.read_band_from_disk(band)
+            im_tp = image_data.dtype
 
-        regridded = image_utils.grid_warp_image_band(image_data, pixels_x, pixels_y,
-                                                     nodata_val=nodata_val, interpolation=interpolation)
-        regridded = regridded.astype(im_tp)
-        images.append(regridded)
+            regridded = image_utils.grid_warp_image_band(image_data, pixels_x, pixels_y,
+                                                         nodata_val=nodata_val, interpolation=interpolation)
+            regridded = regridded.astype(im_tp)
+            images.append(regridded)
+    else:
+        pixels_x, pixels_y = overhead_image.get_point_calculator(). \
+            lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=0, world_proj=world_proj)
+        for band in bands:
+            image_data = overhead_image.read_band_from_disk(band)
+            im_tp = image_data.dtype
+            regridded = image_utils.grid_warp_image_band(image_data, pixels_x, pixels_y,
+                                                         nodata_val=nodata_val, interpolation=interpolation)
+            regridded = regridded.astype(im_tp)
+            images.append(regridded)
 
     orthorectified_image = np.stack(images, axis=2)
     gtiff_image = GeotiffImageFactory.from_numpy_array(orthorectified_image, geo_t, world_proj)
@@ -158,18 +171,26 @@ def get_extent(overhead_image,  # type: AbstractEarthOverheadImage
     if type(bands) == (type(1)):
         bands = [bands]
 
-    if bands is None or not overhead_image.get_point_calculator().bands_coregistered():
+    if bands is None:
         bands = np.arange(overhead_image.get_metadata().get_n_bands())
-        if not overhead_image.get_point_calculator().bands_coregistered():
-            warnings.warn("the bands for this image aren't co-registered.  Getting the full image extent using all bands.")
 
     all_band_lons = np.array([])
     all_band_lats = np.array([])
-    for band in bands:
+
+    if not overhead_image.get_point_calculator().bands_coregistered():
+        warnings.warn("the bands for this image aren't co-registered.  Getting the full image extent using all bands.")
+        for band in bands:
+            lons, lats = get_pixel_lon_lats(overhead_image, pixels_x=x_border, pixels_y=y_border, dem=dem,
+                                            pixel_error_threshold=pixel_error_threshold,
+                                            max_iter=max_iter,
+                                            band=band)
+            all_band_lons = np.append(all_band_lons, lons)
+            all_band_lats = np.append(all_band_lats, lats)
+    else:
         lons, lats = get_pixel_lon_lats(overhead_image, pixels_x=x_border, pixels_y=y_border, dem=dem,
                                         pixel_error_threshold=pixel_error_threshold,
                                         max_iter=max_iter,
-                                        band=band)
+                                        band=0)
         all_band_lons = np.append(all_band_lons, lons)
         all_band_lats = np.append(all_band_lats, lats)
 
