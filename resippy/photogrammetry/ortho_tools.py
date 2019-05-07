@@ -53,7 +53,7 @@ def get_pixel_values(image_object,  # type: AbstractEarthOverheadImage
     return np.array(pix_vals)
 
 
-# TODO replace this with the ray caster once it is tested and more robust.  This is a total hack right now.
+# TODO replace this with the ray caster once it is tested and more robust.
 def get_pixel_lon_lats(overhead_image,  # type: AbstractEarthOverheadImage
                        dem=None,  # type: AbstractDem
                        band=None,  # type: list

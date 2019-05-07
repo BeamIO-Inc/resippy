@@ -8,8 +8,10 @@ import numpy as np
 import numbers
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 import resippy.utils.image_utils.image_utils as image_utils
-import resippy.utils.numpy_and_array_utils as numpy_utils
 from six import add_metaclass
+import logging
+
+import time
 
 
 @add_metaclass(abc.ABCMeta)
@@ -78,14 +80,15 @@ class AbstractEarthOverheadPointCalc:
             lons, lats, alts = proj_transform(world_proj, self.get_projection(), lons, lats, alts)
         pixel_coords = self._lon_lat_alt_to_pixel_x_y_native(lons, lats, alts, band)
 
+        if lons_is_number or lats_is_number:
+            pixel_coords = pixel_coords[0][0], pixel_coords[1][0]
+
         # now transform everything back if it wasn't in a standard form coming in
         # unflatten world_xyz arrays if the original inputs were 2d
         if world_xyz_is_2d:
             pixel_coords_x_2d = np.reshape(pixel_coords[0], (ny, nx))
             pixel_coords_y_2d = np.reshape(pixel_coords[1], (ny, nx))
             return pixel_coords_x_2d, pixel_coords_y_2d
-        if lons_is_number or lats_is_number:
-            pixel_coords = pixel_coords[0][0], pixel_coords[1][0]
 
         return pixel_coords
 
@@ -210,16 +213,16 @@ class AbstractEarthOverheadPointCalc:
 
         return lons, lats
 
-    def _pixel_x_y_to_lon_lat_ray_caster(self,
-                                         pixels_x,  # type: ndarray
-                                         pixels_y,  # type: ndarray
-                                         dem,  # type: AbstractDem
-                                         dem_sample_distance,  # type: float
-                                         dem_highest_alt=None,       # type: float
-                                         dem_lowest_alt=None,           # type: float
-                                         band=None,  # type: int
-                                         solver_dtype=np.float64  # type: np.dtype
-                                         ):                             # type: (...) -> (ndarray, ndarray)
+    def _deprecated_pixel_x_y_to_lon_lat_ray_caster(self,
+                                                    pixels_x,  # type: ndarray
+                                                    pixels_y,  # type: ndarray
+                                                    dem,  # type: AbstractDem
+                                                    dem_sample_distance,  # type: float
+                                                    dem_highest_alt=None,       # type: float
+                                                    dem_lowest_alt=None,           # type: float
+                                                    band=None,  # type: int
+                                                    solver_dtype=np.float64  # type: np.dtype
+                                                    ):                             # type: (...) -> (ndarray, ndarray)
 
         max_alt = dem_highest_alt
         min_alt = dem_lowest_alt
@@ -250,8 +253,8 @@ class AbstractEarthOverheadPointCalc:
         break_by_indices = [0]
         for lon_high, lon_low, lat_high, lat_low in zip(lons_max_alt_1d, lons_min_alt_1d, lats_max_alt_1d, lats_min_alt_1d):
             n_points = int(np.ceil(ray_horizontal_lens[counter] / dem_sample_distance) + 1)
-            lons = numpy_utils.ndarray_n_to_m(lon_high, lon_low, n_points)
-            lats = numpy_utils.ndarray_n_to_m(lat_high, lat_low, n_points)
+            lons = np.linspace(lon_high, lon_low, n_points)
+            lats = np.linspace(lat_high, lat_low, n_points)
             lons_big_list += (list(lons))
             lats_big_list += (list(lats))
             break_by_indices.append(len(lons_big_list))
@@ -266,7 +269,7 @@ class AbstractEarthOverheadPointCalc:
 
         for i, break_index in enumerate(range(len(break_by_indices) - 1)):
             alts = all_elevations[break_by_indices[break_index]:break_by_indices[break_index + 1]]
-            ray = numpy_utils.ndarray_n_to_m(max_alt, min_alt, len(alts))
+            ray = np.linspace(max_alt, min_alt, len(alts))
             first_index = np.where(ray < alts)[0][0] - 1
             second_index = first_index + 1
             b_ray = ray[first_index]
@@ -285,6 +288,151 @@ class AbstractEarthOverheadPointCalc:
 
         # alts_at_intersected_lon_lats = dem.get_elevations(intersected_lons, intersected_lats)
         return intersected_lons, intersected_lats, intersected_alts
+
+    def _pixel_x_y_to_lon_lat_ray_caster_native(self,
+                                                pixels_x,  # type: ndarray
+                                                pixels_y,  # type: ndarray
+                                                dem,  # type: AbstractDem
+                                                dem_sample_distance,  # type: float
+                                                dem_highest_alt=None,  # type: float
+                                                dem_lowest_alt=None,  # type: float
+                                                band=None,  # type: int
+                                                ):  # type: (...) -> (ndarray, ndarray, ndarray)
+
+        # TODO put stuff in here to make sure nx and ny are same size
+        # TODO put something here to check that the DEM projection and image projection are the same
+
+        tic = time.process_time()
+        ny = None
+        nx = None
+        is2d = np.ndim(pixels_x) == 2
+        if is2d:
+            ny, nx = np.shape(pixels_x)
+            pixels_x = image_utils.flatten_image_band(pixels_x)
+            pixels_y = image_utils.flatten_image_band(pixels_y)
+
+        n_pixels_to_project = len(pixels_x)
+
+        max_alt = dem_highest_alt
+        min_alt = dem_lowest_alt
+
+        if max_alt is None:
+            max_alt = dem.get_highest_alt()
+        if min_alt is None:
+            min_alt = dem.get_lowest_alt()
+        alt_range = max_alt - min_alt
+
+        max_alt = max_alt + alt_range * 0.01
+        min_alt = min_alt - alt_range * 0.01
+
+        lons_max_alt, lats_max_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, max_alt, band=band)
+        lons_min_alt, lats_min_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, min_alt, band=band)
+
+        toc = time.process_time()
+        logging.debug("ray caster... first part: " + str(toc-tic))
+
+        tic = time.process_time()
+
+        ray_horizontal_lens = np.sqrt(
+            np.square(lons_max_alt - lons_min_alt) + np.square(lats_max_alt - lats_min_alt))
+        n_steps_per_ray = int(np.ceil(np.max(ray_horizontal_lens) / dem_sample_distance) + 1)
+
+        toc = time.process_time()
+
+        logging.debug("ray caster... a: " + str(toc-tic))
+
+        tic = time.process_time()
+
+        lons_matrix = np.zeros((n_pixels_to_project, n_steps_per_ray)) + np.linspace(0, 1, n_steps_per_ray)
+        lats_matrix = np.zeros((n_pixels_to_project, n_steps_per_ray)) + np.linspace(0, 1, n_steps_per_ray)
+
+        lons_matrix = np.tile((lons_min_alt - lons_max_alt), (n_steps_per_ray, 1)).transpose() * \
+                      lons_matrix + np.tile(lons_max_alt, (n_steps_per_ray, 1)).transpose()
+        lats_matrix = np.tile((lats_min_alt - lats_max_alt), (n_steps_per_ray, 1)).transpose() * \
+                      lats_matrix + np.tile(lats_max_alt, (n_steps_per_ray, 1)).transpose()
+
+        toc = time.process_time()
+        logging.debug("ray caster... b: " + str(toc-tic))
+
+        tic = time.process_time()
+
+        # TODO this operation becomes very expensive at very fine DEM resolutions
+        # TODO create implementation for a raster DEM that works faster
+        all_elevations = dem.get_elevations(np.array(lons_matrix), np.array(lats_matrix))
+
+        toc = time.process_time()
+        logging.debug("ray caster... second part: " + str(toc-tic))
+
+        tic = time.process_time()
+
+        ray = np.linspace(max_alt, min_alt, n_steps_per_ray)
+        first_ray_intersect_indices = np.zeros(n_pixels_to_project, dtype=np.int)
+        ray_step_indices = list(range(n_steps_per_ray))
+        ray_step_indices.reverse()
+        for i in ray_step_indices:
+            does_ray_intersect = all_elevations[:, i] > ray[i]
+            first_ray_intersect_indices[np.where(does_ray_intersect)] = i
+
+        all_pixel_indices = np.arange(0, n_pixels_to_project, dtype=int)
+
+        first_ray_intersect_indices = first_ray_intersect_indices - 1
+        second_ray_intersect_indices = first_ray_intersect_indices + 1
+        b_rays = ray[first_ray_intersect_indices]
+        b_alts = all_elevations[all_pixel_indices, first_ray_intersect_indices]
+
+        m_rays = ray[1] - ray[0]
+        m_alts = all_elevations[all_pixel_indices, second_ray_intersect_indices] - b_alts
+
+        xs = (b_alts - b_rays) / (m_rays - m_alts)
+        intersected_lons = (lons_matrix[all_pixel_indices, second_ray_intersect_indices] -
+                            lons_matrix[all_pixel_indices, first_ray_intersect_indices]) * xs + \
+                           lons_matrix[all_pixel_indices, first_ray_intersect_indices]
+        intersected_lats = (lats_matrix[all_pixel_indices, second_ray_intersect_indices] -
+                            lats_matrix[all_pixel_indices, first_ray_intersect_indices]) * xs + \
+                           lats_matrix[all_pixel_indices, first_ray_intersect_indices]
+        intersected_alts = (all_elevations[all_pixel_indices, second_ray_intersect_indices] -
+                            all_elevations[all_pixel_indices, first_ray_intersect_indices]) * xs + \
+                           all_elevations[all_pixel_indices, first_ray_intersect_indices]
+
+        if is2d:
+            intersected_lons = image_utils.unflatten_image_band(intersected_lons, nx, ny)
+            intersected_lats = image_utils.unflatten_image_band(intersected_lats, nx, ny)
+            intersected_alts = image_utils.unflatten_image_band(intersected_alts, nx, ny)
+
+        toc = time.process_time()
+        logging.debug(" ray caster ... third part: " + str(toc-tic))
+
+        return intersected_lons, intersected_lats, intersected_alts
+
+    def pixel_x_y_to_lon_lat_alt(self,
+                                 pixels_x,  # type: ndarray
+                                 pixels_y,  # type: ndarray
+                                 dem,  # type: AbstractDem
+                                 world_proj=None,           # type: Proj
+                                 dem_sample_distance=None,  # type: float
+                                 dem_highest_alt=None,  # type: float
+                                 dem_lowest_alt=None,  # type: float
+                                 band=None,  # type: int
+                                 ): # type: (...) -> (float, float, float)
+
+        DEFAULT_DEM_SAMPLE_DISTANCE = 5
+        if dem_sample_distance is None:
+            dem_sample_distance = DEFAULT_DEM_SAMPLE_DISTANCE
+
+        if world_proj is None:
+            world_proj = self.get_projection()
+
+        native_lons, native_lats, native_alts = self._pixel_x_y_to_lon_lat_ray_caster_native(pixels_x, pixels_y, dem,
+                                                                                             dem_sample_distance,
+                                                                                             dem_highest_alt,
+                                                                                             dem_lowest_alt,
+                                                                                             band=band)
+
+        if world_proj.srs != self.get_projection().srs:
+            lons, lats = proj_transform(self.get_projection(), world_proj, native_lons, native_lats)
+            return lons, lats, native_alts
+        else:
+            return native_lons, native_lats, native_alts
 
     def get_projection(self):  # type: (...) -> Proj
         return self._projection
