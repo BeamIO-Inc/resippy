@@ -13,6 +13,7 @@ import logging
 
 import time
 
+import matplotlib.pyplot as plt
 
 @add_metaclass(abc.ABCMeta)
 class AbstractEarthOverheadPointCalc:
@@ -322,6 +323,7 @@ class AbstractEarthOverheadPointCalc:
             min_alt = dem.get_lowest_alt()
         alt_range = max_alt - min_alt
 
+        # put the max and min alts at 1 percent above and below the maximum returned by the DEM
         max_alt = max_alt + alt_range * 0.01
         min_alt = min_alt - alt_range * 0.01
 
@@ -332,6 +334,9 @@ class AbstractEarthOverheadPointCalc:
         logging.debug("ray caster... first part: " + str(toc-tic))
 
         tic = time.process_time()
+        # TODO this operation becomes very expensive at very fine DEM resolutions
+        # TODO create implementation for a raster DEM that works faster
+        # TODO the time consuming operations are obtaining lon/lats for many points as the DEM resolution becomes finer
 
         ray_horizontal_lens = np.sqrt(
             np.square(lons_max_alt - lons_min_alt) + np.square(lats_max_alt - lats_min_alt))
@@ -355,9 +360,6 @@ class AbstractEarthOverheadPointCalc:
         logging.debug("ray caster... b: " + str(toc-tic))
 
         tic = time.process_time()
-
-        # TODO this operation becomes very expensive at very fine DEM resolutions
-        # TODO create implementation for a raster DEM that works faster
         all_elevations = dem.get_elevations(np.array(lons_matrix), np.array(lats_matrix))
 
         toc = time.process_time()
