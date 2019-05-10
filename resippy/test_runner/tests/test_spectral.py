@@ -8,6 +8,8 @@ from resippy.utils.image_utils import image_utils
 import numpy as np
 import copy
 
+import logging
+
 nx = 300
 ny = 200
 nbands = 30
@@ -16,8 +18,11 @@ y_loc = 60
 
 
 class TestSpectralTools(unittest.TestCase):
+    print("SHAPE CONSISTENCY TEST")
+    print("")
+
     def test_spectraltool_imageutils_shape_consistency(self):
-        print("SPECTRAL TOOLS AND IMAGE UTILS SHAPE CONSISTENCY TEST")
+        logging.debug("SPECTRAL TOOLS AND IMAGE UTILS SHAPE CONSISTENCY TEST")
         image_cube = image_utils.create_uniform_image_data(
             nx, ny, nbands, values=0, dtype=np.float32)
         im_nx, im_ny, im_nbands = spectral_utils.get_2d_cube_nx_ny_nbands(
@@ -26,13 +31,14 @@ class TestSpectralTools(unittest.TestCase):
         assert nx == im_nx
         assert ny == im_ny
         assert nbands == im_nbands
-        print(
+        logging.debug(
             "dimensionality consistency between image_utils "
             "and spectral_tools passed"
         )
-        print("")
+    print("shape consistency test passed")
 
     def test_flatten_image_cube(self):
+        print("")
         print("FLATTEN IMAGE CUBE TEST")
         image_cube = image_utils.create_uniform_image_data(
             nx, ny, nbands, values=0, dtype=np.float32)
@@ -43,9 +49,9 @@ class TestSpectralTools(unittest.TestCase):
 
         assert (unflattend_image_cube == image_cube).all()
         print("flattening and unflattening image cube matches with original")
-        print("")
 
     def test_masked_mean_1d(self):
+        print("")
         print("MASKED MEAN TEST 1D")
         image_cube = image_utils.create_uniform_image_data(
             nx, ny, nbands, values=0, dtype=np.float32)
@@ -62,15 +68,16 @@ class TestSpectralTools(unittest.TestCase):
 
         assert len(masked_mean) == nbands
         assert len(raw_mean) == nbands
-        print("length of means equals number of spectral bands")
+        logging.debug("length of means equals number of spectral bands")
 
         assert masked_mean.max() == 0
         assert raw_mean.max() != 0
-        print("1d image cube raw and masked means have different results")
-        print("masked_mean_1d test passed")
-        print("")
+        logging.debug("1d image cube raw and masked means have different results")
+        logging.debug("masked_mean_1d test passed")
+        print("MASKED MEAN TEST 1D - TEST PASSED")
 
     def test_masked_mean_2d(self):
+        print("")
         print("MASKED MEAN TEST 2D")
         image_cube = image_utils.create_uniform_image_data(
             nx, ny, nbands, values=0, dtype=np.float32)
@@ -85,17 +92,17 @@ class TestSpectralTools(unittest.TestCase):
 
         assert len(raw_mean) == nbands
         assert len(masked_mean) == nbands
-        print("length of means equals number of spectral bands")
+        logging.debug("length of means equals number of spectral bands")
 
         assert masked_mean.max() == 0
         assert raw_mean.max() != 0
-        print(
+        logging.debug(
             "2d image cube raw and masked means have "
             "different results, test passed"
         )
-        print("")
 
     def test_masked_covar_1d(self):
+        print("")
         print("MASKED COVARIANCE TEST 1D")
         image_cube = image_utils.create_uniform_image_data(
             nx, ny, nbands, values=0, dtype=np.float32)
@@ -113,17 +120,17 @@ class TestSpectralTools(unittest.TestCase):
 
         assert masked_covar.shape == (nbands, nbands)
         assert raw_covar.shape == (nbands, nbands)
-        print("covariance shape is (nbands x nbands)")
+        logging.debug("covariance shape is (nbands x nbands)")
 
         assert masked_covar.max() == 0
         assert raw_covar.max() != 0
-        print(
+        logging.debug(
             "1d image cube raw and masked covariances have different results"
         )
-        print("masked_covar_1d test passed")
-        print("")
+        print("MASKED_COVAR_1D TEST PASSED")
 
     def test_masked_covar_2d(self):
+        print("")
         print("MASKED COVARIANCE TEST 2D")
         image_cube = image_utils.create_uniform_image_data(
             nx, ny, nbands, values=0, dtype=np.float32)
@@ -137,17 +144,17 @@ class TestSpectralTools(unittest.TestCase):
 
         assert masked_covar.shape == (nbands, nbands)
         assert raw_covar.shape == (nbands, nbands)
-        print("covariance shape is (nbands x nbands)")
+        logging.debug("covariance shape is (nbands x nbands)")
 
         assert masked_covar.max() == 0
         assert raw_covar.max() != 0
-        print(
+        logging.debug(
             "2d image cube raw and masked covariances have different results"
         )
-        print("masked_covar_2d test passed")
-        print("")
+        print("MASKED COVAR 2D TEST PASSED")
 
     def test_rx_1d(self):
+        print("")
         print("RX ANAMOLY TEST 1D")
         image_cube = np.random.random((ny, nx, nbands))
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -178,14 +185,15 @@ class TestSpectralTools(unittest.TestCase):
         assert len(detection_result.shape) == 1
         assert detection_result.shape[0] == nx*ny
 
-        print(
+        logging.debug(
             "location of highest detection return matches x/y "
             "location of embedded signal"
         )
-        print("1d rx test passed.")
+        print("1d rx passed ")
         print("")
 
     def test_rx_2d(self):
+        print("")
         print("RX ANAMOLY TEST 2D")
         image_cube = np.random.random((ny, nx, nbands))
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -209,14 +217,14 @@ class TestSpectralTools(unittest.TestCase):
 
         assert detection_max_y == y_loc
         assert detection_max_x == x_loc
-        print(
+        logging.debug(
             "location of highest detection return matches x/y "
             "location of embedded signal"
         )
-        print("2d rx test passed.")
-        print("")
+        logging.debug("2d rx test passed.")
 
     def test_ace_1d(self):
+        print("")
         print("ACE TEST 1D")
         image_cube = np.random.random((ny, nx, nbands))
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -248,14 +256,14 @@ class TestSpectralTools(unittest.TestCase):
         assert detection_max_x == x_loc
         assert len(detection_result.shape) == 1
         assert detection_result.shape[0] == nx*ny
-        print(
+        logging.debug(
             "location of highest detection return matches x/y "
             "location of embedded signal"
         )
-        print("1d ace test passed.")
-        print("")
+        print("1D ACE TEST PASSED")
 
     def test_ace_2d(self):
+        print("")
         print("ACE TEST 2D")
         image_cube = np.random.random((ny, nx, nbands))
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -281,14 +289,14 @@ class TestSpectralTools(unittest.TestCase):
 
         assert detection_max_y == y_loc
         assert detection_max_x == x_loc
-        print(
+        logging.debug(
             "location of highest detection return matches x/y "
             "location of embedded signal"
         )
-        print("2d ace test passed.")
-        print("")
+        logging.debug("2d ace test passed.")
 
     def test_sam_1d(self):
+        print("")
         print("SAM TEST 1D")
         random_cube = np.random.random((ny, nx, nbands))
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -309,14 +317,14 @@ class TestSpectralTools(unittest.TestCase):
 
         assert detection_max_y == y_loc
         assert detection_max_x == x_loc
-        print(
+        logging.debug(
             "location of highest detection return matches x/y "
             "location of embedded signal"
         )
-        print("1d sam test passed.")
-        print("")
+        print("1-D SAM TEST PASSED")
 
     def test_sam_2d(self):
+        print("")
         print("SAM TEST 2D")
         random_cube = np.random.random((ny, nx, nbands))
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -335,15 +343,15 @@ class TestSpectralTools(unittest.TestCase):
 
         assert detection_max_y == y_loc
         assert detection_max_x == x_loc
-        print(
+        logging.debug(
             "location of highest detection return matches x/y "
             "location of embedded signal"
         )
         print("2d sam test passed.")
-        print("")
 
     # TODO: possibly remove, this might be redundant with test_sam_ace_compare
     def test_sam_ace_sanity_check(self):
+        print("")
         print("SAM / ACE COMPARISON AND SANITY CHECK TEST")
         random_cube = np.random.random((ny, nx, nbands))
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -407,13 +415,14 @@ class TestSpectralTools(unittest.TestCase):
         np.testing.assert_allclose(ace_den_left, np.square(sam_den_left))
         np.testing.assert_allclose(ace_den_right, np.square(sam_den_right))
 
-        print(
+        logging.debug(
             "sam and ace portions of numerators and denominators are "
             "close when the covariance is an identify matrix."
         )
-        print("")
+        print("SAM / ACE SANITY CHECK TEST PASSED")
 
     def test_sam_ace_compare(self):
+        print("")
         print("SAM / ACE EQUALITY TEST WHEN INVERSE COVARIANCE IS IDENTITY")
         random_cube = np.random.random((ny, nx, nbands))
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -433,14 +442,14 @@ class TestSpectralTools(unittest.TestCase):
 
         np.testing.assert_allclose(ace_detection_result, np.square(
             sam_detection_result))
-        print(
+        logging.debug(
             "SAM squared is equivalent to ACE if the inverse "
             "covariance is the identify matrix"
         )
         print("ACE / SAM comparison test passed.")
-        print("")
 
     def test_covariance_equalization(self):
+        print("")
         print("COVARIANCE EQUALIZATION TEST")
         scene_1 = np.random.random((ny, nx, nbands))
         scene_1 = spectral_utils.flatten_image_cube(scene_1)
@@ -453,12 +462,13 @@ class TestSpectralTools(unittest.TestCase):
         scene_1_equalized_cov = sp1d.compute_image_cube_spectral_covariance(
             scene_1_equalized)
         np.testing.assert_almost_equal(scene_2_cov, scene_1_equalized_cov)
-        print(
+        logging.debug(
             "equalized covariance from scene_1 matches covariance of scene_2"
         )
-        print("")
+        print("COVARIANCE EQUALIZATION TEST PASSED")
 
     def test_cov_eq_target_detection(self):
+        print("")
         print("COVARIANCE EQUALIZATION TARGET DETECTION TEST")
         scene_1 = (np.random.random((ny, nx, nbands))) * 0.1 + 0.95
         signal_x_axis = np.arange(0, nbands) / nbands * 2 * np.pi
@@ -478,10 +488,10 @@ class TestSpectralTools(unittest.TestCase):
 
         assert scene_2_ace_max_loc[0][0] == y_loc
         assert scene_2_ace_max_loc[1][0] == x_loc
-        print("scene 2 target location identified correctly")
+        logging.debug("scene 2 target location identified correctly")
         assert scene_1_ace_max_loc[0][0] != y_loc or \
             scene_1_ace_max_loc[1][0] != x_loc
-        print(
+        logging.debug(
             "scene 1 target location was not identified "
             "correctly before covariance equalization"
         )
@@ -498,12 +508,11 @@ class TestSpectralTools(unittest.TestCase):
                 scene_1_equalized_ace_result))
         assert scene_1_equalized_ace_max_loc[0][0] == y_loc
         assert scene_1_equalized_ace_max_loc[1][0] == x_loc
-        print(
+        logging.debug(
             "scene 1 target location was identified correctly "
             "after covariance equalization"
         )
-        print("test passed.")
-        print("")
+        print("COVARIANCE EQUALIZATION TARGET DETECTION TEST PASSED")
 
 
 if __name__ == '__main__':
