@@ -4,7 +4,28 @@ from numpy import ndarray
 from resippy.utils import spectral_utils as spectral_tools
 from resippy.spectral import spectral_image_processing_1d
 import resippy.utils.image_utils.image_utils as image_utils
+from sklearn.decomposition import IncrementalPCA, PCA
 
+
+def compute_image_cube_pca(spectral_image,      # type: ndarray
+                           n_components=None,   # type: int
+                           whiten=False,    # type: str
+                           ):
+    ny, nx, nfeatures = spectral_image.shape
+    nsamples = ny*nx
+    prepped_cube = spectral_image.reshape(nsamples, nfeatures)
+
+    # pca = IncrementalPCA(n_components=n_components,
+    #                      batch_size=batch_size,
+    #                      whiten=whiten,
+    #                      copy=False)
+    pca = PCA(n_components=n_components,
+                         whiten=whiten,
+                         copy=False)
+
+    xformed = pca.fit_transform(prepped_cube)
+    nsamp, ncomp = xformed.shape
+    return xformed.reshape((ny, nx, ncomp))
 
 def compute_image_cube_spectral_mean(spectral_image,    # type: ndarray
                                      image_mask=None    # type: ndarray

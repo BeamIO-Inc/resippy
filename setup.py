@@ -30,6 +30,5 @@ setuptools.setup(
         'imageio',
         'seaborn',
         'colorutils',
-        'gdal2tiles'
     ]
 )
