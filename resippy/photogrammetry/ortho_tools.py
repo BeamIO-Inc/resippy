@@ -19,6 +19,11 @@ from resippy.photogrammetry import crs_defs as crs_defs
 from resippy.utils.photogrammetry_utils import create_ground_grid, world_poly_to_geo_t
 from resippy.photogrammetry.dem.dem_factory import DemFactory
 from resippy.utils.image_utils import image_utils as image_utils
+import numbers
+import time
+import logging
+
+import matplotlib.pyplot as plt
 
 
 def get_pixel_values(image_object,  # type: AbstractEarthOverheadImage
@@ -198,3 +203,41 @@ def get_extent(overhead_image,  # type: AbstractEarthOverheadImage
     # TODO, check into whether we can get rid of this tolerance, also, this isn't a very good approach, since it assumes
     # TODO a particular CRS (probably 4326)
     return unary_union(extents).convex_hull.simplify(0.001)
+
+
+def are_pixels_obstructed_by_dem(earth_overhead_image,      # type: AbstractEarthOverheadImage
+                                 pixels_x,                  # type: ndarray
+                                 pixels_y,              # type: ndarray
+                                 lons,  # type: ndarray
+                                 lats,  # type: ndarray
+                                 dem,   # type: AbstractDem
+                                 alts=None,     # type: ndarray
+                                 dem_resolution=None,   # type: float
+                                 band=0,                # type: int
+                                 ):  # type: (...) -> ndarray
+    DEFAULT_DEM_RESOLUTION = 5
+    if dem_resolution is None:
+        dem_resolution = DEFAULT_DEM_RESOLUTION
+    highest_alts = np.zeros_like(pixels_x)
+    highest_alts[:] = dem.get_highest_alt() + 0.001
+
+    if alts is None:
+        alts = dem.get_elevations(lons, lats)
+
+    obstructed_mask = np.zeros_like(lons)
+
+    lons_highest, lats_highest = earth_overhead_image.get_point_calculator().pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, highest_alts, band=band)
+    lon_diffs = lons - lons_highest
+    lat_diffs = lats - lats_highest
+    horizontal_distances = np.sqrt(np.square(lon_diffs + lat_diffs))
+    vertical_distances = highest_alts - alts
+    max_horizontal_distance = horizontal_distances.max()
+    n_dem_steps = max_horizontal_distance / dem_resolution
+    for step in np.arange(1, n_dem_steps):
+        test_lons = lons + lon_diffs * (step) / n_dem_steps
+        test_lats = lats + lat_diffs * (step) / n_dem_steps
+        test_alts = dem.get_elevations(test_lons, test_lats)
+        obstruction_heights = alts + vertical_distances * step / n_dem_steps
+        obstructed_mask[np.where(test_alts > obstruction_heights)] = 1
+    return obstructed_mask
+

@@ -15,6 +15,7 @@ import time
 
 import matplotlib.pyplot as plt
 
+
 @add_metaclass(abc.ABCMeta)
 class AbstractEarthOverheadPointCalc:
     """Concrete implementations should initialize an image for reading/writing
@@ -27,29 +28,29 @@ class AbstractEarthOverheadPointCalc:
 
     @abc.abstractmethod
     def _lon_lat_alt_to_pixel_x_y_native(self,
-                                         lons,          # type: ndarray
-                                         lats,          # type: ndarray
-                                         alts,          # type: ndarray
-                                         band=None      # type: int
-                                         ):             # type: (...) -> (ndarray, ndarray)
+                                         lons,  # type: ndarray
+                                         lats,  # type: ndarray
+                                         alts,  # type: ndarray
+                                         band=None  # type: int
+                                         ):  # type: (...) -> (ndarray, ndarray)
         pass
 
     @abc.abstractmethod
     def _pixel_x_y_alt_to_lon_lat_native(self,
-                                         pixel_xs,      # type: ndarray
-                                         pixel_ys,      # type: ndarray
-                                         alts=None,     # type: ndarray
-                                         band=None      # type: int
-                                         ):             # type: (...) -> (ndarray, ndarray)
+                                         pixel_xs,  # type: ndarray
+                                         pixel_ys,  # type: ndarray
+                                         alts=None,  # type: ndarray
+                                         band=None  # type: int
+                                         ):  # type: (...) -> (ndarray, ndarray)
         pass
 
     def lon_lat_alt_to_pixel_x_y(self,
-                                 lons,                  # type: ndarray
-                                 lats,                  # type: ndarray
-                                 alts,                  # type: ndarray
-                                 world_proj=None,       # type: Proj
-                                 band=None              # type: int
-                                 ):                     # type: (...) -> (ndarray, ndarray)
+                                 lons,  # type: ndarray
+                                 lats,  # type: ndarray
+                                 alts,  # type: ndarray
+                                 world_proj=None,  # type: Proj
+                                 band=None  # type: int
+                                 ):  # type: (...) -> (ndarray, ndarray)
 
         # check for some errors up front
         if alts is None:
@@ -94,20 +95,20 @@ class AbstractEarthOverheadPointCalc:
         return pixel_coords
 
     def pixel_x_y_alt_to_lon_lat(self,
-                                 pixel_xs,                      # type: ndarray
-                                 pixel_ys,                      # type: ndarray
-                                 alts,                          # type: ndarray
-                                 world_proj=None,               # type: Proj
-                                 band=None,                     # type: int
-                                 pixel_error_threshold=0.01,    # type: float
-                                 max_iter=1000,                 # type: int
-                                 ):                             # type: (...) -> (ndarray, ndarray)
+                                 pixel_xs,  # type: ndarray
+                                 pixel_ys,  # type: ndarray
+                                 alts,  # type: ndarray
+                                 world_proj=None,  # type: Proj
+                                 band=None,  # type: int
+                                 pixel_error_threshold=0.01,  # type: float
+                                 max_iter=1000,  # type: int
+                                 ):  # type: (...) -> (ndarray, ndarray)
         if world_proj is None:
             world_proj = self.get_projection()
         if self._pixel_x_y_alt_to_lon_lat_native(pixel_xs, pixel_ys, alts, band) is not None:
             native_lons, native_lats = self._pixel_x_y_alt_to_lon_lat_native(pixel_xs, pixel_ys, alts, band=band)
         else:
-            native_lons, native_lats =\
+            native_lons, native_lats = \
                 self._pixel_x_y_alt_to_lon_lat_native_solver(pixel_xs,
                                                              pixel_ys,
                                                              alts,
@@ -121,15 +122,15 @@ class AbstractEarthOverheadPointCalc:
             return native_lons, native_lats
 
     def _pixel_x_y_alt_to_lon_lat_native_solver(self,
-                                                pixel_xs,                   # type: ndarray
-                                                pixel_ys,                   # type: ndarray
-                                                alts,                       # type: ndarray
-                                                d_lon=None,                 # type: float
-                                                d_lat=None,                 # type: float
-                                                band=None,                  # type: int
-                                                max_pixel_error=0.01,       # type: float
-                                                max_iter=1000,              # type: int
-                                                ):                          # type: (...) -> (ndarray, ndarray)
+                                                pixel_xs,  # type: ndarray
+                                                pixel_ys,  # type: ndarray
+                                                alts,  # type: ndarray
+                                                d_lon=None,  # type: float
+                                                d_lat=None,  # type: float
+                                                band=None,  # type: int
+                                                max_pixel_error=0.01,  # type: float
+                                                max_iter=1000,  # type: int
+                                                ):  # type: (...) -> (ndarray, ndarray)
 
         n_pixels = np.shape(pixel_xs)
         approximate_lon, approximate_lat = self.get_approximate_lon_lat_center()
@@ -187,16 +188,16 @@ class AbstractEarthOverheadPointCalc:
             pixel_x_shift_x, pixel_y_shift_x = self.lon_lat_alt_to_pixel_x_y(lon_shift, lats, alts, band=band)
             pixel_x_shift_y, pixel_y_shift_y = self.lon_lat_alt_to_pixel_x_y(lons, lat_shift, alts, band=band)
 
-            pxx = (pixel_x_shift_x - pixel_x_estimate)/d_lon
-            pxy = (pixel_x_shift_y - pixel_x_estimate)/d_lat
-            pyx = (pixel_y_shift_x - pixel_y_estimate)/d_lon
-            pyy = (pixel_y_shift_y - pixel_y_estimate)/d_lat
+            pxx = (pixel_x_shift_x - pixel_x_estimate) / d_lon
+            pxy = (pixel_x_shift_y - pixel_x_estimate) / d_lat
+            pyx = (pixel_y_shift_x - pixel_y_estimate) / d_lon
+            pyy = (pixel_y_shift_y - pixel_y_estimate) / d_lat
 
             delta_px = pixel_xs - pixel_x_estimate
             delta_py = pixel_ys - pixel_y_estimate
 
-            delta_lat = (delta_py*pxx - pyx*delta_px)/(pyy*pxx - pxy*pyx)
-            delta_lon = (delta_px - delta_lat*pxy)/pxx
+            delta_lat = (delta_py * pxx - pyx * delta_px) / (pyy * pxx - pxy * pyx)
+            delta_lon = (delta_px - delta_lat * pxy) / pxx
 
             new_lons = lons + delta_lon
             new_lats = lats + delta_lat
@@ -219,11 +220,11 @@ class AbstractEarthOverheadPointCalc:
                                                     pixels_y,  # type: ndarray
                                                     dem,  # type: AbstractDem
                                                     dem_sample_distance,  # type: float
-                                                    dem_highest_alt=None,       # type: float
-                                                    dem_lowest_alt=None,           # type: float
+                                                    dem_highest_alt=None,  # type: float
+                                                    dem_lowest_alt=None,  # type: float
                                                     band=None,  # type: int
                                                     solver_dtype=np.float64  # type: np.dtype
-                                                    ):                             # type: (...) -> (ndarray, ndarray)
+                                                    ):  # type: (...) -> (ndarray, ndarray)
 
         max_alt = dem_highest_alt
         min_alt = dem_lowest_alt
@@ -237,7 +238,7 @@ class AbstractEarthOverheadPointCalc:
         max_alt = max_alt + alt_range * 0.01
         min_alt = min_alt - alt_range * 0.01
 
-        lons_max_alt, lats_max_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y,  max_alt, band=band)
+        lons_max_alt, lats_max_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, max_alt, band=band)
         lons_min_alt, lats_min_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, min_alt, band=band)
 
         lons_max_alt_1d, lats_max_alt_1d = image_utils.flatten_image_band(
@@ -252,7 +253,8 @@ class AbstractEarthOverheadPointCalc:
         lats_big_list = []
         counter = 0
         break_by_indices = [0]
-        for lon_high, lon_low, lat_high, lat_low in zip(lons_max_alt_1d, lons_min_alt_1d, lats_max_alt_1d, lats_min_alt_1d):
+        for lon_high, lon_low, lat_high, lat_low in zip(lons_max_alt_1d, lons_min_alt_1d, lats_max_alt_1d,
+                                                        lats_min_alt_1d):
             n_points = int(np.ceil(ray_horizontal_lens[counter] / dem_sample_distance) + 1)
             lons = np.linspace(lon_high, lon_low, n_points)
             lats = np.linspace(lat_high, lat_low, n_points)
@@ -331,7 +333,7 @@ class AbstractEarthOverheadPointCalc:
         lons_min_alt, lats_min_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, min_alt, band=band)
 
         toc = time.process_time()
-        logging.debug("ray caster... first part: " + str(toc-tic))
+        logging.debug("ray caster... first part: " + str(toc - tic))
 
         tic = time.process_time()
         # TODO this operation becomes very expensive at very fine DEM resolutions
@@ -344,7 +346,7 @@ class AbstractEarthOverheadPointCalc:
 
         toc = time.process_time()
 
-        logging.debug("ray caster... a: " + str(toc-tic))
+        logging.debug("ray caster... a: " + str(toc - tic))
 
         tic = time.process_time()
 
@@ -357,13 +359,13 @@ class AbstractEarthOverheadPointCalc:
                       lats_matrix + np.tile(lats_max_alt, (n_steps_per_ray, 1)).transpose()
 
         toc = time.process_time()
-        logging.debug("ray caster... b: " + str(toc-tic))
+        logging.debug("ray caster... b: " + str(toc - tic))
 
         tic = time.process_time()
         all_elevations = dem.get_elevations(np.array(lons_matrix), np.array(lats_matrix))
 
         toc = time.process_time()
-        logging.debug("ray caster... second part: " + str(toc-tic))
+        logging.debug("ray caster... second part: " + str(toc - tic))
 
         tic = time.process_time()
 
@@ -402,7 +404,7 @@ class AbstractEarthOverheadPointCalc:
             intersected_alts = image_utils.unflatten_image_band(intersected_alts, nx, ny)
 
         toc = time.process_time()
-        logging.debug(" ray caster ... third part: " + str(toc-tic))
+        logging.debug(" ray caster ... third part: " + str(toc - tic))
 
         return intersected_lons, intersected_lats, intersected_alts
 
@@ -410,12 +412,12 @@ class AbstractEarthOverheadPointCalc:
                                  pixels_x,  # type: ndarray
                                  pixels_y,  # type: ndarray
                                  dem,  # type: AbstractDem
-                                 world_proj=None,           # type: Proj
+                                 world_proj=None,  # type: Proj
                                  dem_sample_distance=None,  # type: float
                                  dem_highest_alt=None,  # type: float
                                  dem_lowest_alt=None,  # type: float
                                  band=None,  # type: int
-                                 ): # type: (...) -> (float, float, float)
+                                 ):  # type: (...) -> (float, float, float)
 
         DEFAULT_DEM_SAMPLE_DISTANCE = 5
         if dem_sample_distance is None:
@@ -440,18 +442,18 @@ class AbstractEarthOverheadPointCalc:
         return self._projection
 
     def set_projection(self,
-                       projection       # type: Proj
-                       ):               # type: (...) -> None
+                       projection  # type: Proj
+                       ):  # type: (...) -> None
         self._projection = projection
 
-    def get_approximate_lon_lat_center(self):       # type: (...) -> (float, float)
+    def get_approximate_lon_lat_center(self):  # type: (...) -> (float, float)
         return self._lon_lat_center_approximate
 
     def set_approximate_lon_lat_center(self,
-                                       lon,         # type: float
-                                       lat          # type: float
-                                       ):           # type: (...) -> (float, float)
+                                       lon,  # type: float
+                                       lat  # type: float
+                                       ):  # type: (...) -> (float, float)
         self._lon_lat_center_approximate = (lon, lat)
 
-    def bands_coregistered(self):       # type: (...) -> bool
+    def bands_coregistered(self):  # type: (...) -> bool
         return self._bands_coregistered
