@@ -96,14 +96,6 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
                                                         reverse_x_pixels=self.reverse_x_pixels)
         return pixel_locs
 
-    def pixel_x_y_to_lon_lat_alt(self,
-                                 pixel_x,  # type: ndarray
-                                 pixel_y,  # type: ndarray
-                                 dem=None,  # type: AbstractDem
-                                 band=None  # type: int
-                                 ):  # type: (...) -> (ndarray, ndarray, ndarray)
-        pass
-
     def world_xyzs_to_pixel_locations(self,
                                       world_x_arr,  # type: ndarray
                                       world_y_arr,  # type: ndarray

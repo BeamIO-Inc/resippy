@@ -193,7 +193,7 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
     if continuous is not True:
         max_clip = min_clip + (max_clip - min_clip) * (n_bins - 1) / n_bins
 
-    palette_indices = numpy_utils.ndarray_n_to_m(min_clip, max_clip, n_bins)
+    palette_indices = np.linspace(min_clip, max_clip, n_bins)
     image_low_index_map = np.zeros(grayscale_image.shape, dtype=np.int8)
     image_high_index_map = np.zeros(grayscale_image.shape, dtype=np.int8)
     image_low_palette_index = np.zeros(grayscale_image.shape)

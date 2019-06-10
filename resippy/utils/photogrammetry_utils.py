@@ -8,6 +8,7 @@ from numpy import ndarray
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry import Polygon
 
+
 import resippy.photogrammetry.crs_defs as crs_defs
 
 
@@ -78,3 +79,58 @@ def get_nx_ny_pixels_in_extent(extent,  # type: Polygon
     ny = int(height / gsd_y)
 
     return nx, ny
+
+
+def create_M_matrix(omega_radians, phi_radians, kappa_radians):
+
+    m_matrix = np.zeros((3,3))
+
+    m11 = np.cos(phi_radians) * np.cos(kappa_radians)
+    m12 = np.cos(omega_radians) * np.sin(kappa_radians) + np.sin(omega_radians) * np.sin(phi_radians) * np.cos(
+        kappa_radians)
+    m13 = np.sin(omega_radians) * np.sin(kappa_radians) - np.cos(omega_radians) * np.sin(phi_radians) * np.cos(
+        kappa_radians)
+
+    m21 = -1.0 * np.cos(phi_radians) * np.sin(kappa_radians)
+    m22 = np.cos(omega_radians) * np.cos(kappa_radians) - np.sin(omega_radians) * np.sin(phi_radians) * np.sin(
+        kappa_radians)
+    m23 = np.sin(omega_radians) * np.cos(kappa_radians) + np.cos(omega_radians) * np.sin(phi_radians) * np.sin(
+        kappa_radians)
+
+    m31 = np.sin(phi_radians)
+    m32 = -1.0 * np.sin(omega_radians) * np.cos(phi_radians)
+    m33 = np.cos(omega_radians) * np.cos(phi_radians)
+
+    m_matrix[0, 0] = m11
+    m_matrix[0, 1] = m12
+    m_matrix[0, 2] = m13
+
+    m_matrix[1, 0] = m21
+    m_matrix[1, 1] = m22
+    m_matrix[1, 2] = m23
+
+    m_matrix[2, 0] = m31
+    m_matrix[2, 1] = m32
+    m_matrix[2, 2] = m33
+
+    return m_matrix
+
+
+def solve_for_omega_phi_kappa(m_matrix,  # type: ndarray
+                              ):         # type: (...) -> tuple
+
+    # m11 = cos(phi) * cos(kappa)
+    # m31 = sin(phi)
+    # m33 = cos(omega) * cos(phi)
+
+    # 3 equations, 3 unknowns
+
+    m11 = m_matrix[0, 0]
+    m31 = m_matrix[2, 0]
+    m33 = m_matrix[2, 2]
+
+    phi = np.arcsin(m31)
+    kappa = np.arccos(m11 / np.cos(phi))
+    omega = np.arccos(m33 / np.cos(phi))
+
+    return omega, phi, kappa
