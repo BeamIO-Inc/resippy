@@ -7,6 +7,7 @@ import resippy.utils.image_utils.image_utils as image_utils
 from sklearn.decomposition import IncrementalPCA, PCA
 
 
+# TODO replace reshape with the resippy utilities to flatten and unflatten image cubes
 def compute_image_cube_pca(spectral_image,      # type: ndarray
                            n_components=None,   # type: int
                            whiten=False,    # type: str
@@ -26,6 +27,7 @@ def compute_image_cube_pca(spectral_image,      # type: ndarray
     xformed = pca.fit_transform(prepped_cube)
     nsamp, ncomp = xformed.shape
     return xformed.reshape((ny, nx, ncomp))
+
 
 def compute_image_cube_spectral_mean(spectral_image,    # type: ndarray
                                      image_mask=None    # type: ndarray

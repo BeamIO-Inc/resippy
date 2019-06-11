@@ -1,8 +1,6 @@
 from __future__ import division
 
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
-from resippy.photogrammetry import crs_defs
-import numpy as np
 from numpy import ndarray
 from resippy.utils import photogrammetry_utils
 
@@ -99,3 +97,4 @@ class PinholeCamera(AbstractEarthOverheadPointCalc):
                                          band=None  # type: ndarray
                                          ):  # type: (...) -> (ndarray, ndarray)
         return None
+

@@ -240,4 +240,3 @@ def are_pixels_obstructed_by_dem(earth_overhead_image,      # type: AbstractEart
         obstruction_heights = alts + vertical_distances * step / n_dem_steps
         obstructed_mask[np.where(test_alts > obstruction_heights)] = 1
     return obstructed_mask
-

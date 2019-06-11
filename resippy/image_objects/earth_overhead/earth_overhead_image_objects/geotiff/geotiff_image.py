@@ -1,7 +1,6 @@
 from __future__ import division
 
 import gdal
-import gdal2tiles
 import numpy as np
 import osr
 from numpy import ndarray
@@ -177,6 +176,8 @@ class GeotiffImage(AbstractEarthOverheadImage):
         return gdalwarp_geoTiffImage(geotiff_image, dst_fname, ops)
 
     def create_map_tiles(self, out_dir, gdalwarp_ops=None):
+        # keep this import statement in here until all OS / pip related issues with installing gdal2tiles are resolved.
+        import gdal2tiles
         tmp_filename = "/tmp/tmp_gdalwarp.tif"
         gdal_warp_options = gdal.WarpOptions(dstSRS="EPSG:3857")
         mem_fname = "/vsimem/tmp_gdalwarp_geotiff.vrt"

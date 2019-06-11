@@ -132,5 +132,4 @@ def solve_for_omega_phi_kappa(m_matrix,  # type: ndarray
     phi = np.arcsin(m31)
     kappa = np.arccos(m11 / np.cos(phi))
     omega = np.arccos(m33 / np.cos(phi))
-
     return omega, phi, kappa
