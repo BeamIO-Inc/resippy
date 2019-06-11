@@ -1,4 +1,4 @@
-from integration_tests_baseline.test_runner.timings import test_point_calc_timings
+from resippy.test_runner.timings import test_point_calc_timings
 
 
 def main():

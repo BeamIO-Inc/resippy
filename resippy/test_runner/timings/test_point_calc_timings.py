@@ -1,4 +1,6 @@
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.rpc_point_calc import RPCPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
+
 from resippy.utils import photogrammetry_utils
 from resippy.utils.image_utils import image_utils
 import numpy as np
@@ -57,18 +59,48 @@ def rpc_timings():
     lats = image_utils.flatten_image_band(ground_grid[1])
     alts = np.zeros_like(lats)
 
-    n_loops = 10
+    n_loops = 4
 
     tic = time.time()
     for n in range(n_loops):
         point_calc.compute_p(samp_num_coeff, lats, lons, alts)
     toc = time.time()
-    print("calculated " + str(nx*ny) + " pixels in " + str(toc-tic) + " seconds.")
-    print(str(nx*ny/(toc-tic)/1e6) + " Megapixels per second")
+    print("calculated " + str(n_loops*nx*ny) + " pixels in " + str(toc-tic) + " seconds.")
+    print(str(n_loops*nx*ny/(toc-tic)/1e6) + " Megapixels per second")
 
+
+def pinhole_timings():
+
+    point_calc = PinholeCamera.init_from_coeffs(0, 0, 10000, 0.0, 0.0, 0.0, 50.0, 5, 5, 0, 0)
+
+    lon_center = 0
+    lat_center = 0
+    d_lon = 500
+    d_lat = 500
+
+    nx = 2000
+    ny = 2000
+
+    ground_grid = photogrammetry_utils.create_ground_grid(lon_center - d_lon, lon_center + d_lon,
+                                                          lat_center - d_lat, lat_center + d_lat,
+                                                          nx, ny)
+
+    lons = image_utils.flatten_image_band(ground_grid[0])
+    lats = image_utils.flatten_image_band(ground_grid[1])
+    alts = np.zeros_like(lats)
+
+    n_loops = 4
+
+    tic = time.time()
+    for n in range(n_loops):
+        point_calc._world_to_image_space(lons, lats, alts)
+    toc = time.time()
+    print("calculated " + str(n_loops*nx*ny) + " pixels in " + str(toc-tic) + " seconds.")
+    print(str(n_loops*nx*ny/(toc-tic)/1e6) + " Megapixels per second")
 
 def main():
     rpc_timings()
+    pinhole_timings()
 
 
 if __name__ == "__main__":
