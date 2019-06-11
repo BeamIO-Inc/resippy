@@ -87,6 +87,7 @@ class MicasensePix4dPointCalc(AbstractEarthOverheadPointCalc):
             return self.point_calc_5._lon_lat_alt_to_pixel_x_y_native(lons, lats, alts)
         # TODO throw error or exception if no band is specified.  Tell the user they need to specify a band number
 
+
     def set_distortion_model(self,
                              distortion_model  # type: str
                              ):  # type: (...) -> None

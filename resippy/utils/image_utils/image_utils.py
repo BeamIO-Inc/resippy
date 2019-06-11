@@ -178,7 +178,7 @@ def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
     color_palette = np.asarray(color_palette)
 
     if n_bins is not None:
-        tmp_grayscale_image = numpy_utils.ndarray_n_to_m(min_clip, max_clip, n_bins)
+        tmp_grayscale_image = np.linspace(min_clip, max_clip, n_bins)
         tmp_grayscale_image = np.expand_dims(tmp_grayscale_image, 0)
         new_color_palette = apply_colormap_to_grayscale_image(tmp_grayscale_image,
                                                               color_palette,
