@@ -36,6 +36,7 @@ def create_vehicle_training_chips():
     print("CHIPPING OUT VEHICLES FROM TRAINING IMAGE, THIS MIGHT TAKE A WHILE")
     print("save dir = " + save_dir_base)
 
+
     chipper_ny = 50
     chipper_nx = 50
 

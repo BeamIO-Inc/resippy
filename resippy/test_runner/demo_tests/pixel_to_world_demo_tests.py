@@ -20,6 +20,7 @@ micasense_dir = file_utils.get_path_from_subdirs(demo_data_base_dir, ['image_dat
                                                                       'processed'
                                                                       ])
 
+
 # set up filename bundle for a frame, note that it is assumed that the band number is the last item in the filename
 band_fname_dict = {}
 for cam_num in range(1, 6):
@@ -39,6 +40,7 @@ dsm_fullpath = file_utils.get_path_from_subdirs(micasense_dir,
                                                 ['pix4d_1703_mica_imgs85_1607',
                                                  '3_dsm_ortho',
                                                  'pix4d_1704_mica_85_1607_dsm.tif'])
+
 
 
 # load up the pix4d info

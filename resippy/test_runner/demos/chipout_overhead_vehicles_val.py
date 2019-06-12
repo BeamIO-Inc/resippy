@@ -112,7 +112,6 @@ def create_vehicle_training_chips():
 
     print("DONE CHIPPING OUT IMAGES")
 
-
 def main():
     create_vehicle_training_chips()
 

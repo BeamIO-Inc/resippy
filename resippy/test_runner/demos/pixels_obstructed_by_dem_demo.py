@@ -25,6 +25,7 @@ micasense_dir = file_utils.get_path_from_subdirs(demo_data_base_dir, ['image_dat
                                                                       'processed'
                                                                       ])
 
+
 band_fname_dict = {}
 for cam_num in range(1, 6):
     band_num = str(cam_num)
@@ -42,6 +43,7 @@ dsm_fullpath = file_utils.get_path_from_subdirs(micasense_dir,
                                                 ['pix4d_1703_mica_imgs85_1607',
                                                  '3_dsm_ortho',
                                                  'pix4d_1704_mica_85_1607_dsm.tif'])
+
 
 # load up the pix4d info
 pix4d_master_dict = pix4d.make_master_dict(params_dir)

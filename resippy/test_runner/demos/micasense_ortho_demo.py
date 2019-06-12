@@ -29,6 +29,7 @@ micasense_dir = file_utils.get_path_from_subdirs(demo_data_base_dir, ['image_dat
                                                                       'processed'
                                                                       ])
 
+
 band_fname_dict = {}
 for cam_num in range(1, 6):
     band_num = str(cam_num)
