@@ -16,24 +16,34 @@ import time
 save_dir = os.path.join(demo_data_save_dir, "pixels_obstructed_by_dem_demo")
 file_utils.make_dir_if_not_exists(save_dir)
 
+micasense_dir = file_utils.get_path_from_subdirs(demo_data_base_dir, ['image_data',
+                                                                      'multispectral',
+                                                                      'micasense',
+                                                                      '20181019_hana',
+                                                                      '1703',
+                                                                      'micasense',
+                                                                      'processed'
+                                                                      ])
+
 
 band_fname_dict = {}
 for cam_num in range(1, 6):
     band_num = str(cam_num)
     band_fname_dict['band' + band_num] = \
-        os.path.join(demo_data_base_dir,
-                     'image_data/20181019_hana/1703/micasense/processed'
-                     '/merged/L0_IMG_0404_' + band_num + '.tif')
+        file_utils.get_path_from_subdirs(micasense_dir, ['merged', 'L0_IMG_0404_' + band_num + '.tif'])
 
 # set up path to pix4d parameters used to build point calculator etc
-params_dir = os.path.join(demo_data_base_dir,
-                          'image_data/20181019_hana/1703/micasense/processed'
-                          '/pix4d_1703_mica_imgs85_1607/1_initial/params/')
+params_dir = file_utils.get_path_from_subdirs(micasense_dir, ['pix4d_1703_mica_imgs85_1607',
+                                                              '1_initial',
+                                                              'params'])
+
 
 # set up where digital surface model is stored
-dsm_fullpath = os.path.join(demo_data_base_dir,
-                            'image_data/20181019_hana/1703/micasense/processed'
-                            '/pix4d_1703_mica_imgs85_1607/3_dsm_ortho/pix4d_1704_mica_85_1607_dsm.tif')
+dsm_fullpath = file_utils.get_path_from_subdirs(micasense_dir,
+                                                ['pix4d_1703_mica_imgs85_1607',
+                                                 '3_dsm_ortho',
+                                                 'pix4d_1704_mica_85_1607_dsm.tif'])
+
 
 # load up the pix4d info
 pix4d_master_dict = pix4d.make_master_dict(params_dir)
