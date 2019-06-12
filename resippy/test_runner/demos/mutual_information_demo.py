@@ -13,13 +13,19 @@ import logging
 save_dir = os.path.join(demo_data_save_dir, "mmi_demos")
 file_utils.make_dir_if_not_exists(save_dir)
 
+micasense_dir = file_utils.get_path_from_subdirs(demo_data_base_dir, ['image_data',
+                                                                      'multispectral',
+                                                                      'micasense',
+                                                                      '20181019_hana',
+                                                                      '1703',
+                                                                      'micasense',
+                                                                      'processed'
+                                                                      ])
 band_fname_dict = {}
 for cam_num in range(1, 6):
     band_num = str(cam_num)
     band_fname_dict['band' + band_num] = \
-        os.path.join(demo_data_base_dir,
-                     'image_data/20181019_hana/1703/micasense/processed'
-                     '/merged/L0_IMG_0404_' + band_num + '.tif')
+        file_utils.get_path_from_subdirs(micasense_dir, ['merged', 'L0_IMG_0404_' + band_num + '.tif'])
 
 
 def mmi_window_demo():

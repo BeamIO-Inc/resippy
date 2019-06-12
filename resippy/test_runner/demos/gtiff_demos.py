@@ -5,9 +5,19 @@ from resippy.test_runner import demo_data_save_dir
 from resippy.utils import file_utils as file_utils
 
 
-gtiff_full_path = os.path.join(demo_data_base_dir,
-                               'image_data/20181019_hana/1703/micasense/processed'
-                               '/pix4d_1703_mica_imgs85_1607/3_dsm_ortho/pix4d_1704_mica_85_1607_dsm.tif')
+micasense_dir = file_utils.get_path_from_subdirs(demo_data_base_dir, ['image_data',
+                                                                      'multispectral',
+                                                                      'micasense',
+                                                                      '20181019_hana',
+                                                                      '1703',
+                                                                      'micasense',
+                                                                      'processed'
+                                                                      ])
+
+gtiff_full_path = file_utils.get_path_from_subdirs(micasense_dir,
+                                                ['pix4d_1703_mica_imgs85_1607',
+                                                 '3_dsm_ortho',
+                                                 'pix4d_1704_mica_85_1607_dsm.tif'])
 
 save_dir = os.path.join(demo_data_save_dir, "gtiff_demos")
 file_utils.make_dir_if_not_exists(save_dir)

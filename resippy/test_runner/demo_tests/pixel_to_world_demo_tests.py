@@ -6,34 +6,40 @@ from resippy.photogrammetry.dem.dem_factory import DemFactory
 from resippy.image_objects.image_factory import ImageFactory
 from resippy.test_runner import demo_data_base_dir
 import resippy.utils.image_utils.image_utils as image_utils
-import resippy.photogrammetry.ortho_tools as ortho_tools
-
+import resippy.utils.file_utils as file_utils
+import numpy as np
 import os
 
-import numpy as np
-import time
 
-import matplotlib.pyplot as plt
-
+micasense_dir = file_utils.get_path_from_subdirs(demo_data_base_dir, ['image_data',
+                                                                      'multispectral',
+                                                                      'micasense',
+                                                                      '20181019_hana',
+                                                                      '1703',
+                                                                      'micasense',
+                                                                      'processed'
+                                                                      ])
 
 # set up filename bundle for a frame, note that it is assumed that the band number is the last item in the filename
 band_fname_dict = {}
 for cam_num in range(1, 6):
     band_num = str(cam_num)
     band_fname_dict['band' + band_num] = \
-        os.path.join(demo_data_base_dir,
-                     'image_data/20181019_hana/1703/micasense/processed'
-                     '/merged/L0_IMG_0404_' + band_num + '.tif')
+        file_utils.get_path_from_subdirs(micasense_dir, ['merged', 'L0_IMG_0404_' + band_num + '.tif'])
+
 
 # set up path to pix4d parameters used to build point calculator etc
-params_dir = os.path.join(demo_data_base_dir,
-                          'image_data/20181019_hana/1703/micasense/processed'
-                          '/pix4d_1703_mica_imgs85_1607/1_initial/params/')
+params_dir = file_utils.get_path_from_subdirs(micasense_dir, ['pix4d_1703_mica_imgs85_1607',
+                                                              '1_initial',
+                                                              'params'])
+
 
 # set up where digital surface model is stored
-dsm_fullpath = os.path.join(demo_data_base_dir,
-                            'image_data/20181019_hana/1703/micasense/processed'
-                            '/pix4d_1703_mica_imgs85_1607/3_dsm_ortho/pix4d_1704_mica_85_1607_dsm.tif')
+dsm_fullpath = file_utils.get_path_from_subdirs(micasense_dir,
+                                                ['pix4d_1703_mica_imgs85_1607',
+                                                 '3_dsm_ortho',
+                                                 'pix4d_1704_mica_85_1607_dsm.tif'])
+
 
 # load up the pix4d info
 pix4d_master_dict = pix4d.make_master_dict(params_dir)
