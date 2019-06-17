@@ -13,10 +13,21 @@ from six import add_metaclass
 
 @add_metaclass(abc.ABCMeta)
 class AbstractEarthOverheadPointCalc:
-    """Concrete implementations should initialize an image for reading/writing
-    and should also set the image's metadata object and point calculator object"""
+    """
+    This is the Abstract Earth Overhead Point Calculator class.  Concrete implementations for specific types of
+    Overhead Earth Point Calculators should be created for the specific Earth Overhead Image Objects they support.
+    """
 
     def __init__(self):
+        # TODO add parameters that specify the point calculator's altitude reference datum.
+        """
+        This is used to initialize the point calculator.  There following class variables store information about
+        the point calculator:
+        _lon_lat_center_approximate: The approximate (longitude, latitude) center of the the image
+        _projection: The native projection of the point calculator
+        _bands_coregistered: If the image this point calculator supports has multiple bands this variable
+        specifies whether or not they are coregistered.
+        """
         self._lon_lat_center_approximate = None
         self._projection = None
         self._bands_coregistered = True
@@ -28,6 +39,18 @@ class AbstractEarthOverheadPointCalc:
                                          alts,  # type: ndarray
                                          band=None  # type: int
                                          ):  # type: (...) -> (ndarray, ndarray)
+        """
+        This is an protected abstract method that can be implemented for concrete implementations of this class.
+        A point calculator should implement either this method or _pixel_x_y_alt_to_lon_lat_native.  If this method
+        is not implemented and _pixel_x_y_alt_to_lon_lat_native is, then this method can be solved for with iterative
+        methods.
+        :param lons: longitudes in the point calculator's native projection, provided as a numpy ndarray
+        :param lats: latitudes in the point calculator's native projection, provided as a numpy ndarray
+        :param alts: altitudes in the point calculator's native elevation datum reference, provided as a numpy ndarray
+        :param band: specific image band provided as an int.  If this variable is None it assumes all bands are
+        coregistered
+        :return: (pixel_x, pixel_y) provided as a tuple of numpy ndarrays
+        """
         pass
 
     @abc.abstractmethod
@@ -37,6 +60,19 @@ class AbstractEarthOverheadPointCalc:
                                          alts=None,  # type: ndarray
                                          band=None  # type: int
                                          ):  # type: (...) -> (ndarray, ndarray)
+        """
+        This is an protected abstract method that can be implemented for concrete implementations of this class.
+        A point calculator should implement either this method or _lon_lat_alt_to_pixel_x_y_native.  If this method
+        is not implemented and _lon_lat_alt_to_pixel_x_y_native is, then this method can be solved for with iterative
+        methods.  This functionality is provided automatically within the pixel_x_y_alt_to_lon_lat method of this.
+        class.
+        :param pixel_xs: x pixels, provided as a numpy ndarray
+        :param pixel_ys: y pixels, provided as a numpy ndarray
+        :param alts: altitudes in the point calculator's native elevation datum reference, provided as a numpy ndarray
+        :param band: specific image band provided as an int.  If this variable is None it assumes all bands are coregistered
+        :return: (longitudes, latitudes) in the point calculator's native projection, provided as a tuple of numpy
+        ndarrays
+        """
         pass
 
     def lon_lat_alt_to_pixel_x_y(self,
@@ -46,7 +82,19 @@ class AbstractEarthOverheadPointCalc:
                                  world_proj=None,  # type: Proj
                                  band=None  # type: int
                                  ):  # type: (...) -> (ndarray, ndarray)
-
+        """
+        This method calculates pixel x / y values given longitude, latitude and altitude information.  It uses
+        _lon_lat_alt_to_pixel_x_y_native under the hood, and provides some convenience to the user.  These
+        conveniences include automatic handling of different projections, and also allows the user to input
+        longitudes, latitudes and altidues as either 1d or 2d numpy arrays.  The results will be output in the
+        same dimensions as the inputs.
+        :param lons: longitudes provided as a numpy ndarray, can be either 1d or 2d numpy array, or a single float value
+        :param lats: latitudes provided as a numpy ndarray, can be either 1d or 2d numpy array, or a single float value
+        :param alts: altitudes in the point calculator's native elevation datum reference, provided as a numpy ndarray
+        :param world_proj: projection of the input longitudes and latitudes
+        :param band: specific image band provided as an int.  If this variable is None it assumes all bands are coregistered
+        :return: (pixel x, pixel y) as a tuple of numpy ndarrays (1d or 2d), or a tuple of float.  The output will match the input
+        """
         # check for some errors up front
         if alts is None:
             alts = 0
@@ -98,6 +146,21 @@ class AbstractEarthOverheadPointCalc:
                                  pixel_error_threshold=0.01,  # type: float
                                  max_iter=1000,  # type: int
                                  ):  # type: (...) -> (ndarray, ndarray)
+        """
+        This will calculate a pixel's lon / lat location on earth.  It uses _pixel_x_y_alt_to_lon_lat_native under the
+        hood, and if that method is not implemented it will solve iteratively using _pixel_x_y_alt_to_lon_lat_native_solver.
+        It provides conveniences to users such as automatic handling of world projections, and allows the user to input
+        either numbers, or 1d or 2d numpy arrays as inputs for pixel values and altitudes.
+        :param pixel_xs: x pixels, as either a float or 1d or 2d numpy array
+        :param pixel_ys: y pixels, as either a float or 1d or 2d numpy array
+        :param alts: altitudes in the point calculator's native elevation datum reference, provided as a numpy ndarray
+        :param world_proj: projection of the input longitudes and latitudes
+        :param band: band number of the image
+        :param pixel_error_threshold: pixel threshold to use if the iterative solver is used. Defaults to 0.01 pixels
+        :param max_iter: maximum iteration.  This is used if the iterative solver does not converge to avoid entering
+        an infinite loop.  Defaults to 1000 iterations.
+        :return: (lon, lat) as a tuple of float, or tuple of 1d or 2d numpy ndarray, to match the input of pixel_xs, and pixel_ys
+        """
         if world_proj is None:
             world_proj = self.get_projection()
         if self._pixel_x_y_alt_to_lon_lat_native(pixel_xs, pixel_ys, alts, band) is not None:
@@ -126,6 +189,19 @@ class AbstractEarthOverheadPointCalc:
                                                 max_pixel_error=0.01,  # type: float
                                                 max_iter=1000,  # type: int
                                                 ):  # type: (...) -> (ndarray, ndarray)
+        """
+        This is a protected method that is used to solve for longitude, and latitude given pixel x, y and altitude values.
+        It uses an approximation of a newton method solver.
+        :param pixel_xs: pixel x values, as a 1d numpy ndarray
+        :param pixel_ys: pixel y values, as a 1d numpy ndarray
+        :param alts: altitudes in the point calculator's native elevation datum reference, provided as a numpy ndarray
+        :param d_lon: delta_longitude to use for the newton-like solver.  If it is not provided this value will be calculated
+        :param d_lat: delta_latitude to use for the newton-like solver.  If it is not provided this value will be calcualted
+        :param band: image band as an int or None if all the bands are coregistered
+        :param max_pixel_error: maximum pixel error.  Same as the description in pixel_x_y_alt_to_lon_lat
+        :param max_iter: Same as the description in pixel_x_y_alt_to_lon_lat
+        :return: (longitude, latitude) in the point calculator's native projection, as a tuple of numpy ndarrays
+        """
 
         n_pixels = np.shape(pixel_xs)
         approximate_lon, approximate_lat = self.get_approximate_lon_lat_center()
@@ -220,6 +296,20 @@ class AbstractEarthOverheadPointCalc:
                                                 dem_lowest_alt=None,  # type: float
                                                 band=None,  # type: int
                                                 ):  # type: (...) -> (ndarray, ndarray, ndarray)
+        """
+        Protected method that solves for pixel x, y by casting rays onto a DEM.  This is used when the pixel altitudes
+        are not already known, and only a method for _lon_lat_alt_to_pixel_x_y_native is available.
+        :param pixels_x: x pixels, as a numpy ndarray
+        :param pixels_y: y pixels, as a numpy ndarray
+        :param dem: digital elevation model, as concrete implementation of an AbstractDem object
+        :param dem_sample_distance: resolution at which to sample the DEM, in meters.  If no value is provided
+        this value will default to 5 meters.
+        :param dem_highest_alt: Highest DEM altitude.  This will be calculated using the full DEM if it is not provided
+        :param dem_lowest_alt: Lowest DEM altitude.  This will be calculated using the full DEM if it is not provided
+        :param band: image band, as an int, or None if all the image bands are coregistered.
+        :return: (longitude, latitude, altitude) in the point calculator's native projection, and the input DEM's
+        elevation reference dataum
+        """
 
         # TODO put stuff in here to make sure nx and ny are same size
         # TODO put something here to check that the DEM projection and image projection are the same
@@ -314,6 +404,21 @@ class AbstractEarthOverheadPointCalc:
                                  dem_lowest_alt=None,  # type: float
                                  band=None,  # type: int
                                  ):  # type: (...) -> (float, float, float)
+        """
+        Solves for pixel x, y by casting rays onto a DEM.  Uses _pixel_x_y_to_lon_lat_ray_caster_native under the hood
+        and provides some convenience to the user, such as automatic handling of world projections
+        :param pixels_x: x pixels, as a 1d or 2d numpy ndarray
+        :param pixels_y: y pixels, as a 1d or 2d numpy ndarray
+        :param dem: concrete implementation of an AbstractDem, defaults to a flat earth DEM with an elevation of zero if
+        this parameter is not provided.
+        :param world_proj: world projection of the output longitudes and latitudes.
+        :param dem_sample_distance: sample distance to use when sampling the DEM.  Defaults to 5 meters
+        :param dem_highest_alt: Highest DEM altitude.  This will be calculated using the full DEM if it is not provided
+        :param dem_lowest_alt: Lowest DEM altitude.  This will be calculated using the full DEM if it is not provided
+        :param band: Image band, as an int, or None if all of the image bands are coregistered.
+        :return: (longitude, latitude, altitude) in the projection specified by the world_proj input parameter, and
+        The altitude specified by the input dem object parameter.
+        """
 
         DEFAULT_DEM_SAMPLE_DISTANCE = 5
         if dem_sample_distance is None:
@@ -335,21 +440,48 @@ class AbstractEarthOverheadPointCalc:
             return native_lons, native_lats, native_alts
 
     def get_projection(self):  # type: (...) -> Proj
+        """
+        returns the point calculator's native projection
+        :return: point calculator's native projection as a pyproj Proj object
+        """
         return self._projection
 
     def set_projection(self,
                        projection  # type: Proj
                        ):  # type: (...) -> None
+        """
+        sets the point calculator's native projection.  This should only be used when creating a new point calculator
+        :param projection: point calculator's native projection as a pyproj Proj object
+        :return: None
+        """
         self._projection = projection
 
     def get_approximate_lon_lat_center(self):  # type: (...) -> (float, float)
+        """
+        Gets the point calculator's approximate lon/lat center, in the point calculator's native projection.  This
+        assumes that the lon / lat center was set when the point calculator was initialized.
+        :return: (lon, lat) as a tuple of floats
+        """
         return self._lon_lat_center_approximate
 
     def set_approximate_lon_lat_center(self,
                                        lon,  # type: float
                                        lat  # type: float
                                        ):  # type: (...) -> (float, float)
+        """
+        sets the point calculator's approximate lon / lat center.  This should only be used when creating a new
+        point calculator.
+        :param lon: longitude, in the point calculator's native projection
+        :param lat: latitude, in the point calculator's native projection
+        :return: None
+        """
         self._lon_lat_center_approximate = (lon, lat)
 
     def bands_coregistered(self):  # type: (...) -> bool
+        """
+        returns a boolean that says whether or not the image object's spectral bands are coregistered.  If bands are
+        not coregistered then lon/lat to pixel (or vice versa) calculations must be performed for each band.  If bands
+        are coregistered then these calculations only need to be done once.
+        :return: boolean, False if bands are not coregistered, True if they are.
+        """
         return self._bands_coregistered

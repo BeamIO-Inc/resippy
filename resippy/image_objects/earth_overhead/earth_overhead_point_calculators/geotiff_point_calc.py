@@ -10,6 +10,9 @@ from numpy import ndarray
 
 
 class GeotiffPointCalc(AbstractEarthOverheadPointCalc):
+    """
+    This is a concrete implementation of AbstractEarthOverheadPointCalc for a geotiff point calculator.
+    """
 
     def __init__(self):
         self._geo_t = None
@@ -22,6 +25,11 @@ class GeotiffPointCalc(AbstractEarthOverheadPointCalc):
     def init_from_file(cls,
                        fname  # type: str
                        ):  # type: (...) -> GeotiffPointCalc
+        """
+        This is a class method that returns an initialized GeotiffPointCalc object from an input file.
+        :param fname: filename of geotiff image file
+        :return: initialized Geotiff point calculator
+        """
         point_calc = cls()
         dset = gdal.Open(fname)
         point_calc.set_geot(np.array(dset.GetGeoTransform()))
@@ -36,24 +44,47 @@ class GeotiffPointCalc(AbstractEarthOverheadPointCalc):
 
     def set_geot(self,
                  geo_t  # type: list
-                 ):  # type: (...) -> list
+                 ):  # type: (...) -> None
+        """
+        sets the geotiffs geotransform and inverse geotransform
+        :param geo_t: geotransform specified by gdal's documentation.
+        :return: None
+        """
         self._geo_t = geo_t
         self._inv_geo_t = gdal.InvGeoTransform(geo_t)
 
     def get_geot(self):  # type: (...) -> ndarray
+        """
+        Returns the geotransform for the point calculator
+        :return: list of geotransform parameters
+        """
         return self._geo_t
 
     def get_inv_geot(self):  # type: (...) -> ndarray
+        """
+        Returns the inverse geotransform for the point calculator
+        :return: list of inverse geotransform parameters
+        """
         return self._inv_geo_t
 
     def set_npix_x(self,
                    image_npix_x  # type: int
                    ):  # type: (...) -> None
+        """
+        Sets the number of x pixels for the image.  This is generally useful for computing image geographic bounds
+        :param image_npix_x: number of x pixels, integer
+        :return: None
+        """
         self._npix_x = image_npix_x
 
     def set_npix_y(self,
                    image_npix_y  # type: int
                    ):  # type: (...) -> None
+        """
+        Sets the number of y pixels for the image.  This is generally useful for computing image geographic bounds
+        :param image_npix_y: number of x pixels, integer
+        :return: None
+        """
         self._npix_y = image_npix_y
 
     def _lon_lat_alt_to_pixel_x_y_native(self,
@@ -62,6 +93,16 @@ class GeotiffPointCalc(AbstractEarthOverheadPointCalc):
                                          alts=None,  # type: ndarray
                                          band=None  # type: int
                                          ):  # type: (...) -> (ndarray, ndarray)
+        """
+        Uses the point calculator's inverse geotransform parameters to calculate pixel locations from
+        longitude, latitude. Altitude is ignored in this case.
+        See documentation for AbstractEarthOverheadPointCalc.
+        :param lons:
+        :param lats:
+        :param alts:
+        :param band:
+        :return:
+        """
         x = self._inv_geo_t[0] + self._inv_geo_t[1] * lons + self._inv_geo_t[2] * lats
         y = self._inv_geo_t[3] + self._inv_geo_t[4] * lons + self._inv_geo_t[5] * lats
         return x, y
@@ -72,6 +113,16 @@ class GeotiffPointCalc(AbstractEarthOverheadPointCalc):
                                          alts=None,  # type: ndarray
                                          band=None  # type: ndarray
                                          ):  # type: (...) -> (ndarray, ndarray)
+        """
+        Uses the point calculator's geotransform parameters to calculate longitude, latitude locations from the image
+        pixel x y locations.  Altitude is ignored in this case.
+        See documentation for AbstractEarthOverheadPointCalc.
+        :param x_pixels:
+        :param y_pixels:
+        :param alts:
+        :param band:
+        :return:
+        """
         lons = self._geo_t[0] + x_pixels * self._geo_t[1] + y_pixels * self._geo_t[2]
         lats = self._geo_t[3] + x_pixels * self._geo_t[4] + y_pixels * self._geo_t[5]
         return lons, lats

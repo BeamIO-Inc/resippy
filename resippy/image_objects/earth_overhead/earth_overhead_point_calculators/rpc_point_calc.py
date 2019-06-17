@@ -8,6 +8,10 @@ from numpy import ndarray
 
 
 class RPCPointCalc(AbstractEarthOverheadPointCalc):
+    """
+    This is a concrete implementation of an AbstractEarthOverheadPointCalc.  It is an RPC Point Calculator, and
+    computes pixel x / y locations using rational polynomials.
+    """
 
     def __init__(self):
         self._samp_num_coeff = None      # type: ndarray
@@ -36,6 +40,13 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
     def init_from_file(cls,
                        fname  # type: str
                        ):
+        """
+        This is a class method that initializes an RPC Point Calculator from a file.  The file is assumed to have
+        RPC's (rational polynomial coefficients), which are readable and pare-able using GDAL.  It reads the
+        coefficients from the file and uses 'init_from_coeffs' under the hood to initialize the point calculator.
+        :param fname:
+        :return:
+        """
         dset = gdal.Open(fname)
         rpcs = dset.GetMetadata("RPC")
         dset = None
@@ -82,6 +93,24 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
                          height_scale,          # type: float
                          height_off,            # type: float
                          ):
+        """
+        This is a class method that initializes an RPC Point Calculator from all of the required coefficients.
+        :param samp_num_coeff: ndarray containing sample numerator coefficients
+        :param samp_den_coeff: ndarray containing sample denominator coefficients
+        :param samp_scale: float value the specifies sample scale factor
+        :param samp_off: float value that specifies sample offset
+        :param line_num_coeff: ndarray containing line numerator coefficients
+        :param line_den_coeff: ndarray containing line denominator coefficients
+        :param line_scale: float value that specifies line scale factor
+        :param line_off: float value that specifies line offset
+        :param lat_scale: float value that specifies latitude scale factor
+        :param lat_off: float value that specifies latitude offset
+        :param lon_scale: float value that specifies longitude scale factor
+        :param lon_off: float value that specifies longitude offset
+        :param height_scale: float value that specifies height scale factor
+        :param height_off: float value that specifies height offset
+        :return: RPC Point Calculator object
+        """
         point_calc = cls()
         point_calc._samp_num_coeff = samp_num_coeff
         point_calc._samp_den_coeff = samp_den_coeff
@@ -108,6 +137,14 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
                   y,            # type: ndarray
                   z             # type: ndarray
                   ):
+        """
+        This method computes sample and line numerator and denominators from their respective coefficients
+        :param coeffs: coefficients for line/sample numerator/denominator to be calculated
+        :param x: normalized latitudes, calculated by (lats - lat_off)/lat_scale
+        :param y: normalized longitudes, calculated by (lons - lon_off)/lon_scale
+        :param z: normalized altitudes, calculated by (alts - height_off)/height_scale
+        :return: the numerator or denominator for line or sample to be calculated given the provided coefficients
+        """
         a1 = coeffs[0]
         a2 = coeffs[1]
         a3 = coeffs[2]
@@ -153,6 +190,14 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
                                          alts=None,  # type: ndarray
                                          band=None  # type: int
                                          ):  # type: (...) -> (ndarray, ndarray)
+        """
+        See documentation in AbstractEarthOverheadPointCalc
+        :param lons:
+        :param lats:
+        :param alts:
+        :param band:
+        :return:
+        """
 
         X_normalized = (lats - self._lat_off)/self._lat_scale
         Y_normalized = (lons - self._lon_off)/self._lon_scale
@@ -177,9 +222,23 @@ class RPCPointCalc(AbstractEarthOverheadPointCalc):
                                          alts=None,  # type: ndarray
                                          band=None  # type: ndarray
                                          ):  # type: (...) -> (ndarray, ndarray)
+        """
+        See documentation in AbstractEarthOverheadPointCalc
+        :param x_pixels:
+        :param y_pixels:
+        :param alts:
+        :param band:
+        :return:
+        """
         return None
 
     @staticmethod
     def _str_to_numpy_arr(string_entry,     # type: str
                           ):
+        """
+        Converts string values to numpy arrays.  This is used to convert coefficients returned in a string
+        format by GDAL.
+        :param string_entry:
+        :return: numpy array version of the a coefficient provided in string format
+        """
         return np.array([float(x) for x in string_entry.split()])

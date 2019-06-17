@@ -6,6 +6,10 @@ from resippy.utils import photogrammetry_utils
 
 
 class PinholeCamera(AbstractEarthOverheadPointCalc):
+    """
+    This is an idealized pinhole camera model.
+    """
+    # TODO find the photogrammetry book that was used to implement all of these calculations and cite it here.
 
     def __init__(self):
         # all of these units are in meters and radians

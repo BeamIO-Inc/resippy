@@ -12,6 +12,9 @@ import os
 
 
 class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
+    """
+    This is an implementation of an AbstractEarthOverheadPointCalc for performing calculations for a pix4d camera model.
+    """
 
     def __init__(self):
         super(Pix4dPointCalc, self).__init__()
@@ -38,12 +41,21 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
                                          alts=None,  # type: ndarray
                                          band=None  # type: int
                                          ):  # type: (...) -> (ndarray, ndarray)
+        # TODO: This is the same as the implementation in AbstractEarthOverheadPointCalc, can probably be removed.
         pass
 
     def _get_reverse_principal_point_x(self):  # type: (...) -> float
+        """
+        Returns the x principal point if the x pixels are reversed
+        :return: principal point in the x pixel direction in the case where x pixels are reversed
+        """
         return self.npix_x - self.principal_point_x_pixels
 
     def _get_reverse_principal_point_y(self):  # type: (...) -> float
+        """
+        Returns the y principal point if the y pixels are reversed
+        :return: principal point in the y pixel direction in the case where y pixels are reversed
+        """
         return self.npix_y - self.principal_point_y_pixels
 
     @classmethod
@@ -52,6 +64,20 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
                          all_params,  # type: dict
                          distortion_model="regular",  # type: str
                          ):  # type: (...) -> Pix4dPointCalc
+        """
+        Initializes a Pix4d Point Calculator
+        :param image_key: This is a key that specifies the image filename the corresponds with the point calculator
+        that will be returned by this method.  It can either be a full path to the image file, or the base
+        name of the image file.
+        :param all_params: dictionary of all parameters.  Pix4d generates several files that contain parameter
+        information for an entire collect.  This parameters dictionary can be generated using an assumed directory
+        structure that is output by pix4d.  The method that creates the all_params dictionary can be found in
+        'make_master_dict' within pix4d_utils.py
+        :param distortion_model: This is the distortion model to be used.  It should either be specified by 'regular',
+        which will perform calculations with radial and tangential distortion coefficients, or None, which will
+        perform calculations ignoring all distortion coefficients.
+        :return:
+        """
         point_calc = Pix4dPointCalc()
 
         image_key_basename = os.path.basename(image_key)
@@ -90,6 +116,14 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
                                          alts,  # type: ndarray
                                          band=None  # type: int
                                          ):  # type: (...) -> (ndarray, ndarray)
+        """
+        See documentation for AbstractEarthOverheadPointCalc
+        :param lons:
+        :param lats:
+        :param alts:
+        :param band:
+        :return:
+        """
         pixel_locs = self.world_xyzs_to_pixel_locations(lons, lats, alts,
                                                         distortion_model=self.distortion_model,
                                                         reverse_y_pixels=self.reverse_y_pixels,
@@ -104,6 +138,19 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
                                       reverse_y_pixels=True,  # type: bool
                                       reverse_x_pixels=True  # type: bool
                                       ):  # type: (...) -> ndarray
+        """
+        Calculates pixel locations from world x, y, z coordinates (which are longitude, latitude, altitude respectively)
+        This makes calls to camera_coords_to_pixel_coords_no_distortion, or
+        camera_coords_to_pixel_coords_with_distortion
+        depending on which distortion model has been specified.
+        :param world_x_arr: longitudes, in the point calculator's native projection
+        :param world_y_arr: latitudes, in the point calculator's native projection
+        :param world_z_arr: altitudes, in the point calculator's native elevation reference datum
+        :param distortion_model: either 'regular' or None.  None by default
+        :param reverse_y_pixels: boolean value that specifies whether the x pixels are reversed.  True by default
+        :param reverse_x_pixels: boolean value that specifies whether the y pixels are reversed.  True by default
+        :return:
+        """
 
         local_world_xyz_arr = np.zeros((3, len(world_x_arr)))
         local_world_xyz_arr[0, :] = world_x_arr
@@ -128,6 +175,7 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
     def read_calibrated_external_camera_parameters(self,
                                                    calibrated_external_params_file  # type: str
                                                    ):  # type: (...) -> dict
+        # TODO, this is duplicated in pix4d utils and can probably be removed here.
         external_params = {}
         with open(calibrated_external_params_file, 'r') as f:
             lines = f.readlines()
@@ -141,6 +189,7 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
                                                          internal_params_cam_file,  # type: str
                                                          search_text="Pix4D"  # type: str
                                                          ):  # type: (...) -> list
+        # TODO: This is duplicated in pix4d_utils and can probably be removed here.
         with open(internal_params_cam_file, 'r') as f:
             lines = f.readlines()
         lines = [string_utils.remove_newlines(x) for x in lines]
@@ -176,6 +225,15 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
     def world_to_camera_coordinates(self,
                                     local_world_xyzs  # type: ndarray
                                     ):  # type: (...) -> ndarray
+        """
+        Converts world coordinates in the point calculator's native projection to camera coordinates acoording to the
+        pix4d documentation.
+        :param local_world_xyzs: 3d numpy ndarray of shape (3, n_samples).
+        The first dimension is longitudes
+        Seconds dimension is latitudes
+        Third dimension is altitudes
+        :return: 2d ndarray of (x, y, z) camera coordinates.  This is a local camera coordinate system, not pixels.
+        """
         translated_xyzs = np.zeros(np.shape(local_world_xyzs))
         translated_xyzs[0, :] = local_world_xyzs[0, :] - self.camera_translation[0]
         translated_xyzs[1, :] = local_world_xyzs[1, :] - self.camera_translation[1]
@@ -187,6 +245,13 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
     def camera_coords_to_pixel_coords_with_distortion(self,
                                                       camera_coords_xyz  # type: ndarray
                                                       ):  # type: (...) -> (float, float)
+        """
+        Converts camera coordinates to pixel locations using radial and tangential distortion parameters, according
+        to the pix4d documentation.
+        :param camera_coords_xyz: Camera xyz coordinates, which can be calculated using the
+        'world_to_camera_coordinates' method.
+        :return: (x, y) tuple of ndarrays containing pixel coordinates
+        """
         principal_point_x_pixels = self.principal_point_x_pixels
         principal_point_y_pixels = self.principal_point_y_pixels
         if self.reverse_x_pixels:
@@ -211,6 +276,13 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
     def camera_coords_to_pixel_coords_no_distortion(self,
                                                     camera_coords_xyz  # type: ndarray
                                                     ):  # type: (...) -> (float, float)
+        """
+        Converts camera coordinates to pixel locations without distortion parameters, according
+        to the pix4d documentation.
+        :param camera_coords_xyz: Camera xyz coordinates, which can be calculated using the
+        'world_to_camera_coordinates' method.
+        :return: (x, y) tuple of ndarrays containing pixel coordinates
+        """
 
         principal_point_x = self.principal_point_x_pixels
         principal_point_y = self.principal_point_y_pixels

@@ -11,6 +11,8 @@ class AbstractImage():
     """
     This is the AbstractImage class.  Instantiating this class provides functionality to read data from disk, if image
     data for the class comes from data on disk.  There are routines to manipulate image data and metadata.
+    Each concrete implementation of this abstract class should be bundled with a metadata object, and an ImageFactory
+    Object that is used to initialize and create image objects, either from disk or from user parameters.
     """
 
     def __init__(self):
