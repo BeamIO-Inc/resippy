@@ -30,5 +30,6 @@ setuptools.setup(
         'imageio',
         'seaborn',
         'colorutils',
-    ]
+    ],
+    include_package_data=True
 )
