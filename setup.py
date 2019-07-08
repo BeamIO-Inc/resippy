@@ -12,6 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/BeamIO-Inc/resippy",
+    include_package_data=True,
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -31,5 +32,4 @@ setuptools.setup(
         'seaborn',
         'colorutils',
     ],
-    include_package_data=True
 )
