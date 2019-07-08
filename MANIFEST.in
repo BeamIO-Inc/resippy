@@ -1,1 +1,1 @@
-include resippy/utils/units/unit_defs.txt
+recursive-include resippy *.txt
