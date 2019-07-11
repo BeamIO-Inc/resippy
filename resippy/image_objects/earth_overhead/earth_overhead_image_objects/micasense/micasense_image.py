@@ -8,7 +8,7 @@ from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import A
 
 from numpy import ndarray
 import numpy as np
-import scipy.misc as misc
+from imageio import imread
 import os
 
 
@@ -18,7 +18,7 @@ class MicasenseImage(AbstractEarthOverheadImage):
         self.band_fnames = []
 
     def read_all_image_data_from_disk(self):  # type: (...) -> ndarray
-        imgs = [misc.imread(fname) for fname in self.band_fnames]
+        imgs = [imread(fname) for fname in self.band_fnames]
         all_image_data = np.dstack(imgs)
 
         return all_image_data
@@ -26,7 +26,7 @@ class MicasenseImage(AbstractEarthOverheadImage):
     def read_band_from_disk(self,
                             band_number  # type: int
                             ):  # type: (...) -> ndarray
-        return misc.imread(self.band_fnames[band_number])
+        return imread(self.band_fnames[band_number])
 
     @classmethod
     def init_from_image_number_and_pix4d(cls,
