@@ -30,14 +30,20 @@ class ApplanixSBETNav(AbstractNav):
         # convert structured data array to dict
         self._nav_data = {convert_to_snake_case(name): data[name] for name in data.dtype.names}
 
-    def _get_nav_record(self, gps_time):
-        if self._gps_time_in_range(gps_time):
-            right_index = bisect_right(self._nav_data['gps_time'], gps_time)
-            left_index = right_index - 1
+    def _gps_times_in_range(self, gps_times):
+        if self._nav_data['gps_time'][0] <= gps_times.all() <= self._nav_data['gps_time'][-1]:
+            return True
 
-            xs = [self._nav_data['gps_time'][left_index], self._nav_data['gps_time'][right_index]]
+        return False
 
-            return {key: np.interp(gps_time, xs, [value[left_index], value[right_index]])
+    def _get_nav_records_native(self, gps_times):
+        if self._gps_times_in_range(gps_times):
+            right_indexes = bisect_right(self._nav_data['gps_time'], gps_times)
+            left_indexes = right_indexes - 1
+
+            xs = [self._nav_data['gps_time'][left_indexes], self._nav_data['gps_time'][right_indexes]]
+
+            return {key: np.interp(gps_times, xs, [value[left_indexes], value[right_indexes]])
                     for key, value in self._nav_data.items()}
 
         # TODO: throw exception/error instead of returning None
