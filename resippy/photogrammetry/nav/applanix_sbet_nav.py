@@ -43,20 +43,20 @@ class ApplanixSBETNav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_lat(self, gps_time):
+    def _get_lats_native(self, gps_times):
         pass
 
-    def _get_lon(self, gps_time):
+    def _get_lons_native(self, gps_times):
         pass
 
-    def _get_alt(self, gps_time):
+    def _get_alts_native(self, gps_times):
         pass
 
-    def _get_roll(self, gps_time):
+    def _get_rolls_native(self, gps_times):
         pass
 
-    def _get_pitch(self, gps_time):
+    def _get_pitches_native(self, gps_times):
         pass
 
-    def _get_heading(self, gps_time):
+    def _get_headings_native(self, gps_times):
         pass

@@ -54,14 +54,6 @@ class AbstractNav:
                      ):         # type: (...) -> np.ndarray
         pass
 
-    def _gps_time_in_range(self,
-                           gps_time     # type: float
-                           ):           # type: (...) -> bool
-        if self._nav_data['gps_time'][0] <= gps_time <= self._nav_data['gps_time'][-1]:
-            return True
-
-        return False
-
     @abc.abstractmethod
     def _get_nav_records_native(self,
                                 gps_times   # type: np.ndarray
