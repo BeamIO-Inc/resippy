@@ -22,7 +22,7 @@ class AbstractNav:
     def get_nav_records(self,
                         gps_times   # type: np.ndarray
                         ):          # type: (...) -> np.ndarray
-        pass
+        return self._get_nav_records_native(gps_times)
 
     def get_lats(self,
                  gps_times  # type: np.ndarray

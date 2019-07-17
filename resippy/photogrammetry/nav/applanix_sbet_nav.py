@@ -36,14 +36,18 @@ class ApplanixSBETNav(AbstractNav):
 
         return False
 
+    @staticmethod
+    def _linear_interp(x, xs, ys):
+        return (ys[:, 0]*(xs[:, 1] - x) + ys[:, 1]*(x - xs[:, 0])) / (xs[:, 1] - xs[:, 0])
+
     def _get_nav_records_native(self, gps_times):
         if self._gps_times_in_range(gps_times):
-            right_indexes = bisect_right(self._nav_data['gps_time'], gps_times)
+            right_indexes = np.searchsorted(self._nav_data['gps_time'], gps_times)
             left_indexes = right_indexes - 1
 
-            xs = [self._nav_data['gps_time'][left_indexes], self._nav_data['gps_time'][right_indexes]]
+            xs = np.array([self._nav_data['gps_time'][left_indexes], self._nav_data['gps_time'][right_indexes]])
 
-            return {key: np.interp(gps_times, xs, [value[left_indexes], value[right_indexes]])
+            return {key: self._linear_interp(gps_times, xs, np.array([value[left_indexes], value[right_indexes]]))
                     for key, value in self._nav_data.items()}
 
         # TODO: throw exception/error instead of returning None
@@ -66,3 +70,13 @@ class ApplanixSBETNav(AbstractNav):
 
     def _get_headings_native(self, gps_times):
         pass
+
+
+if __name__ == '__main__':
+    nav = ApplanixSBETNav()
+    nav.load_from_file('/home/ryan/Data/dirs/20180823_snapbeans/Missions/1018/gpsApplanix/processed/sample.sbet')
+
+    data = np.array([335010, 335090])
+
+    print(nav._gps_times_in_range(data))
+    print(nav.get_nav_records(data))
