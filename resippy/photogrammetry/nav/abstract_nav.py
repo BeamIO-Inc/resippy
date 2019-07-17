@@ -63,43 +63,43 @@ class AbstractNav:
         return False
 
     @abc.abstractmethod
-    def _get_nav_record(self,
-                        gps_time    # type: float
-                        ):          # type: (...) -> dict
+    def _get_nav_records_native(self,
+                                gps_times   # type: np.ndarray
+                                ):          # type: (...) -> np.ndarray
         pass
 
     @abc.abstractmethod
-    def _get_lat(self,
-                 gps_time   # type: float
-                 ):         # type: (...) -> float
+    def _get_lats_native(self,
+                         gps_times  # type: np.ndarray
+                         ):         # type: (...) -> np.ndarray
         pass
 
     @abc.abstractmethod
-    def _get_lon(self,
-                 gps_time   # type: float
-                 ):         # type: (...) -> float
+    def _get_lons_native(self,
+                         gps_times  # type: np.ndarray
+                         ):         # type: (...) -> np.ndarray
         pass
 
     @abc.abstractmethod
-    def _get_alt(self,
-                 gps_time   # type: float
-                 ):         # type: (...) -> float
+    def _get_alts_native(self,
+                         gps_times  # type: np.ndarray
+                         ):         # type: (...) -> np.ndarray
         pass
 
     @abc.abstractmethod
-    def _get_roll(self,
-                  gps_time  # type: float
-                  ):        # type: (...) -> float
+    def _get_rolls_native(self,
+                          gps_times     # type: np.ndarray
+                          ):            # type: (...) -> np.ndarray
         pass
 
     @abc.abstractmethod
-    def _get_pitch(self,
-                   gps_time     # type: float
-                   ):           # type: (...) -> float
+    def _get_pitches_native(self,
+                            gps_times   # type: np.ndarray
+                            ):          # type: (...) -> np.ndarray
         pass
 
     @abc.abstractmethod
-    def _get_heading(self,
-                     gps_time   # type: float
-                     ):         # type: (...) -> float
+    def _get_headings_native(self,
+                             gps_times  # type: np.ndarray
+                             ):         # type: (...) -> np.ndarray
         pass
