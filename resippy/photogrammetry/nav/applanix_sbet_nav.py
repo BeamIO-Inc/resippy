@@ -31,7 +31,7 @@ class ApplanixSBETNav(AbstractNav):
         self._nav_data = {convert_to_snake_case(name): data[name] for name in data.dtype.names}
 
     def _gps_times_in_range(self, gps_times):
-        if self._nav_data['gps_time'][0] <= gps_times.all() <= self._nav_data['gps_time'][-1]:
+        if (self._nav_data['gps_time'][0] <= gps_times).all() and (self._nav_data['gps_time'][-1] >= gps_times).all():
             return True
 
         return False
