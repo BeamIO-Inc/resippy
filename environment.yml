@@ -1,16 +1,19 @@
 name: resippy
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
-  - cython
   - gdal
-  - openssl
   - pdal
   - pip
+  - psutil
   - pyproj
   - python
   - python-pdal
   - scikit-learn
   - pip:
+    - opencv-python
+    - pyexiftool
+    - pysolar
     - git+https://github.com/BeamIO-Inc/resippy.git
+    - git+https://github.com/BeamIO-Inc/algorithm_toolkit  
