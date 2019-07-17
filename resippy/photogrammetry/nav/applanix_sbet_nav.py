@@ -30,7 +30,7 @@ class ApplanixSBETNav(AbstractNav):
         # convert structured data array to dict
         self._nav_data = {convert_to_snake_case(name): data[name] for name in data.dtype.names}
 
-    def get_nav_record(self, gps_time):
+    def _get_nav_record(self, gps_time):
         if self._gps_time_in_range(gps_time):
             right_index = bisect_right(self._nav_data['gps_time'], gps_time)
             left_index = right_index - 1
@@ -42,3 +42,21 @@ class ApplanixSBETNav(AbstractNav):
 
         # TODO: throw exception/error instead of returning None
         return None
+
+    def _get_lat(self, gps_time):
+        pass
+
+    def _get_lon(self, gps_time):
+        pass
+
+    def _get_alt(self, gps_time):
+        pass
+
+    def _get_roll(self, gps_time):
+        pass
+
+    def _get_pitch(self, gps_time):
+        pass
+
+    def _get_heading(self, gps_time):
+        pass

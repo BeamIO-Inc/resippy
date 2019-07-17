@@ -1,4 +1,5 @@
 import abc
+import numpy as np
 from six import add_metaclass
 
 
@@ -10,10 +11,47 @@ class AbstractNav:
         self._record_length = 0
         self._nav_data = None
 
-    @abc.abstractmethod
-    def get_nav_record(self,
-                       gps_time     # type: float
-                       ):           # type: (...) -> dict
+    def get_num_records(self
+                        ):  # type: (...) -> int
+        return self._num_records
+
+    def get_record_length(self
+                          ):  # type: (...) -> int
+        return self._record_length
+
+    def get_nav_records(self,
+                        gps_times   # type: np.ndarray
+                        ):          # type: (...) -> np.ndarray
+        pass
+
+    def get_lats(self,
+                 gps_times  # type: np.ndarray
+                 ):         # type: (...) -> np.ndarray
+        pass
+
+    def get_lons(self,
+                 gps_times  # type: np.ndarray
+                 ):         # type: (...) -> np.ndarray
+        pass
+
+    def get_alts(self,
+                 gps_times  # type: np.ndarray
+                 ):         # type: (...) -> np.ndarray
+        pass
+
+    def get_rolls(self,
+                  gps_times     # type: np.ndarray
+                  ):            # type: (...) -> np.ndarray
+        pass
+
+    def get_pitches(self,
+                    gps_times   # type: np.ndarray
+                    ):          # type: (...) -> np.ndarray
+        pass
+
+    def get_headings(self,
+                     gps_times  # type: np.ndarray
+                     ):         # type: (...) -> np.ndarray
         pass
 
     def _gps_time_in_range(self,
@@ -24,10 +62,44 @@ class AbstractNav:
 
         return False
 
-    def get_num_records(self
-                        ):  # type: (...) -> int
-        return self._num_records
+    @abc.abstractmethod
+    def _get_nav_record(self,
+                        gps_time    # type: float
+                        ):          # type: (...) -> dict
+        pass
 
-    def get_record_length(self
-                          ):    # type: (...) -> int
-        return self._record_length
+    @abc.abstractmethod
+    def _get_lat(self,
+                 gps_time   # type: float
+                 ):         # type: (...) -> float
+        pass
+
+    @abc.abstractmethod
+    def _get_lon(self,
+                 gps_time   # type: float
+                 ):         # type: (...) -> float
+        pass
+
+    @abc.abstractmethod
+    def _get_alt(self,
+                 gps_time   # type: float
+                 ):         # type: (...) -> float
+        pass
+
+    @abc.abstractmethod
+    def _get_roll(self,
+                  gps_time  # type: float
+                  ):        # type: (...) -> float
+        pass
+
+    @abc.abstractmethod
+    def _get_pitch(self,
+                   gps_time     # type: float
+                   ):           # type: (...) -> float
+        pass
+
+    @abc.abstractmethod
+    def _get_heading(self,
+                     gps_time   # type: float
+                     ):         # type: (...) -> float
+        pass
