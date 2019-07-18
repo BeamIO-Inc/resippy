@@ -2,6 +2,8 @@ import numpy as np
 import json
 import pdal
 
+from pyproj import Proj
+
 from resippy.photogrammetry.nav.abstract_nav import AbstractNav
 from resippy.utils.string_utils import convert_to_snake_case
 
@@ -28,6 +30,8 @@ class ApplanixSBETNav(AbstractNav):
 
         # convert structured data array to dict
         self._nav_data = {convert_to_snake_case(name): data[name] for name in data.dtype.names}
+        
+        self._projection = Proj(proj='geocent', ellps='WGS84', datum='WGS84')
 
     def _gps_times_in_range(self, gps_times):
         if (self._nav_data['gps_time'][0] <= gps_times).all() and (self._nav_data['gps_time'][-1] >= gps_times).all():

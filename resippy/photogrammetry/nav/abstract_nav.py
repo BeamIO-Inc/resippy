@@ -11,6 +11,7 @@ class AbstractNav:
         self._num_records = 0
         self._record_length = 0
         self._nav_data = None
+        self._projection = None
 
     @abc.abstractmethod
     def _get_nav_records_native(self,
