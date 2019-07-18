@@ -1,4 +1,3 @@
-from bisect import bisect_right
 import numpy as np
 import json
 import pdal
@@ -38,7 +37,7 @@ class ApplanixSBETNav(AbstractNav):
 
     @staticmethod
     def _linear_interp(x, xs, ys):
-        return (ys[:, 0]*(xs[:, 1] - x) + ys[:, 1]*(x - xs[:, 0])) / (xs[:, 1] - xs[:, 0])
+        return (ys[0, :]*(xs[1, :] - x) + ys[1, :]*(x - xs[0, :])) / (xs[1, :] - xs[0, :])
 
     def _get_nav_records_native(self, gps_times):
         if self._gps_times_in_range(gps_times):
@@ -47,8 +46,11 @@ class ApplanixSBETNav(AbstractNav):
 
             xs = np.array([self._nav_data['gps_time'][left_indexes], self._nav_data['gps_time'][right_indexes]])
 
-            return {key: self._linear_interp(gps_times, xs, np.array([value[left_indexes], value[right_indexes]]))
-                    for key, value in self._nav_data.items()}
+            records = np.array([{key: value[i] for key, value in {
+                key: self._linear_interp(gps_times, xs, np.array([value[left_indexes], value[right_indexes]])) for
+                key, value in self._nav_data.items()}.items()} for i in range(gps_times.size)])
+
+            return records
 
         # TODO: throw exception/error instead of returning None
         return None
@@ -76,7 +78,11 @@ if __name__ == '__main__':
     nav = ApplanixSBETNav()
     nav.load_from_file('/home/ryan/Data/dirs/20180823_snapbeans/Missions/1018/gpsApplanix/processed/sample.sbet')
 
-    data = np.array([335010, 335090])
+    # times = 335010
+    # times = np.array([335010, 335090, 335091])
+    times = np.array([[335010, 335090], [335011, 335091.2]])
 
-    print(nav._gps_times_in_range(data))
-    print(nav.get_nav_records(data))
+    records = nav.get_nav_records(times)
+    print(f'nav: {records}')
+    print(f'time-shape: {times.shape}')
+    print(f'nav-shape: {records.shape}')
