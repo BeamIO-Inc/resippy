@@ -14,7 +14,7 @@ class ApplanixSBETNav(AbstractNav):
 
         self._lla_projection = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
 
-    def load_from_file(self, filename, proj='utm', zone=None, ellps='WGS84', datum='WGS84'):
+    def load_from_file(self, filename, proj, zone, ellps, datum):
         pipe_json = json.dumps([
             {
                 'type': 'readers.sbet',
