@@ -75,32 +75,56 @@ class AbstractNav:
     def get_lats(self,
                  gps_times  # type: np.ndarray
                  ):         # type: (...) -> np.ndarray
-        pass
+        gps_times, descriptor = self._format_input_array(gps_times)
+
+        lats = self._get_lats_native(gps_times)
+
+        return self._format_output_array(lats, descriptor)
 
     def get_lons(self,
                  gps_times  # type: np.ndarray
                  ):         # type: (...) -> np.ndarray
-        pass
+        gps_times, descriptor = self._format_input_array(gps_times)
+
+        lons = self._get_lons_native(gps_times)
+
+        return self._format_output_array(lons, descriptor)
 
     def get_alts(self,
                  gps_times  # type: np.ndarray
                  ):         # type: (...) -> np.ndarray
-        pass
+        gps_times, descriptor = self._format_input_array(gps_times)
+
+        alts = self._get_alts_native(gps_times)
+
+        return self._format_output_array(alts, descriptor)
 
     def get_rolls(self,
                   gps_times     # type: np.ndarray
                   ):            # type: (...) -> np.ndarray
-        pass
+        gps_times, descriptor = self._format_input_array(gps_times)
+
+        rolls = self._get_rolls_native(gps_times)
+
+        return self._format_output_array(rolls, descriptor)
 
     def get_pitches(self,
                     gps_times   # type: np.ndarray
                     ):          # type: (...) -> np.ndarray
-        pass
+        gps_times, descriptor = self._format_input_array(gps_times)
+
+        pitches = self._get_pitches_native(gps_times)
+
+        return self._format_output_array(pitches, descriptor)
 
     def get_headings(self,
                      gps_times  # type: np.ndarray
                      ):         # type: (...) -> np.ndarray
-        pass
+        gps_times, descriptor = self._format_input_array(gps_times)
+
+        headings = self._get_headings_native(gps_times)
+
+        return self._format_output_array(headings, descriptor)
 
     @staticmethod
     def _format_input_array(input_array     # type: np.ndarray
