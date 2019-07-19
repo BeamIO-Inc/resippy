@@ -78,22 +78,12 @@ class ApplanixSBETNav(AbstractNav):
             x_utm_left = self._nav_data['x'][left_indexes]
             x_utm_right = self._nav_data['x'][right_indexes]
             x_utm = self._linear_interp(gps_times, xs, np.array([x_utm_left, x_utm_right]))
-            print(f'x_utm: {x_utm}')
 
             y_utm_left = self._nav_data['y'][left_indexes]
             y_utm_right = self._nav_data['y'][right_indexes]
             y_utm = self._linear_interp(gps_times, xs, np.array([y_utm_left, y_utm_right]))
-            print(f'y_utm: {y_utm}')
 
-            z_utm_left = self._nav_data['z'][left_indexes]
-            z_utm_right = self._nav_data['z'][right_indexes]
-            z_utm = self._linear_interp(gps_times, xs, np.array([z_utm_left, z_utm_right]))
-            print(f'z_utm: {z_utm}')
-
-            lons, lats, alts = pyproj.transform(self._projection, self._lla_projection, x_utm, y_utm, z_utm)
-            print(f'lons: {lons}')
-            print(f'lats: {lats}')
-            print(f'alts: {alts}')
+            __, lats = pyproj.transform(self._projection, self._lla_projection, x_utm, y_utm)
 
             return lats
 
@@ -101,28 +91,77 @@ class ApplanixSBETNav(AbstractNav):
         return None
 
     def _get_lons_native(self, gps_times):
-        pass
+        if self._gps_times_in_range(gps_times):
+            left_indexes, right_indexes = self._get_indexes(gps_times)
+            xs = self._get_xs(left_indexes, right_indexes)
+
+            x_utm_left = self._nav_data['x'][left_indexes]
+            x_utm_right = self._nav_data['x'][right_indexes]
+            x_utm = self._linear_interp(gps_times, xs, np.array([x_utm_left, x_utm_right]))
+
+            y_utm_left = self._nav_data['y'][left_indexes]
+            y_utm_right = self._nav_data['y'][right_indexes]
+            y_utm = self._linear_interp(gps_times, xs, np.array([y_utm_left, y_utm_right]))
+
+            lons, __ = pyproj.transform(self._projection, self._lla_projection, x_utm, y_utm)
+
+            return lons
+
+        # TODO: throw exception/error instead of returning None
+        return None
 
     def _get_alts_native(self, gps_times):
-        pass
+        if self._gps_times_in_range(gps_times):
+            left_indexes, right_indexes = self._get_indexes(gps_times)
+            xs = self._get_xs(left_indexes, right_indexes)
+
+            alts_left = self._nav_data['z'][left_indexes]
+            alts_right = self._nav_data['z'][right_indexes]
+            alts = self._linear_interp(gps_times, xs, np.array([alts_left, alts_right]))
+
+            return alts
+
+        # TODO: throw exception/error instead of returning None
+        return None
 
     def _get_rolls_native(self, gps_times):
-        pass
+        if self._gps_times_in_range(gps_times):
+            left_indexes, right_indexes = self._get_indexes(gps_times)
+            xs = self._get_xs(left_indexes, right_indexes)
+
+            rolls_left = self._nav_data['roll'][left_indexes]
+            rolls_right = self._nav_data['roll'][right_indexes]
+            rolls = self._linear_interp(gps_times, xs, np.array([rolls_left, rolls_right]))
+
+            return rolls
+
+        # TODO: throw exception/error instead of returning None
+        return None
 
     def _get_pitches_native(self, gps_times):
-        pass
+        if self._gps_times_in_range(gps_times):
+            left_indexes, right_indexes = self._get_indexes(gps_times)
+            xs = self._get_xs(left_indexes, right_indexes)
+
+            pitches_left = self._nav_data['pitch'][left_indexes]
+            pitches_right = self._nav_data['pitch'][right_indexes]
+            pitches = self._linear_interp(gps_times, xs, np.array([pitches_left, pitches_right]))
+
+            return pitches
+
+        # TODO: throw exception/error instead of returning None
+        return None
 
     def _get_headings_native(self, gps_times):
-        pass
+        if self._gps_times_in_range(gps_times):
+            left_indexes, right_indexes = self._get_indexes(gps_times)
+            xs = self._get_xs(left_indexes, right_indexes)
 
+            azimuths_left = self._nav_data['azimuth'][left_indexes]
+            azimuths_right = self._nav_data['azimuth'][right_indexes]
+            azimuths = self._linear_interp(gps_times, xs, np.array([azimuths_left, azimuths_right]))
 
-if __name__ == '__main__':
-    nav = ApplanixSBETNav()
-    nav.load_from_file('/home/ryan/Data/dirs/20180823_snapbeans/Missions/1018/gpsApplanix/processed/sample.sbet', zone='18N')
+            return azimuths
 
-    times = 335010
-    # times = np.array([335010, 335090, 335091])
-    # times = np.array([[335010, 335090], [335011, 335091.2]])
-
-    lats = nav.get_lats(times)
-    print(f'lats: {lats}')
+        # TODO: throw exception/error instead of returning None
+        return None

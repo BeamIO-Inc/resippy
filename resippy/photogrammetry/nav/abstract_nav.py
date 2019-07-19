@@ -150,3 +150,5 @@ class AbstractNav:
             return output_array[0]
         elif descriptor['input_array_is_2d']:
             return output_array.reshape(descriptor['ny'], descriptor['nx'])
+
+        return output_array
