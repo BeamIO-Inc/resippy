@@ -1,29 +1,43 @@
-# resippy
-REmote Sensing and Image Processing in PYthon
+# ReSIPPy
 
-Tools to perform image processing with a focus on overhead and spectral remote sensing applications.  Some features include:
+#### Remote Sensing and Image Processing in Python
 
-Navigation from world coordinate to camera pixel coordinates
+ReSIPPy is a set of tools to perform image processing with a focus on overhead and spectral remote sensing applications.
+Some features include:
+- Navigation from world coordinate to camera pixel coordinates
+- Navigation from pixel coordinates to world coordinates
+- Orthorectification
+- Spectral matched filters
+- Reading spectral libraries
 
-Navigation from pixel coordinates to world coordinates
+### Installation
 
-Orthorectification
+The installation of ReSIPPy requires two tricky dependencies:
+- GDAL
+- PyProj
 
-Spectral matched filters
+### Using conda
 
-Reading spectral libraries
+We prefer to use conda to manage our Python environments and dependencies.
+To install Anaconda (or Miniconda), follow the instructions in the [Anaconda Docs](https://docs.anaconda.com/anaconda/install/).
+Once you have a working conda installation, clone this repo and create an environment for working with ReSIPPy:
 
+```bash
+$ conda env create -f environment.yml
+```
 
+Then, activate the environment to work with ReSIPPy:
 
-Package will be available on PyPi and can be installed using pip.
+```bash
+$ conda activate resippy
+```
 
+#### Using pip
 
-A few notes on installation.  There are 2 dependencies that can be tricky.  Those dependencies are GDAL and PyProj.  An easy way to install these packages is through Anaconda.  If the user sets up a new Conda environment, and installs these packages first using:
+ReSIPPy is also available on PyPi and can be installed using pip:
 
+```bash
+$ pip install resippy
+```
 
-conda install gdal
-
-conda install pyproj
-
-
-The rest of the installation should work.  Otherwise it is up to the user to install system dependencies to support installation of those packages through pip.
+Installation using pip may require the user to download and install additional system level dependencies.
