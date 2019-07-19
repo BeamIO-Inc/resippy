@@ -16,7 +16,7 @@ The installation of ReSIPPy requires two tricky dependencies:
 - GDAL
 - PyProj
 
-### Using conda
+#### Using conda
 
 We prefer to use conda to manage our Python environments and dependencies.
 To install Anaconda (or Miniconda), follow the instructions in the [Anaconda Docs](https://docs.anaconda.com/anaconda/install/).
