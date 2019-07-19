@@ -9,12 +9,19 @@ from resippy.utils.string_utils import convert_to_snake_case
 
 class ApplanixSBETNav(AbstractNav):
 
-    def __init__(self):
+    def __init__(self
+                 ):     # type: (...) -> ApplanixSBETNav
         super(ApplanixSBETNav, self).__init__()
 
         self._lla_projection = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
 
-    def load_from_file(self, filename, proj, zone, ellps, datum):
+    def load_from_file(self,
+                       filename,    # type: str
+                       proj,        # type: str
+                       zone,        # type: str
+                       ellps,       # type: str
+                       datum        # type: str
+                       ):           # type: (...) -> None
         pipe_json = json.dumps([
             {
                 'type': 'readers.sbet',
@@ -37,26 +44,38 @@ class ApplanixSBETNav(AbstractNav):
         else:
             self._projection = pyproj.Proj(proj=proj, zone=zone, ellps=ellps, datum=datum)
 
-    def _gps_times_in_range(self, gps_times):
+    def _gps_times_in_range(self,
+                            gps_times   # type: np.ndarray
+                            ):          # type: (...) -> bool
         if (self._nav_data['gps_time'][0] <= gps_times).all() and (self._nav_data['gps_time'][-1] >= gps_times).all():
             return True
 
         return False
 
     @staticmethod
-    def _linear_interp(x, xs, ys):
+    def _linear_interp(x,   # type: np.ndarray
+                       xs,  # type: np.ndarray
+                       ys   # type: np.ndarray
+                       ):   # type: (...) -> np.ndarray
         return (ys[0, :]*(xs[1, :] - x) + ys[1, :]*(x - xs[0, :])) / (xs[1, :] - xs[0, :])
 
-    def _get_indexes(self, gps_times):
+    def _get_indexes(self,
+                     gps_times  # type: np.ndarray
+                     ):         # type: (...) -> (np.ndarray, np.ndarray)
         right_indexes = np.searchsorted(self._nav_data['gps_time'], gps_times)
         left_indexes = right_indexes - 1
 
         return left_indexes, right_indexes
 
-    def _get_xs(self, left_indexes, right_indexes):
+    def _get_xs(self,
+                left_indexes,   # type: np.ndarray
+                right_indexes   # type: np.ndarray
+                ):              # type: (...) -> np.ndarray
         return np.array([self._nav_data['gps_time'][left_indexes], self._nav_data['gps_time'][right_indexes]])
 
-    def _get_nav_records_native(self, gps_times):
+    def _get_nav_records_native(self,
+                                gps_times   # type: np.ndarray
+                                ):  # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
@@ -70,7 +89,9 @@ class ApplanixSBETNav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_lats_native(self, gps_times):
+    def _get_lats_native(self,
+                         gps_times  # type: np.ndarray
+                         ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
@@ -90,7 +111,9 @@ class ApplanixSBETNav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_lons_native(self, gps_times):
+    def _get_lons_native(self,
+                         gps_times  # type: np.ndarray
+                         ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
@@ -124,7 +147,9 @@ class ApplanixSBETNav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_rolls_native(self, gps_times):
+    def _get_rolls_native(self,
+                          gps_times     # type: np.ndarray
+                          ):            # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
@@ -138,7 +163,9 @@ class ApplanixSBETNav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_pitches_native(self, gps_times):
+    def _get_pitches_native(self,
+                            gps_times   # type: np.ndarray
+                            ):          # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
@@ -152,7 +179,9 @@ class ApplanixSBETNav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_headings_native(self, gps_times):
+    def _get_headings_native(self,
+                             gps_times  # type: np.ndarray
+                             ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
