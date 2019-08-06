@@ -6,7 +6,7 @@ import resippy.utils.photogrammetry_utils as photogram_utils
 import numpy as np
 from numpy import ndarray
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera_point_calc \
-    import PinholeCamera
+    import PinholeCameraPointCalc
 from typing import Union
 
 
@@ -14,7 +14,7 @@ class FixturedCamera(AbstractEarthOverheadPointCalc):
 
     def __init__(self):
 
-        self.camera = None          # type: Union[PinholeCamera]
+        self.camera = None          # type: Union[PinholeCameraPointCalc]
 
         # all of these units are in meters and radians
         self.reference_X = None       # type: float
@@ -35,7 +35,8 @@ class FixturedCamera(AbstractEarthOverheadPointCalc):
         self._bands_coregistered = True
 
     def set_exterior_orientation(self, reference_x, reference_y, reference_z, omega, phi, kappa):
-        reference_system = PinholeCamera.init_from_coeffs(reference_x, reference_y, reference_z, omega, phi, kappa, 1000, 5, 5)
+        reference_system = PinholeCameraPointCalc.init_from_coeffs(reference_x, reference_y, reference_z, omega, phi,
+                                                                   kappa, 1000, 5, 5)
         fixtured_M = reference_system.M @ self.relative_M
         fixtured_XYZ = reference_system.M @ [self.relative_x, self.relative_y, self.relative_z]
         omega, phi, kappa = photogram_utils.solve_for_omega_phi_kappa(fixtured_M)

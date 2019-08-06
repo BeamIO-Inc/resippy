@@ -6,7 +6,7 @@ from numpy import ndarray
 from resippy.utils import photogrammetry_utils
 
 
-class PinholeCamera(AbstractEarthOverheadPointCalc):
+class PinholeCameraPointCalc(AbstractEarthOverheadPointCalc):
     """
     This is an idealized pinhole camera model.
     """
