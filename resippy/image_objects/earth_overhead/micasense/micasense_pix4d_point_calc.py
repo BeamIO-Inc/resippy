@@ -3,7 +3,8 @@ from __future__ import division
 from numpy.core.multiarray import ndarray
 from pyproj import Proj
 
-from resippy.image_objects.earth_overhead.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
+    import AbstractEarthOverheadPointCalc
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pix4d_point_calc import Pix4dPointCalc
 
 

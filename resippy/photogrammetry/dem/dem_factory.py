@@ -1,7 +1,6 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.\
-    geotiff_image_factory import GeotiffImageFactory
+from resippy.image_objects.earth_overhead.geotiff.geotiff_image_factory import GeotiffImageFactory
 from resippy.photogrammetry.dem.geotiff_dem import GeotiffDem
 from resippy.photogrammetry.dem.constant_elevation_dem import ConstantElevationDem
 

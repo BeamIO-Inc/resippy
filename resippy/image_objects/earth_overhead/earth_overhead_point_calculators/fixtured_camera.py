@@ -1,10 +1,12 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
+    import AbstractEarthOverheadPointCalc
 import resippy.utils.photogrammetry_utils as photogram_utils
 import numpy as np
 from numpy import ndarray
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera_point_calc \
+    import PinholeCamera
 from typing import Union
 
 

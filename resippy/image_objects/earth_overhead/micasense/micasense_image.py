@@ -1,9 +1,7 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.micasense.\
-    micasense_metadata import MicasenseMetadata
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.micasense.\
-    micasense_pix4d_point_calc import MicasensePix4dPointCalc
+from resippy.image_objects.earth_overhead.micasense.micasense_metadata import MicasenseMetadata
+from resippy.image_objects.earth_overhead.micasense.micasense_pix4d_point_calc import MicasensePix4dPointCalc
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
 
 from numpy import ndarray

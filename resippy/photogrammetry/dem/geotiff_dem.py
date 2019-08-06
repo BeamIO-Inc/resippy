@@ -2,7 +2,7 @@ from __future__ import division
 
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.geotiff_image import GeotiffImage
+from resippy.image_objects.earth_overhead.geotiff.geotiff_image import GeotiffImage
 import numpy as np
 from numpy import ndarray
 

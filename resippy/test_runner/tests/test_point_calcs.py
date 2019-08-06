@@ -1,7 +1,8 @@
 from __future__ import division
 
 import unittest
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera_point_calc \
+    import PinholeCamera
 import numpy as np
 import resippy.utils.photogrammetry_utils as photogram_utils
 

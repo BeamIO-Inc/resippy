@@ -1,6 +1,7 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
+    import AbstractEarthOverheadPointCalc
 from numpy import ndarray
 from resippy.utils import photogrammetry_utils
 
