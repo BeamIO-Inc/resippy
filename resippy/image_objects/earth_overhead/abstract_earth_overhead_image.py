@@ -2,9 +2,8 @@ from __future__ import division
 
 from numpy import ndarray
 from resippy.image_objects.abstract_image import AbstractImage
+from resippy.image_objects.earth_overhead.earth_overhead_sensor_model import EarthOverheadSensorModel
 from resippy.image_objects.abstract_image_metadata import AbstractImageMetadata
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
-    import AbstractEarthOverheadPointCalc
 import abc
 
 
@@ -19,17 +18,18 @@ class AbstractEarthOverheadImage(AbstractImage):
 
     def __init__(self):
         super(AbstractEarthOverheadImage, self).__init__()
-        self._point_calc = AbstractEarthOverheadPointCalc
+        self._sensor_model = EarthOverheadSensorModel
         self._metadata = AbstractImageMetadata
 
-    def get_point_calculator(self):  # type: (...) -> AbstractEarthOverheadPointCalc
+    def get_sensor_model(self):  # type: (...) -> EarthOverheadSensorModel
         """
-        Returns the image object's point calculator
-        :return: a point calculator.  The specific type of point calculator will be determined by the corresponding
-        image object.  All point calculators are concrete implementations of the AbstractEarthOverheadPointCalc class
-        and should all be able to be used the same way, regardless of the specific type of point calculator.
+        Returns the image object's sensor model
+        :return: a sensor model.  The types of point calculator in the sensor modelwill be determined by the
+        corresponding image object.  All point calculators are concrete implementations of the
+        AbstractEarthOverheadPointCalc class and should all be able to be used the same way, regardless of the specific
+        type of point calculator.
         """
-        return self._point_calc
+        return self._sensor_model
 
     @abc.abstractmethod
     def read_all_image_data_from_disk(self):  # type: (...) -> ndarray
@@ -50,14 +50,13 @@ class AbstractEarthOverheadImage(AbstractImage):
         """
         pass
 
-    def set_point_calculator(self,
-                             point_calculator  # type: AbstractEarthOverheadPointCalc
-                             ):  # type: (...) -> None
+    def set_sensor_model(self,
+                         sensor_model  # type: EarthOverheadSensorModel
+                         ):  # type: (...) -> None
         """
         Sets the point calculator for the image object.  This should only be used when creating a new type of
         EarthOverheadImage object.
-        :param point_calculator: The EarthOverheadImage object's point calculator.  This should be a concrete
-        implementation of an AbstractEarthOverheadPointCalc object
+        :param sensor_model: The EarthOverheadSensorModel containing point calculators for each focal plane.
         :return: None
         """
-        self._point_calc = point_calculator
+        self._sensor_model = sensor_model
