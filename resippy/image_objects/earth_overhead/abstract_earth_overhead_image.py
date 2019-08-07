@@ -2,7 +2,7 @@ from __future__ import division
 
 from numpy import ndarray
 from resippy.image_objects.abstract_image import AbstractImage
-from resippy.image_objects.earth_overhead.earth_overhead_sensor_model import EarthOverheadSensorModel
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.earth_overhead_sensor_model import EarthOverheadSensorModel
 from resippy.image_objects.abstract_image_metadata import AbstractImageMetadata
 import abc
 
