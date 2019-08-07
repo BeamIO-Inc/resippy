@@ -22,7 +22,7 @@ class AbstractEarthOverheadImage(AbstractImage):
         self._point_calc = AbstractEarthOverheadPointCalc
         self._metadata = AbstractImageMetadata
 
-    def get_point_calc(self):  # type: (...) -> AbstractEarthOverheadPointCalc
+    def get_point_calculator(self):  # type: (...) -> AbstractEarthOverheadPointCalc
         """
         Returns the image object's point calculator
         :return: a point calculator.  The types of point calculator will be determined by the corresponding image
@@ -41,8 +41,8 @@ class AbstractEarthOverheadImage(AbstractImage):
 
     @abc.abstractmethod
     def read_band_from_disk(self,
-                            band_number  # type: int
-                            ):  # type: (...) -> ndarray
+                            band_number     # type: int
+                            ):              # type: (...) -> ndarray
         """
         Reads a single image band from disk
         :param band_number: band number to read from disk
@@ -50,9 +50,9 @@ class AbstractEarthOverheadImage(AbstractImage):
         """
         pass
 
-    def set_point_calc(self,
-                       point_calc   # type: AbstractEarthOverheadPointCalc
-                       ):           # type: (...) -> None
+    def set_point_calculator(self,
+                             point_calc     # type: AbstractEarthOverheadPointCalc
+                             ):             # type: (...) -> None
         """
         Sets the point calculator for the image object.  This should only be used when creating a new type of
         EarthOverheadImage object.

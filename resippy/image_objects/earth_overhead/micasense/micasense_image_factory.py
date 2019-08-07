@@ -5,7 +5,6 @@ from resippy.image_objects.earth_overhead.micasense.micasense_image import Micas
 from resippy.image_objects.earth_overhead.micasense.micasense_metadata import MicasenseMetadata
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.earth_overhead_sensor_model \
     import EarthOverheadSensorModel
-from resippy.image_objects.earth_overhead.micasense.micasense_pix4d_point_calc import MicasensePix4dPointCalc
 
 import os
 from uuid import uuid4
@@ -26,7 +25,7 @@ class MicasenseImageFactory:
 
         sensor_model = EarthOverheadSensorModel()
         sensor_model.set_point_calcs([point_calc_1, point_calc_2, point_calc_3, point_calc_4, point_calc_5])
-        sensor_model.set_approximate_lon_lat_center(point_calc_1.get_approximate_lon_lat_center())
+        sensor_model.set_approximate_lon_lat_center(*point_calc_1.get_approximate_lon_lat_center())
         sensor_model.set_projection(point_calc_1.get_projection())
 
         metadata = MicasenseMetadata()
