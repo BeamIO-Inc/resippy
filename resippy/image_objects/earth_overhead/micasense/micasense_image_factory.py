@@ -66,9 +66,9 @@ class MicasenseImageFactory:
                                                                          point_calc_4, point_calc_5])
 
     @staticmethod
-    def from_image_number_and_json(band_fname_dict,     # type: dict
-                                   json_fname           # type: str
-                                   ):                   # type: (...) -> MicasenseImage
+    def from_image_number_and_json_fname(band_fname_dict,   # type: dict
+                                         json_fname         # type: str
+                                         ):                 # type: (...) -> MicasenseImage
         def create_point_calc(band_fname, params):
             point_calc = PhysicalModelPointCalc.init_from_params(band_fname, params)
             point_calc.reverse_x_pixels = True

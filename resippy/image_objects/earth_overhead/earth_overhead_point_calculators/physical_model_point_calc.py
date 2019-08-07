@@ -13,17 +13,14 @@ class PhysicalModelPointCalc(PinholeCameraPointCalc):
         # TODO: initialize exterior orientation
 
     @classmethod
-    def init_from_coeffs(cls
-                         ):     # type: (...) -> PhysicalModelPointCalc
-        # TODO
-        pass
+    def init_from_params(cls,
+                         params     # type: dict
+                         ):         # type: (...) -> PhysicalModelPointCalc
+        point_calc = cls()
 
-    @classmethod
-    def init_from_file(cls,
-                       filename     # type: str
-                       ):           # type: (...) -> PhysicalModelPointCalc
-        # TODO
-        pass
+        # TODO: initialize values
+
+        return point_calc
 
     def _lon_lat_alt_to_pixel_x_y_native(self,
                                          lons,          # type: np.ndarray
@@ -32,4 +29,4 @@ class PhysicalModelPointCalc(PinholeCameraPointCalc):
                                          band=None      # type: int
                                          ):             # type: (...) -> (np.ndarray, np.ndarray)
         # TODO
-        pass
+        super()._lon_lat_alt_to_pixel_x_y_native(lons, lats, alts, band)
