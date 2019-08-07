@@ -25,30 +25,3 @@ class MicasenseImage(AbstractEarthOverheadImage):
                             band_number  # type: int
                             ):  # type: (...) -> ndarray
         return imread(self.band_fnames[band_number])
-
-    @classmethod
-    def init_from_image_number_and_pix4d(cls,
-                                         band_fname_dict,  # type: dict
-                                         pix4d_master_params_dict  # type: dict
-                                         ):  # type: (...) -> MicasenseImage
-        micasense_image = MicasenseImage()
-
-        point_calc = MicasensePix4dPointCalc().init_from_params(band_fname_dict, pix4d_master_params_dict)
-
-        micasense_image.band_fnames.append(band_fname_dict['band1'])
-        micasense_image.band_fnames.append(band_fname_dict['band2'])
-        micasense_image.band_fnames.append(band_fname_dict['band3'])
-        micasense_image.band_fnames.append(band_fname_dict['band4'])
-        micasense_image.band_fnames.append(band_fname_dict['band5'])
-
-        metadata = MicasenseMetadata()
-        basename, _ = os.path.splitext(band_fname_dict['band1'])
-        fparts = basename.split('_')
-        fparts.pop()
-        name = "_".join(fparts)
-        metadata.set_image_name(name)
-        metadata.set_nodata_val(0)
-        micasense_image.set_metadata(metadata)
-        micasense_image.set_point_calculator(point_calc)
-
-        return micasense_image
