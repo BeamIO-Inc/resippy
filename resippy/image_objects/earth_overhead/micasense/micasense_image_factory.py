@@ -17,16 +17,17 @@ class MicasenseImageFactory:
     def from_image_number_and_pix4d(band_fname_dict,            # type: dict
                                     pix4d_master_params_dict    # type: dict
                                     ):                          # type: (...) -> MicasenseImage
-        point_calc_1 = Pix4dPointCalc.init_from_params(band_fname_dict['band1'], pix4d_master_params_dict)
-        point_calc_2 = Pix4dPointCalc.init_from_params(band_fname_dict['band2'], pix4d_master_params_dict)
-        point_calc_3 = Pix4dPointCalc.init_from_params(band_fname_dict['band3'], pix4d_master_params_dict)
-        point_calc_4 = Pix4dPointCalc.init_from_params(band_fname_dict['band4'], pix4d_master_params_dict)
-        point_calc_5 = Pix4dPointCalc.init_from_params(band_fname_dict['band5'], pix4d_master_params_dict)
+        point_calc_1 = MicasenseImageFactory.create_point_calc(band_fname_dict['band1'], pix4d_master_params_dict)
+        point_calc_2 = MicasenseImageFactory.create_point_calc(band_fname_dict['band2'], pix4d_master_params_dict)
+        point_calc_3 = MicasenseImageFactory.create_point_calc(band_fname_dict['band3'], pix4d_master_params_dict)
+        point_calc_4 = MicasenseImageFactory.create_point_calc(band_fname_dict['band4'], pix4d_master_params_dict)
+        point_calc_5 = MicasenseImageFactory.create_point_calc(band_fname_dict['band5'], pix4d_master_params_dict)
 
         sensor_model = EarthOverheadSensorModel()
         sensor_model.set_point_calcs([point_calc_1, point_calc_2, point_calc_3, point_calc_4, point_calc_5])
         sensor_model.set_approximate_lon_lat_center(*point_calc_1.get_approximate_lon_lat_center())
         sensor_model.set_projection(point_calc_1.get_projection())
+        sensor_model._bands_coregistered = False
 
         metadata = MicasenseMetadata()
         basename, _ = os.path.splitext(band_fname_dict['band1'])
@@ -51,7 +52,7 @@ class MicasenseImageFactory:
     @staticmethod
     def from_numpy_and_pix4d(image_data,            # type: np.ndarray
                              metadata,              # type: MicasenseMetadata
-                             point_calculator,      # type: MicasensePix4dPointCalc
+                             point_calculator,      # type: EarthOverheadSensorModel
                              working_dir=None,      # type: str
                              band_basenames=None,   # type: list
                              ):                     # type: (...) -> MicasenseImage
@@ -88,3 +89,11 @@ class MicasenseImageFactory:
         micasense_image.set_point_calculator(point_calculator)
 
         return micasense_image
+
+    @staticmethod
+    def create_point_calc(band_fname,
+                          params):
+        point_calc = Pix4dPointCalc.init_from_params(band_fname, params)
+        point_calc.reverse_x_pixels = True
+        point_calc.reverse_y_pixels = True
+        return point_calc
