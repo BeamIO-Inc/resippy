@@ -1,16 +1,16 @@
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera_point_calc \
-    import PinholeCameraPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera \
+    import PinholeCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
+    import AbstractEarthOverheadPointCalc
 
 import numpy as np
 
 
-class PhysicalModelPointCalc(PinholeCameraPointCalc):
+class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
 
     def __init__(self):
-        super(PhysicalModelPointCalc, self).__init__()
-
-        # TODO: initialize distortion model
-        # TODO: initialize exterior orientation
+        # TODO: initialize intrinsic model parameters
+        pass
 
     @classmethod
     def init_from_params(cls,
@@ -18,7 +18,13 @@ class PhysicalModelPointCalc(PinholeCameraPointCalc):
                          ):         # type: (...) -> PhysicalModelPointCalc
         point_calc = cls()
 
-        # TODO: initialize values
+        extrinsic_params = params['extrinsic']
+        point_calc.init_pinhole_from_coeffs(extrinsic_params['X'], extrinsic_params['Y'], extrinsic_params['Z'],
+                                            extrinsic_params['omega'], extrinsic_params['phi'],
+                                            extrinsic_params['kappa'], extrinsic_params['focal_length'])
+
+        intrinsic_params = params['intrinsic']
+        # TODO: set intrinsic model values from params
 
         return point_calc
 
@@ -29,4 +35,13 @@ class PhysicalModelPointCalc(PinholeCameraPointCalc):
                                          band=None      # type: int
                                          ):             # type: (...) -> (np.ndarray, np.ndarray)
         # TODO
-        super()._lon_lat_alt_to_pixel_x_y_native(lons, lats, alts, band)
+        pass
+
+    def _pixel_x_y_alt_to_lon_lat_native(self,
+                                         pixel_xs,      # type: np.ndarray
+                                         pixel_ys,      # type: np.ndarray
+                                         alts=None,     # type: np.ndarray
+                                         band=None      # type: np.ndarray
+                                         ):             # type: (...) -> (np.ndarray, np.ndarray)
+        # TODO
+        pass

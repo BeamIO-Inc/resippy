@@ -1,5 +1,5 @@
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.rpc_point_calc import RPCPointCalc
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera_point_calc \
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera \
     import PinholeCameraPointCalc
 
 from resippy.utils import photogrammetry_utils
