@@ -77,8 +77,9 @@ class MicasenseImageFactory:
 
         params = {}
         with open(json_fname) as json_file:
-            params = json.load(json_file)
+            json_data = json.load(json_file)
 
+        params = json_data['parameters']
         point_calc_1 = create_point_calc(band_fname_dict['band1'], params)
         point_calc_2 = create_point_calc(band_fname_dict['band2'], params)
         point_calc_3 = create_point_calc(band_fname_dict['band3'], params)
