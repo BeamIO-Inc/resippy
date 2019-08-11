@@ -1,3 +1,5 @@
+import pyproj
+
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera \
     import PinholeCamera
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
@@ -14,9 +16,15 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
 
     @classmethod
     def init_from_params(cls,
-                         params     # type: dict
-                         ):         # type: (...) -> PhysicalModelPointCalc
+                         band_fname,    # type: str
+                         params,        # type: dict
+                         ):             # type: (...) -> PhysicalModelPointCalc
         point_calc = cls()
+
+        center_lon, center_lat = 0.0, 0.0
+
+        point_calc.set_approximate_lon_lat_center(center_lon, center_lat)
+        point_calc.set_projection(pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84'))
 
         extrinsic_params = params['extrinsic']
         point_calc.init_pinhole_from_coeffs(extrinsic_params['X'], extrinsic_params['Y'], extrinsic_params['Z'],

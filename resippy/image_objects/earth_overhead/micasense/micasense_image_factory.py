@@ -21,7 +21,7 @@ class MicasenseImageFactory:
                           point_calcs,
                           ):
         sensor_model = EarthOverheadSensorModel()
-        sensor_model.set_point_calcs([point_calcs[0], point_calcs[1], point_calcs[2], point_calcs[3], point_calcs[4]])
+        sensor_model.set_point_calcs(point_calcs)
         sensor_model.set_approximate_lon_lat_center(*point_calcs[0].get_approximate_lon_lat_center())
         sensor_model.set_projection(point_calcs[0].get_projection())
         sensor_model._bands_coregistered = False
