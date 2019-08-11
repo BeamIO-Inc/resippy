@@ -11,8 +11,15 @@ import numpy as np
 class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
 
     def __init__(self):
-        # TODO: initialize intrinsic model parameters
-        pass
+        self._fx_pixels = 0
+        self._fy_pixels = 0
+        self._cx_pixels = 0
+        self._cy_pixels = 0
+        self._k1 = 0.0
+        self._k2 = 0.0
+        self._k3 = 0.0
+        self._p1 = 0.0
+        self._p2 = 0.0
 
     @classmethod
     def init_from_params(cls,
@@ -21,6 +28,7 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
                          ):             # type: (...) -> PhysicalModelPointCalc
         point_calc = cls()
 
+        # TODO: use nav and image time reference to determine center
         center_lon, center_lat = 0.0, 0.0
 
         point_calc.set_approximate_lon_lat_center(center_lon, center_lat)
@@ -32,9 +40,33 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
                                             extrinsic_params['kappa'], extrinsic_params['focal_length'])
 
         intrinsic_params = params['intrinsic']
-        # TODO: set intrinsic model values from params
+        point_calc.init_physical_from_coeffs(intrinsic_params['fx_pixels'], intrinsic_params['fy_pixels'],
+                                             intrinsic_params['cx_pixels'], intrinsic_params['cy_pixels'],
+                                             intrinsic_params['k1'], intrinsic_params['k2'], intrinsic_params['k3'],
+                                             intrinsic_params['p1'], intrinsic_params['p2'])
 
         return point_calc
+
+    def init_physical_from_coeffs(self,
+                                  fx_pixels,    # type: float
+                                  fy_pixels,    # type: float
+                                  cx_pixels,    # type: float
+                                  cy_pixels,    # type: float
+                                  k1,           # type: float
+                                  k2,           # type: float
+                                  k3,           # type: float
+                                  p1,           # type: float
+                                  p2            # type: float
+                                  ):            # type: (...) -> None
+        self._fx_pixels = fx_pixels
+        self._fy_pixels = fy_pixels
+        self._cx_pixels = cx_pixels
+        self._cy_pixels = cy_pixels
+        self._k1 = k1
+        self._k2 = k2
+        self._k3 = k3
+        self._p1 = p1
+        self._p2 = p2
 
     def _lon_lat_alt_to_pixel_x_y_native(self,
                                          lons,          # type: np.ndarray
