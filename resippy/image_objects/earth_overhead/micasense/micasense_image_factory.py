@@ -70,7 +70,19 @@ class MicasenseImageFactory:
                                          json_fname         # type: str
                                          ):                 # type: (...) -> MicasenseImage
         def create_point_calc(band_fname, params):
-            point_calc = PhysicalModelPointCalc.init_from_params(band_fname, params)
+            # TODO: get this from metadata and nav
+            center_lon = 0.0
+            center_lat = 0.0
+
+            band_num = int(band_fname[band_fname.rfind('.')-1])
+
+            intrinsic_list = params['intrinsic']
+            intrinsic_params = [ip for ip in intrinsic_list if ip['band_number'] == band_num][0]
+            print(intrinsic_params)
+
+            point_calc = PhysicalModelPointCalc.init_from_params_and_center(intrinsic_params, params['extrinsic'],
+                                                                            center_lon, center_lat)
+
             point_calc.reverse_x_pixels = True
             point_calc.reverse_y_pixels = True
             return point_calc

@@ -22,24 +22,21 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
         self._p2 = 0.0
 
     @classmethod
-    def init_from_params(cls,
-                         band_fname,    # type: str
-                         params,        # type: dict
-                         ):             # type: (...) -> PhysicalModelPointCalc
+    def init_from_params_and_center(cls,
+                                    intrinsic_params,   # type: dict
+                                    extrinsic_params,   # type: dict
+                                    center_lon,         # type: float
+                                    center_lat,         # type: float
+                                    ):                  # type: (...) -> PhysicalModelPointCalc
         point_calc = cls()
-
-        # TODO: use nav and image time reference to determine center
-        center_lon, center_lat = 0.0, 0.0
 
         point_calc.set_approximate_lon_lat_center(center_lon, center_lat)
         point_calc.set_projection(pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84'))
 
-        extrinsic_params = params['extrinsic']
         point_calc.init_pinhole_from_coeffs(extrinsic_params['X'], extrinsic_params['Y'], extrinsic_params['Z'],
                                             extrinsic_params['omega'], extrinsic_params['phi'],
                                             extrinsic_params['kappa'], extrinsic_params['focal_length'])
 
-        intrinsic_params = params['intrinsic']
         point_calc.init_physical_from_coeffs(intrinsic_params['fx_pixels'], intrinsic_params['fy_pixels'],
                                              intrinsic_params['cx_pixels'], intrinsic_params['cy_pixels'],
                                              intrinsic_params['k1'], intrinsic_params['k2'], intrinsic_params['k3'],
@@ -74,8 +71,26 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
                                          alts=None,     # type: np.ndarray
                                          band=None      # type: int
                                          ):             # type: (...) -> (np.ndarray, np.ndarray)
-        # TODO
-        pass
+        # TODO: convert to (X, Y, Z)
+        ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
+        x, y, z = pyproj.transform(self.get_projection(), ecef, lons, lats, alts, radians=False)
+
+        x_prime = x / z
+        y_prime = y / z
+        r_squared = (x_prime * x_prime) + (y_prime * y_prime)
+        r_fourth = r_squared * r_squared
+        r_sixth = r_squared * r_squared * r_squared
+        radial_distortion = 1.0 + (self._k1 * r_squared) + (self._k2 * r_fourth) + (self._k3 * r_sixth)
+
+        x_double_prime = (x_prime * radial_distortion) + (2.0 * self._p1 * x_prime * y_prime) + \
+                         (self._p2 * (r_squared + 2.0 * x_prime * x_prime))
+        y_double_prime = (y_prime * radial_distortion) + (self._p1 * (r_squared + 2 * y_prime * y_prime)) + \
+                         (2.0 * self._p2 * x_prime * y_prime)
+
+        u = self._fx_pixels * x_double_prime + self._cx_pixels
+        v = self._fy_pixels + y_double_prime + self._cy_pixels
+
+        return u, v
 
     def _pixel_x_y_alt_to_lon_lat_native(self,
                                          pixel_xs,      # type: np.ndarray
