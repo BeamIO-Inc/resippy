@@ -35,7 +35,7 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
         point_calc = cls()
 
         point_calc.set_approximate_lon_lat_center(center_lon, center_lat)
-        point_calc.set_projection(pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84'))
+        point_calc.set_projection(pyproj.Proj(proj='utm', zone=18, ellps='WGS84', datum='WGS84'))
 
         # point_calc.init_pinhole_from_coeffs(extrinsic_params['X'], extrinsic_params['Y'], extrinsic_params['Z'],
         #                                     extrinsic_params['omega'], extrinsic_params['phi'],
@@ -59,8 +59,8 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
                                   p1,           # type: float
                                   p2            # type: float
                                   ):            # type: (...) -> None
-        self._fx_pixels = fx_pixels
-        self._fy_pixels = fy_pixels
+        self._fx_pixels = -fx_pixels
+        self._fy_pixels = -fy_pixels
         self._cx_pixels = cx_pixels
         self._cy_pixels = cy_pixels
         self._k1 = k1
@@ -82,9 +82,6 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
                                          band=None      # type: int
                                          ):             # type: (...) -> (np.ndarray, np.ndarray)
         # https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
-        ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
-        x, y, z = pyproj.transform(self.get_projection(), ecef, lons, lats, alts, radians=False)
-
         # x_prime = x / z
         # y_prime = y / z
         # r_squared = (x_prime * x_prime) + (y_prime * y_prime)
@@ -101,14 +98,21 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
         # v = self._fy_pixels + y_double_prime + self._cy_pixels
         # return u, v
 
-        object_points = np.array([[x, y, z]], dtype=np.float64)
+        object_points = np.ones((len(lons), 3), dtype=np.float64)
+        object_points[:, 0] = lons
+        object_points[:, 1] = lats
+        object_points[:, 2] = alts
 
-        rot = np.array([0, 0, 0], dtype=np.float64)
-        trans = np.array([0, 0, 0], dtype=np.float64)
+        # rot = np.array([0, 0, 0], dtype=np.float64)
+        # trans = np.array([0, 0, 100], dtype=np.float64)
+
+        # TODO: use real values instead of pix4d values
+        rot = np.array([-0.788417, -5.994801, 8.313844], dtype=np.float64)
+        trans = np.array([334265.746789, 4748702.207249, 262.700231], dtype=np.float64)
 
         image_points, __ = cv2.projectPoints(object_points, rot, trans, self._camera_matrix, self._distortion_coeffs)
 
-        return image_points[0, :, 0], image_points[0, :, 1]
+        return image_points[:, :, 0], image_points[:, :, 1]
 
     def _pixel_x_y_alt_to_lon_lat_native(self,
                                          pixel_xs,      # type: np.ndarray
