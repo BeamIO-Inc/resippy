@@ -101,6 +101,10 @@ class MicasenseImageFactory:
         point_calc_4 = create_point_calc(band_fname_dict['band4'], params)
         point_calc_5 = create_point_calc(band_fname_dict['band5'], params)
 
+        x, y = point_calc_1.lon_lat_alt_to_pixel_x_y(*point_calc_1.get_approximate_lon_lat_center(), 100)
+        print("x: " + str(x))
+        print("y: " + str(y))
+
         return MicasenseImageFactory._from_point_calcs(band_fname_dict, [point_calc_1, point_calc_2, point_calc_3,
                                                                          point_calc_4, point_calc_5])
 

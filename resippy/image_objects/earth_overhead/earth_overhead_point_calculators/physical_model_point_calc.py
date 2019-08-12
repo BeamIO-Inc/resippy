@@ -6,6 +6,7 @@ from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstr
     import AbstractEarthOverheadPointCalc
 
 import numpy as np
+import cv2
 
 
 class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
@@ -21,6 +22,9 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
         self._p1 = 0.0
         self._p2 = 0.0
 
+        self._camera_matrix = None
+        self._distortion_coeffs = None
+
     @classmethod
     def init_from_params_and_center(cls,
                                     intrinsic_params,   # type: dict
@@ -33,9 +37,9 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
         point_calc.set_approximate_lon_lat_center(center_lon, center_lat)
         point_calc.set_projection(pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84'))
 
-        point_calc.init_pinhole_from_coeffs(extrinsic_params['X'], extrinsic_params['Y'], extrinsic_params['Z'],
-                                            extrinsic_params['omega'], extrinsic_params['phi'],
-                                            extrinsic_params['kappa'], extrinsic_params['focal_length'])
+        # point_calc.init_pinhole_from_coeffs(extrinsic_params['X'], extrinsic_params['Y'], extrinsic_params['Z'],
+        #                                     extrinsic_params['omega'], extrinsic_params['phi'],
+        #                                     extrinsic_params['kappa'], extrinsic_params['focal_length'])
 
         point_calc.init_physical_from_coeffs(intrinsic_params['fx_pixels'], intrinsic_params['fy_pixels'],
                                              intrinsic_params['cx_pixels'], intrinsic_params['cy_pixels'],
@@ -65,6 +69,12 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
         self._p1 = p1
         self._p2 = p2
 
+        self._camera_matrix = np.array([[self._fx_pixels, 0, self._cx_pixels],
+                                        [0, self._fy_pixels, self._cy_pixels],
+                                        [0, 0, 1]], dtype=np.float64)
+
+        self._distortion_coeffs = np.array([self._k1, self._k2, self._p1, self._p2, self._k3], dtype=np.float64)
+
     def _lon_lat_alt_to_pixel_x_y_native(self,
                                          lons,          # type: np.ndarray
                                          lats,          # type: np.ndarray
@@ -75,22 +85,30 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
         ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
         x, y, z = pyproj.transform(self.get_projection(), ecef, lons, lats, alts, radians=False)
 
-        x_prime = x / z
-        y_prime = y / z
-        r_squared = (x_prime * x_prime) + (y_prime * y_prime)
-        r_fourth = r_squared * r_squared
-        r_sixth = r_squared * r_squared * r_squared
-        radial_distortion = 1.0 + (self._k1 * r_squared) + (self._k2 * r_fourth) + (self._k3 * r_sixth)
+        # x_prime = x / z
+        # y_prime = y / z
+        # r_squared = (x_prime * x_prime) + (y_prime * y_prime)
+        # r_fourth = r_squared * r_squared
+        # r_sixth = r_squared * r_squared * r_squared
+        # radial_distortion = 1.0 + (self._k1 * r_squared) + (self._k2 * r_fourth) + (self._k3 * r_sixth)
+        #
+        # x_double_prime = (x_prime * radial_distortion) + (2.0 * self._p1 * x_prime * y_prime) + \
+        #                  (self._p2 * (r_squared + 2.0 * x_prime * x_prime))
+        # y_double_prime = (y_prime * radial_distortion) + (self._p1 * (r_squared + 2.0 * y_prime * y_prime)) + \
+        #                  (2.0 * self._p2 * x_prime * y_prime)
+        #
+        # u = self._fx_pixels * x_double_prime + self._cx_pixels
+        # v = self._fy_pixels + y_double_prime + self._cy_pixels
+        # return u, v
 
-        x_double_prime = (x_prime * radial_distortion) + (2.0 * self._p1 * x_prime * y_prime) + \
-                         (self._p2 * (r_squared + 2.0 * x_prime * x_prime))
-        y_double_prime = (y_prime * radial_distortion) + (self._p1 * (r_squared + 2 * y_prime * y_prime)) + \
-                         (2.0 * self._p2 * x_prime * y_prime)
+        object_points = np.array([[x, y, z]], dtype=np.float64)
 
-        u = self._fx_pixels * x_double_prime + self._cx_pixels
-        v = self._fy_pixels + y_double_prime + self._cy_pixels
+        rot = np.array([0, 0, 0], dtype=np.float64)
+        trans = np.array([0, 0, 0], dtype=np.float64)
 
-        return u, v
+        image_points, __ = cv2.projectPoints(object_points, rot, trans, self._camera_matrix, self._distortion_coeffs)
+
+        return image_points[0, :, 0], image_points[0, :, 1]
 
     def _pixel_x_y_alt_to_lon_lat_native(self,
                                          pixel_xs,      # type: np.ndarray
@@ -98,5 +116,4 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
                                          alts=None,     # type: np.ndarray
                                          band=None      # type: np.ndarray
                                          ):             # type: (...) -> (np.ndarray, np.ndarray)
-        # TODO
         pass
