@@ -71,7 +71,7 @@ class PhysicalModelPointCalc(PinholeCamera, AbstractEarthOverheadPointCalc):
                                          alts=None,     # type: np.ndarray
                                          band=None      # type: int
                                          ):             # type: (...) -> (np.ndarray, np.ndarray)
-        # TODO: convert to (X, Y, Z)
+        # https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
         ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
         x, y, z = pyproj.transform(self.get_projection(), ecef, lons, lats, alts, radians=False)
 
