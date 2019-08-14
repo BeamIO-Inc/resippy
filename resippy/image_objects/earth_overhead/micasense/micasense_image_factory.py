@@ -3,8 +3,8 @@ from __future__ import division
 import pyproj
 
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pix4d_point_calc import Pix4dPointCalc
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.physical_model_point_calc \
-    import PhysicalModelPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.opencv_point_calc \
+    import OpenCVPointCalc
 from resippy.image_objects.earth_overhead.micasense.micasense_image import MicasenseImage
 from resippy.image_objects.earth_overhead.micasense.micasense_metadata import MicasenseMetadata
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.earth_overhead_sensor_model \
@@ -80,8 +80,8 @@ class MicasenseImageFactory:
             intrinsic_list = params['intrinsic']
             intrinsic_params = [ip for ip in intrinsic_list if ip['band_number'] == band_num][0]
 
-            point_calc = PhysicalModelPointCalc.init_from_params_and_center(intrinsic_params, params['extrinsic'],
-                                                                            x[band_num-1], y[band_num-1])
+            point_calc = OpenCVPointCalc.init_from_params_and_center(intrinsic_params, params['extrinsic'],
+                                                                     x[band_num-1], y[band_num-1])
 
             point_calc.reverse_x_pixels = True
             point_calc.reverse_y_pixels = True
@@ -98,7 +98,7 @@ class MicasenseImageFactory:
         point_calc_4 = create_point_calc(band_fname_dict['band4'], params)
         point_calc_5 = create_point_calc(band_fname_dict['band5'], params)
 
-        x, y = point_calc_1.lon_lat_alt_to_pixel_x_y(0, 0, 100)
+        x, y = point_calc_1.lon_lat_alt_to_pixel_x_y(*point_calc_1.get_approximate_lon_lat_center(), 260)
         print("x: " + str(x))
         print("y: " + str(y))
 
