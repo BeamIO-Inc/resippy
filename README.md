@@ -1,6 +1,6 @@
 # ReSIPPy
 
-#### Remote Sensing and Image Processing in Python
+### Remote Sensing and Image Processing in Python
 
 ReSIPPy is a set of tools to perform image processing with a focus on overhead and spectral remote sensing applications.
 Some features include:
@@ -10,13 +10,13 @@ Some features include:
 - Spectral matched filters
 - Reading spectral libraries
 
-### Installation
+## Installation
 
 The installation of ReSIPPy requires two tricky dependencies:
 - GDAL
 - PyProj
 
-#### Using conda
+### Using conda
 
 We prefer to use conda to manage our Python environments and dependencies.
 To install Anaconda (or Miniconda), follow the instructions in the [Anaconda Docs](https://docs.anaconda.com/anaconda/install/).
@@ -32,7 +32,7 @@ Then, activate the environment to work with ReSIPPy:
 $ conda activate resippy
 ```
 
-#### Using pip
+### Using pip
 
 ReSIPPy is also available on PyPi and can be installed using pip:
 
@@ -41,3 +41,14 @@ $ pip install resippy
 ```
 
 Installation using pip may require the user to download and install additional system level dependencies.
+
+## Documentation
+
+This project uses Sphinx for documentation.
+To build HTML documentation, navigate to the `docs` folder and run the following:
+
+```bash
+$ make html
+```
+
+When completed, the HTML documentation will be available in `docs/_build/html`.
