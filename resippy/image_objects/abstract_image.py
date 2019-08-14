@@ -77,7 +77,7 @@ class AbstractImage():
         gets the image object's metadata
         :return: ImageMetadata class.  This will be a concrete implementation of AbstractImageMetadata, and will
         match the ImageMetadata class associated with the particular concrete implementation of the Abstract Image.
-        For example, and GeotiffImageObject will have a GeotiffImageMetadata.
+        For example GeotiffImageObject will have a GeotiffImageMetadata.
         """
         return self._metadata
 
