@@ -41,3 +41,14 @@ $ pip install resippy
 ```
 
 Installation using pip may require the user to download and install additional system level dependencies.
+
+### Documentation
+
+This project uses Sphinx for documentation.
+To build HTML documentation, navigate to the `docs` folder and run the following:
+
+```bash
+$ make html
+```
+
+When completed, the HTML documentation will be available in `docs/_build/html`.
