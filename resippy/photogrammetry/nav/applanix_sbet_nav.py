@@ -13,7 +13,7 @@ class ApplanixSBETNav(AbstractNav):
                  ):     # type: (...) -> ApplanixSBETNav
         super(ApplanixSBETNav, self).__init__()
 
-        self._lla_projection = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
+        self._lla_projection = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84', preserve_units=True)
 
     def load_from_file(self,
                        filename,    # type: str
@@ -40,9 +40,9 @@ class ApplanixSBETNav(AbstractNav):
         self._nav_data = {convert_to_snake_case(name): data[name] for name in data.dtype.names}
 
         if not zone:
-            self._projection = pyproj.Proj(proj=proj, ellps=ellps, datum=datum)
+            self._projection = pyproj.Proj(proj=proj, ellps=ellps, datum=datum, preserve_units=True)
         else:
-            self._projection = pyproj.Proj(proj=proj, zone=zone, ellps=ellps, datum=datum)
+            self._projection = pyproj.Proj(proj=proj, zone=zone, ellps=ellps, datum=datum, preserve_units=True)
 
     def _gps_times_in_range(self,
                             gps_times   # type: np.ndarray
