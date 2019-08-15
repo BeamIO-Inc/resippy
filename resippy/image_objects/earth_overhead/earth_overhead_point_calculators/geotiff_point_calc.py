@@ -38,7 +38,7 @@ class GeotiffPointCalc(AbstractEarthOverheadPointCalc):
         srs_wkt = dset.GetProjection()
         srs_converter = osr.SpatialReference()  # makes an empty spatial ref object
         srs_converter.ImportFromWkt(srs_wkt)  # populates the spatial ref object with our WKT SRS
-        point_calc.set_projection(Proj(srs_converter.ExportToProj4()))
+        point_calc.set_projection(Proj(srs_converter.ExportToProj4(), preserve_units=True))
         dset = None
         return point_calc
 
