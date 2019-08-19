@@ -35,7 +35,7 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         point_calc = cls()
 
         point_calc.set_approximate_lon_lat_center(center_lon, center_lat)
-        point_calc.set_projection(pyproj.Proj(proj='utm', zone=18, ellps='WGS84', datum='WGS84'))
+        point_calc.set_projection(pyproj.Proj(proj='utm', zone=18, ellps='WGS84', datum='WGS84', preserve_units=True))
 
         point_calc.init_coeffs(intrinsic_params['fx_pixels'], intrinsic_params['fy_pixels'],
                                intrinsic_params['cx_pixels'], intrinsic_params['cy_pixels'],
