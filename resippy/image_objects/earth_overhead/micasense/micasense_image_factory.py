@@ -1,7 +1,5 @@
 from __future__ import division
 
-import pyproj
-
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pix4d_point_calc import Pix4dPointCalc
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.opencv_point_calc \
     import OpenCVPointCalc
@@ -14,7 +12,6 @@ import os
 from uuid import uuid4
 from PIL import Image
 import numpy as np
-import json
 
 
 class MicasenseImageFactory:
@@ -24,7 +21,6 @@ class MicasenseImageFactory:
                           ):
         sensor_model = EarthOverheadSensorModel()
         sensor_model.set_point_calcs(point_calcs)
-        sensor_model.set_approximate_lon_lat_center(*point_calcs[0].get_approximate_lon_lat_center())
         sensor_model.set_projection(point_calcs[0].get_projection())
         sensor_model._bands_coregistered = False
 
@@ -64,43 +60,36 @@ class MicasenseImageFactory:
         point_calc_4 = create_point_calc(band_fname_dict['band4'], pix4d_master_params_dict)
         point_calc_5 = create_point_calc(band_fname_dict['band5'], pix4d_master_params_dict)
 
-        return MicasenseImageFactory._from_point_calcs(band_fname_dict, [point_calc_1, point_calc_2, point_calc_3,
-                                                                         point_calc_4, point_calc_5])
+        micasense_image = MicasenseImageFactory._from_point_calcs(band_fname_dict, [point_calc_1, point_calc_2,
+                                                                                    point_calc_3, point_calc_4,
+                                                                                    point_calc_5])
+
+        sensor_model = micasense_image.get_point_calculator()
+        sensor_model.set_approximate_lon_lat_center(*sensor_model.get_point_calcs()[0].get_approximate_lon_lat_center())
+
+        return micasense_image
 
     @staticmethod
-    def from_image_number_and_json_fname(band_fname_dict,   # type: dict
-                                         json_fname         # type: str
-                                         ):                 # type: (...) -> MicasenseImage
-        x = [334265.746789, 334265.717233, 334265.720081, 334265.749637, 334265.733435]
-        y = [4748702.207249, 4748702.203111, 4748702.182314, 4748702.186452, 4748702.194782]
-
+    def from_image_number_and_opencv(band_fname_dict,   # type: dict
+                                     opencv_params      # type: dict
+                                     ):                 # type: (...) -> MicasenseImage
         def create_point_calc(band_fname, params):
             band_num = int(band_fname[band_fname.rfind('.')-1])
 
             intrinsic_list = params['intrinsic']
             intrinsic_params = [ip for ip in intrinsic_list if ip['band_number'] == band_num][0]
 
-            point_calc = OpenCVPointCalc.init_from_params_and_center(intrinsic_params, params['extrinsic'],
-                                                                     x[band_num-1], y[band_num-1])
+            point_calc = OpenCVPointCalc.init_from_params(intrinsic_params, params['extrinsic'])
 
             point_calc.reverse_x_pixels = True
             point_calc.reverse_y_pixels = True
             return point_calc
 
-        with open(json_fname) as json_file:
-            json_data = json.load(json_file)
-
-        params = json_data['parameters']
-
-        point_calc_1 = create_point_calc(band_fname_dict['band1'], params)
-        point_calc_2 = create_point_calc(band_fname_dict['band2'], params)
-        point_calc_3 = create_point_calc(band_fname_dict['band3'], params)
-        point_calc_4 = create_point_calc(band_fname_dict['band4'], params)
-        point_calc_5 = create_point_calc(band_fname_dict['band5'], params)
-
-        x, y = point_calc_1.lon_lat_alt_to_pixel_x_y(*point_calc_1.get_approximate_lon_lat_center(), 260)
-        print("x: " + str(x))
-        print("y: " + str(y))
+        point_calc_1 = create_point_calc(band_fname_dict['band1'], opencv_params)
+        point_calc_2 = create_point_calc(band_fname_dict['band2'], opencv_params)
+        point_calc_3 = create_point_calc(band_fname_dict['band3'], opencv_params)
+        point_calc_4 = create_point_calc(band_fname_dict['band4'], opencv_params)
+        point_calc_5 = create_point_calc(band_fname_dict['band5'], opencv_params)
 
         return MicasenseImageFactory._from_point_calcs(band_fname_dict, [point_calc_1, point_calc_2, point_calc_3,
                                                                          point_calc_4, point_calc_5])
