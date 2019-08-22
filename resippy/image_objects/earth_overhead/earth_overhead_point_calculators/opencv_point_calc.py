@@ -1,17 +1,15 @@
 import pyproj
 
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera \
-    import PinholeCamera
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
     import AbstractEarthOverheadPointCalc
 
 import numpy as np
-import cv2
 
 
 class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
 
     def __init__(self):
+        # intrinsic params
         self._fx_pixels = 0
         self._fy_pixels = 0
         self._cx_pixels = 0
@@ -24,6 +22,22 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
 
         self._camera_matrix = None
         self._distortion_coeffs = None
+
+        # extrinsic params
+        self._x_offset = 0.0
+        self._y_offset = 0.0
+        self._z_offset = 0.0
+        self._omega = 0.0
+        self._phi = 0.0
+        self._kappa = 0.0
+
+        # nav data
+        self._x = 0.0
+        self._y = 0.0
+        self._z = 0.0
+        self._roll = 0.0
+        self._pitch = 0.0
+        self._azimuth = 0.0
 
     @classmethod
     def init_from_params(cls,
@@ -39,7 +53,9 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
                                   intrinsic_params['k1'], intrinsic_params['k2'], intrinsic_params['k3'],
                                   intrinsic_params['p1'], intrinsic_params['p2'])
 
-        point_calc.init_extrinsic()
+        point_calc.init_extrinsic(extrinsic_params['x_offset'], extrinsic_params['y_offset'],
+                                  extrinsic_params['z_offset'], extrinsic_params['omega'], extrinsic_params['phi'],
+                                  extrinsic_params['kappa'])
 
         return point_calc
 
@@ -70,9 +86,35 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
 
         self._distortion_coeffs = np.array([self._k1, self._k2, self._p1, self._p2, self._k3], dtype=np.float64)
 
-    def init_extrinsic(self
-                       ):
-        pass
+    def init_extrinsic(self,
+                       x_offset,    # type: float
+                       y_offset,    # type: float
+                       z_offset,    # type: float
+                       omega,       # type: float
+                       phi,         # type: float
+                       kappa        # type: float
+                       ):           # type: (...) -> None
+        self._x_offset = x_offset
+        self._y_offset = y_offset
+        self._z_offset = z_offset
+        self._omega = omega
+        self._phi = phi
+        self._kappa = kappa
+
+    def init_nav(self,
+                 x,         # type: float
+                 y,         # type: float
+                 z,         # type: float
+                 roll,      # type: float
+                 pitch,     # type: float
+                 azimuth    # type: float
+                 ):         # type: (...) -> None
+        self._x = x
+        self._y = y
+        self._z = z
+        self._roll = roll
+        self._pitch = pitch
+        self._azimuth = azimuth
 
     def _lon_lat_alt_to_pixel_x_y_native(self,
                                          lons,          # type: np.ndarray
