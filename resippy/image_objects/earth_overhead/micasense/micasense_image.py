@@ -26,9 +26,9 @@ class MicasenseImage(AbstractEarthOverheadImage):
                             ):              # type: (...) -> ndarray
         return imread(self.band_fnames[band_number])
 
-    def get_gps_timestamp(self,
-                          band_number   # type: int
-                          ):            # type: (...) -> float
+    def get_gps_seconds_in_week(self,
+                                band_number     # type: int
+                                ):              # type: (...) -> float
         with exiftool.ExifTool() as exif_tool:
             exif_data = exif_tool.get_metadata(self.band_fnames[band_number])
 
@@ -41,9 +41,9 @@ class MicasenseImage(AbstractEarthOverheadImage):
         second = int(utc_datetime_str[17:19])
 
         utc_timestamp = datetime(year, month, day, hour, minute, second, tzinfo=timezone.utc).timestamp()
-        gps_timestamp = time_utils.utc_timestamp_to_gps_timestamp(utc_timestamp)
+        __, seconds_in_week = time_utils.utc_timestamp_to_gps_week_and_seconds(utc_timestamp)
 
         timestamp_decimal_str = exif_data['EXIF:SubSecTime']
         timestamp_decimal = float('0.{}'.format(int(timestamp_decimal_str)))
 
-        return gps_timestamp + timestamp_decimal
+        return seconds_in_week + timestamp_decimal
