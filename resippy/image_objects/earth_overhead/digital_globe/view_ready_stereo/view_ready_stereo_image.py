@@ -5,8 +5,10 @@ import numpy as np
 from numpy import ndarray
 
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.digital_globe.view_ready_stereo.view_ready_stereo_metadata import ViewReadyStereoMetadata
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.digital_globe.view_ready_stereo.view_ready_stereo_point_calc import ViewReadyStereoPointCalc
+from resippy.image_objects.earth_overhead.digital_globe.view_ready_stereo.view_ready_stereo_metadata \
+    import ViewReadyStereoMetadata
+from resippy.image_objects.earth_overhead.digital_globe.view_ready_stereo.view_ready_stereo_point_calc \
+    import ViewReadyStereoPointCalc
 
 
 class ViewReadyStereoImage(AbstractEarthOverheadImage):

@@ -1,6 +1,6 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.geotiff_image import GeotiffImage
+from resippy.image_objects.earth_overhead.geotiff.geotiff_image import GeotiffImage
 
 from numpy import ndarray
 from pyproj import Proj

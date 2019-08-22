@@ -2,8 +2,9 @@ from __future__ import division
 
 from numpy import ndarray
 from resippy.image_objects.abstract_image import AbstractImage
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
+    import AbstractEarthOverheadPointCalc
 from resippy.image_objects.abstract_image_metadata import AbstractImageMetadata
-from resippy.image_objects.earth_overhead.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
 import abc
 
 
@@ -24,9 +25,9 @@ class AbstractEarthOverheadImage(AbstractImage):
     def get_point_calculator(self):  # type: (...) -> AbstractEarthOverheadPointCalc
         """
         Returns the image object's point calculator
-        :return: a point calculator.  The specific type of point calculator will be determined by the corresponding
-        image object.  All point calculators are concrete implementations of the AbstractEarthOverheadPointCalc class
-        and should all be able to be used the same way, regardless of the specific type of point calculator.
+        :return: a point calculator.  The types of point calculator will be determined by the corresponding image
+        object.  All point calculators are concrete implementations of the AbstractEarthOverheadPointCalc class and
+        should all be able to be used the same way, regardless of the specific type of point calculator.
         """
         return self._point_calc
 
@@ -40,8 +41,8 @@ class AbstractEarthOverheadImage(AbstractImage):
 
     @abc.abstractmethod
     def read_band_from_disk(self,
-                            band_number  # type: int
-                            ):  # type: (...) -> ndarray
+                            band_number     # type: int
+                            ):              # type: (...) -> ndarray
         """
         Reads a single image band from disk
         :param band_number: band number to read from disk
@@ -50,13 +51,12 @@ class AbstractEarthOverheadImage(AbstractImage):
         pass
 
     def set_point_calculator(self,
-                             point_calculator  # type: AbstractEarthOverheadPointCalc
-                             ):  # type: (...) -> None
+                             point_calc     # type: AbstractEarthOverheadPointCalc
+                             ):             # type: (...) -> None
         """
         Sets the point calculator for the image object.  This should only be used when creating a new type of
         EarthOverheadImage object.
-        :param point_calculator: The EarthOverheadImage object's point calculator.  This should be a concrete
-        implementation of an AbstractEarthOverheadPointCalc object
+        :param point_calc: The AbstractEarthOverheadPointCalc.
         :return: None
         """
-        self._point_calc = point_calculator
+        self._point_calc = point_calc

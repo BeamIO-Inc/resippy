@@ -1,11 +1,14 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
-from numpy import ndarray
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
+    import AbstractEarthOverheadPointCalc
 from resippy.utils import photogrammetry_utils
+from resippy.utils.units import ureg
+
+from numpy import ndarray
 
 
-class PinholeCamera(AbstractEarthOverheadPointCalc):
+class PinholeCamera:
     """
     This is an idealized pinhole camera model.
     """
@@ -34,71 +37,71 @@ class PinholeCamera(AbstractEarthOverheadPointCalc):
         self.m32 = None
         self.m33 = None
 
-        self.pp_x = None
-        self.pp_y = None
+    def init_pinhole_from_coeffs(self,
+                                 X,                         # type: float
+                                 Y,                         # type: float
+                                 Z,                         # type: float
+                                 omega,                     # type: float
+                                 phi,                       # type: float
+                                 kappa,                     # type: float
+                                 focal_length,              # type: float
+                                 x_units='meters',          # type: str
+                                 y_units='meters',          # type: str
+                                 z_units='meters',          # type: str
+                                 omega_units='radians',     # type: str
+                                 phi_units='radians',       # type: str
+                                 kappa_units='radians',     # type: str
+                                 focal_length_units='mm'    # type: str
+                                 ):                         # type: (...) -> None
+        x = X * ureg.parse_expression(x_units)
+        y = Y * ureg.parse_expression(y_units)
+        z = Z * ureg.parse_expression(z_units)
 
-        self.x_0 = None
-        self.y_0 = None
+        x_meters = x.to(ureg['meters'])
+        y_meters = y.to(ureg['meters'])
+        z_meters = z.to(ureg['meters'])
 
-        self.set_projection(None)
-        self._bands_coregistered = True
+        omega_radians = omega * ureg.parse_expression(omega_units).to(ureg['radians'])
+        phi_radians = phi * ureg.parse_expression(phi_units).to(ureg['radians'])
+        kappa_radians = kappa * ureg.parse_expression(kappa_units).to(ureg['radians'])
 
-    @classmethod
-    def init_from_coeffs(cls, x_meters, y_meters, z_meters, omega_radians, phi_radians, kappa_radians, f_millimeters,
-                         ppx_microns, ppy_microns, x_offset_microns=0.0, y_offset_microns=0.0):
-        point_calc = cls()
-        point_calc.X = x_meters
-        point_calc.Y = y_meters
-        point_calc.Z = z_meters
-        point_calc.omega = omega_radians
-        point_calc.phi = phi_radians
-        point_calc.kappa = kappa_radians
-        point_calc.f = f_millimeters*1e-3
-        point_calc.pp_x = ppx_microns*1e-6
-        point_calc.pp_y = ppy_microns*1e-6
-        point_calc.x_0 = x_offset_microns*1e-6
-        point_calc.y_0 = y_offset_microns*1e-6
+        focal_length_meters = focal_length * ureg.parse_expression(focal_length_units).to(ureg['meters'])
 
-        point_calc.M = photogrammetry_utils.create_M_matrix(omega_radians, phi_radians, kappa_radians)
+        self.X = x_meters
+        self.Y = y_meters
+        self.Z = z_meters
+        self.omega = omega_radians
+        self.phi = phi_radians
+        self.kappa = kappa_radians
+        self.f = focal_length_meters
 
-        point_calc.m11 = point_calc.M[0, 0]
-        point_calc.m12 = point_calc.M[0, 1]
-        point_calc.m13 = point_calc.M[0, 2]
+        self.M = photogrammetry_utils.create_M_matrix(omega_radians, phi_radians, kappa_radians)
 
-        point_calc.m21 = point_calc.M[1, 0]
-        point_calc.m22 = point_calc.M[1, 1]
-        point_calc.m23 = point_calc.M[1, 2]
+        self.m11 = self.M[0, 0]
+        self.m12 = self.M[0, 1]
+        self.m13 = self.M[0, 2]
 
-        point_calc.m31 = point_calc.M[2, 0]
-        point_calc.m32 = point_calc.M[2, 1]
-        point_calc.m33 = point_calc.M[2, 2]
+        self.m21 = self.M[1, 0]
+        self.m22 = self.M[1, 1]
+        self.m23 = self.M[1, 2]
 
-        return point_calc
+        self.m31 = self.M[2, 0]
+        self.m32 = self.M[2, 1]
+        self.m33 = self.M[2, 2]
 
-    def _lon_lat_alt_to_pixel_x_y_native(self,
-                                         lons,  # type: ndarray
-                                         lats,  # type: ndarray
-                                         alts=None,  # type: ndarray
-                                         band=None  # type: int
-                                         ):  # type: (...) -> (ndarray, ndarray)
-        pass
-
-    def _world_to_image_space(self, world_x, world_y, world_z):
+    def _world_to_image_space(self,
+                              world_x,  # type: ndarray
+                              world_y,  # type: ndarray
+                              world_z   # type: ndarray
+                              ):        # type: (...) -> (ndarray, ndarray)
         x = -1.0*self.f*(
                 (self.m11*(world_x - self.X) + self.m12*(world_y - self.Y) + self.m13*(world_z - self.Z)) /
                 (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z))
         ) + self.x_0
+
         y = -1.0*self.f*(
                 (self.m21*(world_x - self.X) + self.m22*(world_y - self.Y) + self.m23*(world_z - self.Z)) /
                 (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z))
         ) + self.y_0
+
         return x, y
-
-    def _pixel_x_y_alt_to_lon_lat_native(self,
-                                         x_pixels,  # type: ndarray
-                                         y_pixels,  # type: ndarray
-                                         alts=None,  # type: ndarray
-                                         band=None  # type: ndarray
-                                         ):  # type: (...) -> (ndarray, ndarray)
-        return None
-

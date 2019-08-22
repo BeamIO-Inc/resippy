@@ -10,10 +10,16 @@ dependencies:
   - pyproj
   - python
   - python-pdal
+  - scikit-image
   - scikit-learn
+  - shapely
   - pip:
+    - colorutils
+    - imageio
+    - numpy<1.16.0
     - opencv-python
+    - pint==0.9
     - pyexiftool
     - pysolar
-    - git+https://github.com/BeamIO-Inc/resippy.git
-    - git+https://github.com/BeamIO-Inc/algorithm_toolkit  
+    - scipy
+    - seaborn

@@ -10,10 +10,8 @@ from shapely.ops import unary_union
 from pyproj import Proj
 
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.\
-    geotiff_image_factory import GeotiffImageFactory
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.\
-    geotiff_image import GeotiffImage
+from resippy.image_objects.earth_overhead.geotiff.geotiff_image_factory import GeotiffImageFactory
+from resippy.image_objects.earth_overhead.geotiff.geotiff_image import GeotiffImage
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 from resippy.photogrammetry import crs_defs as crs_defs
 from resippy.utils.photogrammetry_utils import create_ground_grid, world_poly_to_geo_t
