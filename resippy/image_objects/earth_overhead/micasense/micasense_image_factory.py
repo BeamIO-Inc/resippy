@@ -79,7 +79,7 @@ class MicasenseImageFactory:
             intrinsic_list = params['intrinsic']
             intrinsic_params = [ip for ip in intrinsic_list if ip['band_number'] == band_num][0]
 
-            point_calc = OpenCVPointCalc.init_from_params(intrinsic_params, params['extrinsic'])
+            point_calc = OpenCVPointCalc.init_from_params(intrinsic_params, params['offsets'])
 
             point_calc.reverse_x_pixels = True
             point_calc.reverse_y_pixels = True
