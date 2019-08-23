@@ -16,14 +16,19 @@ class AgisoftQuickPreviewPointCalc(AbstractEarthOverheadPointCalc):
         self._pinhole_camera=None       # type: PinholeCamera
         self._lon_lat_center_approximate = None
         self._pixel_pitch_meters = None
+        self._npix_x = None
+        self._npix_y = None
 
     def _pixel_x_y_alt_to_lon_lat_native(self, pixel_xs, pixel_ys, alts=None, band=None):
         pass
 
     def _lon_lat_alt_to_pixel_x_y_native(self, lons, lats, alts, band=None):
-        fpa_coords_meters = self._pinhole_camera._world_to_image_space(lons, lats, alts)
-        fpa_coords_pixels = (fpa_coords_meters[0] / self._pixel_pitch_meters, fpa_coords_meters[1] / self._pixel_pitch_meters)
-        return fpa_coords_pixels
+        half_fpa_x_meters = self._npix_x * self._pixel_pitch_meters
+        half_fpa_y_meters = self._npix_y * self._pixel_pitch_meters
+        fpa_coords_meters_x, fpa_coords_meters_y = self._pinhole_camera._world_to_image_space(lons, lats, alts)
+        fpa_coords_pixels_x = fpa_coords_meters_x / self._pixel_pitch_meters
+        fpa_coords_pixels_y = fpa_coords_meters_y / self._pixel_pitch_meters
+        return fpa_coords_pixels_x, fpa_coords_pixels_y
 
 
     @classmethod
@@ -36,6 +41,8 @@ class AgisoftQuickPreviewPointCalc(AbstractEarthOverheadPointCalc):
                          yaw_degrees,
                          focal_length_mm,
                          pixel_pitch_microns,
+                         npix_x,
+                         npix_y,
                          flip_y=False,
                          flip_x=False,
                          ):                         # type: (...) -> AgisoftQuickPreviewPointCalc
@@ -63,6 +70,8 @@ class AgisoftQuickPreviewPointCalc(AbstractEarthOverheadPointCalc):
         agisoft_quick_preview_point_calc._pixel_pitch_meters = pixel_pitch_microns * 1e-6
         agisoft_quick_preview_point_calc.set_projection(native_proj)
         agisoft_quick_preview_point_calc.set_approximate_lon_lat_center(sensor_x_local, sensor_y_local)
+        agisoft_quick_preview_point_calc._npix_x = npix_x
+        agisoft_quick_preview_point_calc._npix_y = npix_y
         agisoft_quick_preview_point_calc._flip_x=flip_x
         agisoft_quick_preview_point_calc._flip_y=flip_y
         agisoft_quick_preview_point_calc._pinhole_camera = pinhole_camera

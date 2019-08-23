@@ -33,6 +33,8 @@ class AgisoftQuickPreviewImage(AbstractEarthOverheadImage):
         agisoft_quick_preview_image = cls()
         agisoft_quick_preview_image.set_dset(gdal.Open(fname, gdal.GA_ReadOnly))
         metadata = AgisoftQuickPreviewMetadata._from_file(fname)
+        npix_x = metadata.get_npix_x()
+        npix_y = metadata.get_npix_y()
         point_calc = AgisoftQuickPreviewPointCalc.init_from_params(sensor_lon_deg,
                                                                    sensor_lat_deg,
                                                                    sensor_alt_meters_msl,
@@ -40,7 +42,9 @@ class AgisoftQuickPreviewImage(AbstractEarthOverheadImage):
                                                                    pitch_degrees,
                                                                    yaw_degrees,
                                                                    focal_length_mm,
-                                                                   pixel_pitch_microns,)
+                                                                   pixel_pitch_microns,
+                                                                   npix_x,
+                                                                   npix_y)
         agisoft_quick_preview_image.set_metadata(metadata)
         agisoft_quick_preview_image.set_point_calculator(point_calc)
         return agisoft_quick_preview_image
@@ -48,7 +52,7 @@ class AgisoftQuickPreviewImage(AbstractEarthOverheadImage):
     def get_metadata(self):  # type: (...) -> AgisoftQuickPreviewMetadata
         return super(AgisoftQuickPreviewImage, self).get_metadata()
 
-    def get_point_calculator(self):  # type: (...) -> PinholeCamera
+    def get_point_calculator(self):  # type: (...) -> AgisoftQuickPreviewPointCalc
         return super(AgisoftQuickPreviewImage, self).get_point_calculator()
 
     def set_dset(self,
