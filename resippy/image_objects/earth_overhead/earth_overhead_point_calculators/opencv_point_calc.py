@@ -2,6 +2,7 @@ import pyproj
 
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
     import AbstractEarthOverheadPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
 
 import numpy as np
 
@@ -24,13 +25,8 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         self._camera_matrix = None
         self._distortion_coeffs = None
 
-        # extrinsic params
-        self._x = 0.0
-        self._y = 0.0
-        self._z = 0.0
-        self._omega = 0.0
-        self._phi = 0.0
-        self._kappa = 0.0
+        # orientation handled by pinhole camera
+        self._pinhole_camera = PinholeCamera()
 
         # offsets
         self._x_offset = 0.0
@@ -86,19 +82,18 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         self._distortion_coeffs = np.array([self._k1, self._k2, self._p1, self._p2, self._k3], dtype=np.float64)
 
     def init_extrinsic(self,
-                       x,       # type: float
-                       y,       # type: float
-                       z,       # type: float
-                       omega,   # type: float
-                       phi,     # type: float
-                       kappa    # type: float
-                       ):       # type: (...) -> None
-        self._x = x
-        self._y = y
-        self._z = z
-        self._omega = omega
-        self._phi = phi
-        self._kappa = kappa
+                       x_meters,        # type: float
+                       y_meters,        # type: float
+                       z_meters,        # type: float
+                       omega_radians,   # type: float
+                       phi_radians,     # type: float
+                       kappa_radians    # type: float
+                       ):               # type: (...) -> None
+        focal_length_mm = self._fx_pixels * self._pixel_pitch_microns * 0.001
+
+        self._pinhole_camera.init_pinhole_from_coeffs(x_meters, y_meters, z_meters,
+                                                      omega_radians, phi_radians, kappa_radians,
+                                                      focal_length_mm)
 
     def init_offsets(self,
                      x_offset,  # type: float
