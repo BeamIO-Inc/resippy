@@ -7,7 +7,6 @@ from numpy import ndarray
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
 from resippy.image_objects.earth_overhead.agisoft_quick_preview.agisoft_quick_preview_metadata import AgisoftQuickPreviewMetadata
 from resippy.image_objects.earth_overhead.agisoft_quick_preview.agisoft_quick_preview_point_calc import AgisoftQuickPreviewPointCalc
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
 
 
 class AgisoftQuickPreviewImage(AbstractEarthOverheadImage):
@@ -44,7 +43,9 @@ class AgisoftQuickPreviewImage(AbstractEarthOverheadImage):
                                                                    focal_length_mm,
                                                                    pixel_pitch_microns,
                                                                    npix_x,
-                                                                   npix_y)
+                                                                   npix_y,
+                                                                   flip_x=False,
+                                                                   flip_y=True)
         agisoft_quick_preview_image.set_metadata(metadata)
         agisoft_quick_preview_image.set_point_calculator(point_calc)
         return agisoft_quick_preview_image

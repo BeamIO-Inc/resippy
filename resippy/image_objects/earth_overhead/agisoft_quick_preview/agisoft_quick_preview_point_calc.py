@@ -18,16 +18,22 @@ class AgisoftQuickPreviewPointCalc(AbstractEarthOverheadPointCalc):
         self._pixel_pitch_meters = None
         self._npix_x = None
         self._npix_y = None
+        self._flip_x = False
+        self._flip_y = False
 
     def _pixel_x_y_alt_to_lon_lat_native(self, pixel_xs, pixel_ys, alts=None, band=None):
         pass
 
     def _lon_lat_alt_to_pixel_x_y_native(self, lons, lats, alts, band=None):
-        half_fpa_x_meters = self._npix_x * self._pixel_pitch_meters
-        half_fpa_y_meters = self._npix_y * self._pixel_pitch_meters
+        half_fpa_x_meters = (self._npix_x * self._pixel_pitch_meters)/2.0
+        half_fpa_y_meters = (self._npix_y * self._pixel_pitch_meters)/2.0
         fpa_coords_meters_x, fpa_coords_meters_y = self._pinhole_camera._world_to_image_space(lons, lats, alts)
-        fpa_coords_pixels_x = fpa_coords_meters_x / self._pixel_pitch_meters
-        fpa_coords_pixels_y = fpa_coords_meters_y / self._pixel_pitch_meters
+        if self._flip_x:
+            fpa_coords_meters_x = -1.0 * fpa_coords_meters_x
+        if self._flip_y:
+            fpa_coords_meters_y = -1.0 * fpa_coords_meters_y
+        fpa_coords_pixels_x = (fpa_coords_meters_x + half_fpa_x_meters) / self._pixel_pitch_meters
+        fpa_coords_pixels_y = (fpa_coords_meters_y + half_fpa_y_meters) / self._pixel_pitch_meters
         return fpa_coords_pixels_x, fpa_coords_pixels_y
 
 
@@ -72,7 +78,7 @@ class AgisoftQuickPreviewPointCalc(AbstractEarthOverheadPointCalc):
         agisoft_quick_preview_point_calc.set_approximate_lon_lat_center(sensor_x_local, sensor_y_local)
         agisoft_quick_preview_point_calc._npix_x = npix_x
         agisoft_quick_preview_point_calc._npix_y = npix_y
-        agisoft_quick_preview_point_calc._flip_x=flip_x
-        agisoft_quick_preview_point_calc._flip_y=flip_y
+        agisoft_quick_preview_point_calc._flip_x = flip_x
+        agisoft_quick_preview_point_calc._flip_y = flip_y
         agisoft_quick_preview_point_calc._pinhole_camera = pinhole_camera
         return agisoft_quick_preview_point_calc
