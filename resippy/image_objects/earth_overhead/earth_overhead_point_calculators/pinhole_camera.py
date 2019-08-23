@@ -1,7 +1,5 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
-    import AbstractEarthOverheadPointCalc
 from resippy.utils import photogrammetry_utils
 from resippy.utils.units import ureg
 
@@ -67,13 +65,13 @@ class PinholeCamera:
 
         focal_length_meters = focal_length * ureg.parse_expression(focal_length_units).to(ureg['meters'])
 
-        self.X = x_meters
-        self.Y = y_meters
-        self.Z = z_meters
-        self.omega = omega_radians
-        self.phi = phi_radians
-        self.kappa = kappa_radians
-        self.f = focal_length_meters
+        self.X = x_meters.magnitude
+        self.Y = y_meters.magnitude
+        self.Z = z_meters.magnitude
+        self.omega = omega_radians.magnitude
+        self.phi = phi_radians.magnitude
+        self.kappa = kappa_radians.magnitude
+        self.f = focal_length_meters.magnitude
 
         self.M = photogrammetry_utils.create_M_matrix(omega_radians, phi_radians, kappa_radians)
 
@@ -97,11 +95,11 @@ class PinholeCamera:
         x = -1.0*self.f*(
                 (self.m11*(world_x - self.X) + self.m12*(world_y - self.Y) + self.m13*(world_z - self.Z)) /
                 (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z))
-        ) + self.x_0
+        )
 
         y = -1.0*self.f*(
                 (self.m21*(world_x - self.X) + self.m22*(world_y - self.Y) + self.m23*(world_z - self.Z)) /
                 (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z))
-        ) + self.y_0
+        )
 
         return x, y
