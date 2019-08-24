@@ -1,10 +1,9 @@
 import pyproj
+import numpy as np
 
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
     import AbstractEarthOverheadPointCalc
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
-
-import numpy as np
+from resippy.utils import photogrammetry_utils
 
 
 class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
@@ -25,8 +24,16 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         self._camera_matrix = None
         self._distortion_coeffs = None
 
-        # orientation handled by pinhole camera
-        self._pinhole_camera = PinholeCamera()
+        # orientation params
+        self._x_meters = 0.0
+        self._y_meters = 0.0
+        self._z_meters = 0.0
+        self._omega_radians = 0.0
+        self._phi_radians = 0.0
+        self._kappa_radians = 0.0
+
+        self._trans_matrix = None
+        self._rot_matrix = None
 
         # offsets
         self._x_offset = 0.0
@@ -89,11 +96,18 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
                        phi_radians,     # type: float
                        kappa_radians    # type: float
                        ):               # type: (...) -> None
-        focal_length_mm = self._fx_pixels * self._pixel_pitch_microns * 0.001
+        self._x_meters = x_meters
+        self._y_meters = y_meters
+        self._z_meters = z_meters
+        self._omega_radians = omega_radians
+        self._phi_radians = phi_radians
+        self._kappa_radians = kappa_radians
 
-        self._pinhole_camera.init_pinhole_from_coeffs(x_meters, y_meters, z_meters,
-                                                      omega_radians, phi_radians, kappa_radians,
-                                                      focal_length_mm)
+        self._trans_matrix = np.array([[x_meters],
+                                       [y_meters],
+                                       [z_meters]], dtype=np.float64)
+
+        self._rot_matrix = photogrammetry_utils.create_M_matrix(omega_radians, phi_radians, kappa_radians)
 
     def init_offsets(self,
                      x_offset,  # type: float
@@ -112,11 +126,11 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
                                          ):             # type: (...) -> (np.ndarray, np.ndarray)
         # https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
         trans_xyz = np.ones((3, len(lons)))
-        trans_xyz[0, :] = lons - self._trans[0]
-        trans_xyz[1, :] = lats - self._trans[1]
-        trans_xyz[2, :] = alts - self._trans[2]
+        trans_xyz[0, :] = lons - self._trans_matrix[0]
+        trans_xyz[1, :] = lats - self._trans_matrix[1]
+        trans_xyz[2, :] = alts - self._trans_matrix[2]
 
-        cam_coords = np.matmul(self._rot, trans_xyz)
+        cam_coords = np.matmul(self._rot_matrix, trans_xyz)
 
         x_prime = cam_coords[0, :] / cam_coords[2, :]
         y_prime = cam_coords[1, :] / cam_coords[2, :]
