@@ -13,8 +13,6 @@ class ApplanixSBETNav(AbstractNav):
                  ):     # type: (...) -> ApplanixSBETNav
         super(ApplanixSBETNav, self).__init__()
 
-        self._lla_projection = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84', preserve_units=True)
-
     def load_from_file(self,
                        filename,    # type: str
                        proj,        # type: str
