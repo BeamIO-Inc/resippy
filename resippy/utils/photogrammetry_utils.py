@@ -117,19 +117,28 @@ def create_M_matrix(omega_radians, phi_radians, kappa_radians):
 
 
 def solve_for_omega_phi_kappa(m_matrix,  # type: ndarray
-                              ):         # type: (...) -> tuple
+                              ):  # type: (...) -> tuple
 
     # m11 = cos(phi) * cos(kappa)
     # m31 = sin(phi)
     # m33 = cos(omega) * cos(phi)
+    # m32 = -1.0 * np.sin(omega) * np.cos(phi)
+    # m21 = -1.0 * np.cos(phi) * np.sin(kappa)
 
     # 3 equations, 3 unknowns
-
     m11 = m_matrix[0, 0]
     m31 = m_matrix[2, 0]
     m33 = m_matrix[2, 2]
+    m32 = m_matrix[2, 1]
+    m21 = m_matrix[1, 0]
 
     phi = np.arcsin(m31)
-    kappa = np.arccos(m11 / np.cos(phi))
-    omega = np.arccos(m33 / np.cos(phi))
+    cos_phi = np.cos(phi)
+    kappa = np.arccos(m11 / cos_phi)
+    omega = np.arccos(m33 / cos_phi)
+    if m32 > 0:
+        omega = -omega
+    if m21 > 0:
+        kappa = -kappa
+
     return omega, phi, kappa
