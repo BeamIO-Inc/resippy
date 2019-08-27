@@ -144,7 +144,7 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         y_double_prime = (y_prime * radial_distortion) + (self._p1 * (r_squared + 2.0 * y_prime * y_prime)) + \
                          (2.0 * self._p2 * x_prime * y_prime)
 
-        u = -self._fx_pixels * x_double_prime + self._cx_pixels
+        u = self._fx_pixels * x_double_prime + self._cx_pixels
         v = -self._fy_pixels * y_double_prime + self._cy_pixels
 
         return u, v
