@@ -81,39 +81,79 @@ def get_nx_ny_pixels_in_extent(extent,  # type: Polygon
     return nx, ny
 
 
-def create_M_matrix(omega_radians, phi_radians, kappa_radians):
+def create_M_matrix(omega_radians,      # type: float
+                    phi_radians,        # type: float
+                    kappa_radians,      # type: float
+                    order='rpy'         # type: str
+                    ):                  # type: (...) -> ndarray
 
-    m_matrix = np.zeros((3,3))
+    m_matrix = np.zeros((3, 3))
 
-    m11 = np.cos(phi_radians) * np.cos(kappa_radians)
-    m12 = np.cos(omega_radians) * np.sin(kappa_radians) + np.sin(omega_radians) * np.sin(phi_radians) * np.cos(
-        kappa_radians)
-    m13 = np.sin(omega_radians) * np.sin(kappa_radians) - np.cos(omega_radians) * np.sin(phi_radians) * np.cos(
-        kappa_radians)
+    if order == 'rpy':
+        m11 = np.cos(phi_radians) * np.cos(kappa_radians)
+        m12 = np.cos(omega_radians) * np.sin(kappa_radians) + np.sin(omega_radians) * np.sin(phi_radians) * np.cos(
+            kappa_radians)
+        m13 = np.sin(omega_radians) * np.sin(kappa_radians) - np.cos(omega_radians) * np.sin(phi_radians) * np.cos(
+            kappa_radians)
 
-    m21 = -1.0 * np.cos(phi_radians) * np.sin(kappa_radians)
-    m22 = np.cos(omega_radians) * np.cos(kappa_radians) - np.sin(omega_radians) * np.sin(phi_radians) * np.sin(
-        kappa_radians)
-    m23 = np.sin(omega_radians) * np.cos(kappa_radians) + np.cos(omega_radians) * np.sin(phi_radians) * np.sin(
-        kappa_radians)
+        m21 = -1.0 * np.cos(phi_radians) * np.sin(kappa_radians)
+        m22 = np.cos(omega_radians) * np.cos(kappa_radians) - np.sin(omega_radians) * np.sin(phi_radians) * np.sin(
+            kappa_radians)
+        m23 = np.sin(omega_radians) * np.cos(kappa_radians) + np.cos(omega_radians) * np.sin(phi_radians) * np.sin(
+            kappa_radians)
 
-    m31 = np.sin(phi_radians)
-    m32 = -1.0 * np.sin(omega_radians) * np.cos(phi_radians)
-    m33 = np.cos(omega_radians) * np.cos(phi_radians)
+        m31 = np.sin(phi_radians)
+        m32 = -1.0 * np.sin(omega_radians) * np.cos(phi_radians)
+        m33 = np.cos(omega_radians) * np.cos(phi_radians)
 
-    m_matrix[0, 0] = m11
-    m_matrix[0, 1] = m12
-    m_matrix[0, 2] = m13
+        m_matrix[0, 0] = m11
+        m_matrix[0, 1] = m12
+        m_matrix[0, 2] = m13
 
-    m_matrix[1, 0] = m21
-    m_matrix[1, 1] = m22
-    m_matrix[1, 2] = m23
+        m_matrix[1, 0] = m21
+        m_matrix[1, 1] = m22
+        m_matrix[1, 2] = m23
 
-    m_matrix[2, 0] = m31
-    m_matrix[2, 1] = m32
-    m_matrix[2, 2] = m33
+        m_matrix[2, 0] = m31
+        m_matrix[2, 1] = m32
+        m_matrix[2, 2] = m33
 
-    return m_matrix
+        return m_matrix
+    else:
+        m_omega = np.zeros((3, 3))
+        m_phi = np.zeros((3, 3))
+        m_kappa = np.zeros((3, 3))
+
+        m_omega[0, 0] = 1.0
+        m_omega[1, 1] = np.cos(omega_radians)
+        m_omega[1, 2] = np.sin(omega_radians)
+        m_omega[2, 1] = -1 * np.sin(omega_radians)
+        m_omega[2, 2] = np.cos(omega_radians)
+
+        m_phi[0, 0] = np.cos(phi_radians)
+        m_phi[0, 2] = -1.0 * np.sin(phi_radians)
+        m_phi[1, 1] = 1.0
+        m_phi[2, 0] = np.sin(phi_radians)
+        m_phi[2, 2] = np.cos(phi_radians)
+
+        m_kappa[0, 0] = np.cos(kappa_radians)
+        m_kappa[0, 1] = np.sin(kappa_radians)
+        m_kappa[1, 0] = -1.0 * np.sin(kappa_radians)
+        m_kappa[1, 1] = np.cos(kappa_radians)
+        m_kappa[2, 2] = 1.0
+
+        if order == 'ryp':
+            m_matrix = m_phi @ m_kappa @ m_omega
+        elif order == 'pry':
+            m_matrix = m_kappa @ m_omega @ m_phi
+        elif order == 'pyr':
+            m_matrix = m_omega @ m_kappa @ m_phi
+        elif order == 'yrp':
+            m_matrix = m_phi @ m_omega @ m_kappa
+        elif order == 'ypr':
+            m_matrix = m_omega @ m_phi @ m_kappa
+
+        return m_matrix
 
 
 def solve_for_omega_phi_kappa(m_matrix,  # type: ndarray
@@ -142,3 +182,12 @@ def solve_for_omega_phi_kappa(m_matrix,  # type: ndarray
         kappa = -kappa
 
     return omega, phi, kappa
+
+
+def solve_for_offsets(rough_M_matrix,
+                      ideal_M_matrix
+                      ):
+    m_rough_inv = np.linalg.inv(rough_M_matrix)
+    offsets = m_rough_inv @ ideal_M_matrix
+
+    return offsets
