@@ -6,6 +6,7 @@ from numpy import ndarray
 
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
 from resippy.image_objects.earth_overhead.agisoft_quick_preview.agisoft_quick_preview_metadata import AgisoftQuickPreviewMetadata
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
 from resippy.image_objects.earth_overhead.agisoft_quick_preview.agisoft_quick_preview_point_calc import AgisoftQuickPreviewPointCalc
 
 
@@ -16,6 +17,18 @@ class AgisoftQuickPreviewImage(AbstractEarthOverheadImage):
     def __init__(self):
         super(AgisoftQuickPreviewImage, self).__init__()
         self._dset = None
+
+    @classmethod
+    def init_from_fname_and_point_calc(cls,
+                                       fname,               # type: str
+                                       point_calc,          # type: AbstractEarthOverheadPointCalc
+                                       ):
+        agisoft_quick_preview_image = cls()
+        agisoft_quick_preview_image.set_dset(gdal.Open(fname, gdal.GA_ReadOnly))
+        metadata = AgisoftQuickPreviewMetadata._from_file(fname)
+        agisoft_quick_preview_image.set_metadata(metadata)
+        agisoft_quick_preview_image.set_point_calculator(point_calc)
+        return agisoft_quick_preview_image
 
     @classmethod
     def init_from_file_and_nav(cls,
