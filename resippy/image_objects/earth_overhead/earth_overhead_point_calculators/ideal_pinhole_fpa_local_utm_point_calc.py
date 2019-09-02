@@ -13,7 +13,7 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
 
     def __init__(self):
         super(IdealPinholeFpaLocalUtmPointCalc, self).__init__()
-        self._pinhole_camera=None       # type: PinholeCamera
+        self._pinhole_camera = None                 # type: PinholeCamera
         self._lon_lat_center_approximate = None     # type: tuple
         self._pixel_pitch_x_meters = None           # type: float
         self._pixel_pitch_y_meters = None           # type: float
@@ -44,7 +44,7 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
 
 
     @classmethod
-    def init_from_wgs84_params(self,
+    def init_from_wgs84_params(cls,
                                sensor_lon_decimal_degrees,              # type: float
                                sensor_lat_decimal_degrees,              # type: float
                                sensor_altitude,                         # type: float
@@ -90,8 +90,8 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
         :param flip_y:
         :return:
 
-        For now the altitude must be relative to the DEM.  For example, if the DEM is relative to the geoid, then
-        sensor_altitude must also be relative to the geoid.
+        For now the altitude must be relative to the DEM used for orthorectification.
+        For example, if the DEM is relative to the geoid, then sensor_altitude must also be relative to the geoid too.
         """
         native_proj = proj_utils.decimal_degrees_to_local_utm_proj(sensor_lon_decimal_degrees, sensor_lat_decimal_degrees)
         proj_4326 = crs_defs.PROJ_4326

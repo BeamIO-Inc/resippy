@@ -21,7 +21,7 @@ reflectance_cube_fname = file_utils.get_path_from_subdirs(demo_data_base_dir, ["
                                                                             "HyMap",
                                                                             "self_test_refl.img"])
 
-reflectance_envi_image = ImageFactory.envi.from_file(reflectance_cube_fname)
+reflectance_envi_image = ImageFactory.envi.from_gdal_file_and_point_calcs(reflectance_cube_fname)
 reflectance_image_data = reflectance_envi_image.read_all_image_data_from_disk()
 reflectance_image_data = reflectance_image_data.astype(float) * 0.01
 ny, nx, nbands = reflectance_image_data.shape
@@ -89,7 +89,7 @@ def run_pca():
                                                                                    "HyMap",
                                                                                    "self_test_rad.img"])
 
-    radiance_envi_image = ImageFactory.envi.from_file(radiance_cube_fname)
+    radiance_envi_image = ImageFactory.envi.from_gdal_file_and_point_calcs(radiance_cube_fname)
     radiance_image_data = radiance_envi_image.read_all_image_data_from_disk()
 
     print("")

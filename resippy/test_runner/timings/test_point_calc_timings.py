@@ -1,6 +1,5 @@
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.rpc_point_calc import RPCPointCalc
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera \
-    import PinholeCameraPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
 
 from resippy.utils import photogrammetry_utils
 from resippy.utils.image_utils import image_utils
@@ -72,7 +71,8 @@ def rpc_timings():
 
 def pinhole_timings():
 
-    point_calc = PinholeCameraPointCalc.init_from_coeffs(0, 0, 10000, 0.0, 0.0, 0.0, 50.0, 5, 5, 0, 0)
+    point_calc = PinholeCamera()
+    point_calc.init_pinhole_from_coeffs(0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, 50.0)
 
     lon_center = 0
     lat_center = 0
