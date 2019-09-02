@@ -3,11 +3,9 @@ from __future__ import division
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
 from resippy.photogrammetry import crs_defs
-import utm
-from pyproj import Proj
+from resippy.utils import proj_utils
 from pyproj import transform
 from resippy.utils.units import ureg
-import numpy as np
 from numpy import ndarray
 
 
@@ -59,9 +57,8 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
                                pixel_pitch_y,                           # type: float
                                focal_length,                            # type: float
                                alt_units='meters',                      # type: str
-                               alt_reference='ellipsoid',               # type: str
                                omega_units='radians',                   # type: str
-                               phi_units='radians',                         # type: str
+                               phi_units='radians',                     # type: str
                                kappa_units='radians',                   # type: str
                                pixel_pitch_x_units='micrometer',        # type: str
                                pixel_pitch_y_units='micrometer',        # type: str
@@ -69,9 +66,34 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
                                flip_x=False,                            # type: bool
                                flip_y=False,                            # type: bool
                                ):                                       # type: (...) -> IdealPinholeFpaLocalUtmPointCalc
-        zone_info = utm.from_latlon(sensor_lat_decimal_degrees, sensor_lon_decimal_degrees)
-        zone_string = str(zone_info[2]) + zone_info[3]
-        native_proj = Proj(proj='utm', ellps='WGS84', zone=zone_string, south=False)
+        """
+
+        :param sensor_lon_decimal_degrees:
+        :param sensor_lat_decimal_degrees:
+        :param sensor_altitude:
+        :param omega:
+        :param phi:
+        :param kappa:
+        :param npix_x:
+        :param npix_y:
+        :param pixel_pitch_x:
+        :param pixel_pitch_y:
+        :param focal_length:
+        :param alt_units:
+        :param omega_units:
+        :param phi_units:
+        :param kappa_units:
+        :param pixel_pitch_x_units:
+        :param pixel_pitch_y_units:
+        :param focal_length_units:
+        :param flip_x:
+        :param flip_y:
+        :return:
+
+        For now the altitude must be relative to the DEM.  For example, if the DEM is relative to the geoid, then
+        sensor_altitude must also be relative to the geoid.
+        """
+        native_proj = proj_utils.decimal_degrees_to_local_utm_proj(sensor_lon_decimal_degrees, sensor_lat_decimal_degrees)
         proj_4326 = crs_defs.PROJ_4326
 
         sensor_x_local, sensor_y_local = transform(proj_4326,
