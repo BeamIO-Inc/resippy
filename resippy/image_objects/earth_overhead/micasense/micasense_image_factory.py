@@ -7,6 +7,8 @@ from resippy.image_objects.earth_overhead.micasense.micasense_image import Micas
 from resippy.image_objects.earth_overhead.micasense.micasense_metadata import MicasenseMetadata
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.earth_overhead_sensor_model \
     import EarthOverheadSensorModel
+from resippy.utils.micasense.micasense_metadata import Metadata
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.ideal_pinhole_fpa_local_utm_point_calc import IdealPinholeFpaLocalUtmPointCalc
 
 import os
 from uuid import uuid4
@@ -133,4 +135,45 @@ class MicasenseImageFactory:
         micasense_image.set_metadata(metadata)
         micasense_image.set_point_calculator(point_calculator)
 
+        return micasense_image
+
+    @staticmethod
+    def quick_preview_frome_fname(base_fname,  # type: dict
+                                  ):  # type: (...) -> MicasenseImage
+        stop = 1
+        camera_fnames = [base_fname + "_1.tif",
+                         base_fname + "_2.tif",
+                         base_fname + "_3.tif",
+                         base_fname + "_4.tif",
+                         base_fname + "_5.tif"]
+        point_calcs = []
+        for camera_fname in camera_fnames:
+            camera_metadata = Metadata(camera_fname)
+            lon = camera_metadata.exif['Composite:GPSLongitude']
+            lat = camera_metadata.exif['Composite:GPSLatitude']
+            alt = camera_metadata.exif['Composite:GPSAltitude']
+            omega = float(camera_metadata.exif['XMP:Roll'])
+            phi = float(camera_metadata.exif['XMP:Pitch'])
+            kappa = float(camera_metadata.exif['XMP:Yaw'])
+            npix_x = camera_metadata.exif['EXIF:ImageWidth']
+            npix_y = camera_metadata.exif['EXIF:ImageHeight']
+            pixel_pitch_x = 3.75
+            pixel_pitch_y = 3.75
+            focal_length = camera_metadata.exif['XMP:PerspectiveFocalLength']
+            point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params(lon, lat, alt, omega, phi, -kappa, npix_x, npix_y, pixel_pitch_x, pixel_pitch_y, focal_length, alt_units='feet', flip_y=True)
+            point_calcs.append(point_calc)
+
+        sensor_model = EarthOverheadSensorModel()
+        sensor_model.set_point_calcs(point_calcs)
+        sensor_model.set_projection(point_calcs[0].get_projection())
+        sensor_model._bands_coregistered = False
+        native_lon, native_lat = point_calcs[0].get_approximate_lon_lat_center()
+        sensor_model.set_approximate_lon_lat_center(native_lon, native_lat)
+
+        micasense_image = MicasenseImage()
+        micasense_image.band_fnames = camera_fnames
+
+        metadata = MicasenseMetadata()
+        micasense_image.set_metadata(metadata)
+        micasense_image.set_point_calculator(sensor_model)
         return micasense_image

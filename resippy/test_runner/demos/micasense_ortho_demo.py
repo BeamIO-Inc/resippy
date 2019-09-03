@@ -12,7 +12,7 @@ import os
 
 
 # choose a gsd
-gsd_m = 0.5
+gsd_m = 0.1
 # constants calculated from https://msi.nga.mil/MSISiteContent/StaticFiles/Calculators/degree.html
 # based on approx latitude of center of images
 gsd_lon = gsd_m / 81417.0

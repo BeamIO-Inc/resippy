@@ -3,7 +3,7 @@ from __future__ import division
 from numpy import ndarray
 import numpy as np
 from imageio import imread
-# import exiftool
+import exiftool
 from datetime import datetime, timezone
 
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
