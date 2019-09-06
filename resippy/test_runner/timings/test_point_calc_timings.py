@@ -94,7 +94,7 @@ def pinhole_timings():
 
     tic = time.time()
     for n in range(n_loops):
-        point_calc._world_to_image_space(lons, lats, alts)
+        point_calc.world_to_image_plane(lons, lats, alts)
     toc = time.time()
     print("calculated " + str(n_loops*nx*ny) + " pixels in " + str(toc-tic) + " seconds.")
     print(str(n_loops*nx*ny/(toc-tic)/1e6) + " Megapixels per second")

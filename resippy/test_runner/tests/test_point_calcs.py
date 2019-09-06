@@ -53,7 +53,7 @@ class TestPointCalcs(unittest.TestCase):
     def test_projection(self):
         camera = PinholeCamera()
         camera.init_pinhole_from_coeffs(0, 0, 100, 0, 0, 0, 100)
-        x, y = camera._world_to_image_space(100, 0, 0)
+        x, y = camera.world_to_image_plane(100, 0, 0)
         assert x == camera.f
         stop = 1
 

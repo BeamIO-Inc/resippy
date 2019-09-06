@@ -33,7 +33,7 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
                                          ):
         half_fpa_x_meters = (self._npix_x * self._pixel_pitch_x_meters)/2.0
         half_fpa_y_meters = (self._npix_y * self._pixel_pitch_y_meters)/2.0
-        fpa_coords_meters_x, fpa_coords_meters_y = self._pinhole_camera._world_to_image_space(lons, lats, alts)
+        fpa_coords_meters_x, fpa_coords_meters_y = self._pinhole_camera.world_to_image_plane(lons, lats, alts)
         if self._flip_x:
             fpa_coords_meters_x = -1.0 * fpa_coords_meters_x
         if self._flip_y:
