@@ -1,5 +1,6 @@
 from __future__ import division
 
+from pyproj import Proj
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 import numpy as np
 import resippy.photogrammetry.crs_defs as crs_defs
@@ -10,10 +11,10 @@ class ConstantElevationDem(AbstractDem):
         self.elevation = elevation
 
     def get_elevations(self,
-                       world_x,  # type: ndarray
-                       world_y,  # type: ndarray
+                       world_x,  # type: np.ndarray
+                       world_y,  # type: np.ndarray
                        world_proj=crs_defs.PROJ_4326  # type: Proj
-                       ):  # type: (...) -> ndarray
+                       ):  # type: (...) -> np.ndarray
         return np.zeros(np.shape(world_x)) + self.elevation
 
     def get_highest_alt(self):  # type: (...) -> float

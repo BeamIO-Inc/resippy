@@ -1,6 +1,7 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.digital_globe.view_ready_stereo.view_ready_stereo_image import ViewReadyStereoImage
+from resippy.image_objects.earth_overhead.digital_globe.view_ready_stereo.view_ready_stereo_image \
+    import ViewReadyStereoImage
 
 
 class ViewReadyStereoImageFactory:

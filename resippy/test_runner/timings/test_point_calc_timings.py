@@ -71,7 +71,8 @@ def rpc_timings():
 
 def pinhole_timings():
 
-    point_calc = PinholeCamera.init_from_coeffs(0, 0, 10000, 0.0, 0.0, 0.0, 50.0, 5, 5, 0, 0)
+    point_calc = PinholeCamera()
+    point_calc.init_pinhole_from_coeffs(0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, 50.0)
 
     lon_center = 0
     lat_center = 0
@@ -93,7 +94,7 @@ def pinhole_timings():
 
     tic = time.time()
     for n in range(n_loops):
-        point_calc._world_to_image_space(lons, lats, alts)
+        point_calc.world_to_image_plane(lons, lats, alts)
     toc = time.time()
     print("calculated " + str(n_loops*nx*ny) + " pixels in " + str(toc-tic) + " seconds.")
     print(str(n_loops*nx*ny/(toc-tic)/1e6) + " Megapixels per second")

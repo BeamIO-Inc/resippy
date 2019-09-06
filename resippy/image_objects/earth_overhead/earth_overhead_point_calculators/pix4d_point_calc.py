@@ -2,7 +2,8 @@ from __future__ import division
 
 from numpy.core.multiarray import ndarray
 
-from resippy.image_objects.earth_overhead.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
+    import AbstractEarthOverheadPointCalc
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 
 import numpy as np

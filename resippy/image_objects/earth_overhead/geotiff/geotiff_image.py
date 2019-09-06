@@ -8,8 +8,8 @@ from osgeo import gdal_array
 from pyproj import Proj
 
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.geotiff_metadata import GeotiffMetadata
-from resippy.image_objects.earth_overhead.earth_overhead_image_objects.geotiff.geotiff_point_calc import GeotiffPointCalc
+from resippy.image_objects.earth_overhead.geotiff.geotiff_metadata import GeotiffMetadata
+from resippy.image_objects.earth_overhead.geotiff.geotiff_point_calc import GeotiffPointCalc
 
 
 class GeotiffImage(AbstractEarthOverheadImage):
