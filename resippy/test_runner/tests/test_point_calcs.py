@@ -1,8 +1,7 @@
 from __future__ import division
 
 import unittest
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera \
-    import PinholeCameraPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
 import numpy as np
 import resippy.utils.photogrammetry_utils as photogram_utils
 
@@ -13,7 +12,8 @@ class TestPointCalcs(unittest.TestCase):
         omega = np.deg2rad(1.5)
         phi = np.deg2rad(2.3)
         kappa = np.deg2rad(3.4)
-        camera = PinholeCameraPointCalc.init_from_coeffs(0, 0, 0, omega, phi, kappa, 100, 5, 5)
+        camera = PinholeCamera()
+        camera.init_pinhole_from_coeffs(0, 0, 0, omega, phi, kappa, 100)
 
         m_omega = np.zeros((3, 3))
         m_phi = np.zeros((3, 3))
@@ -51,8 +51,9 @@ class TestPointCalcs(unittest.TestCase):
         print("np.matmul(m_kappa, np.matmul(m_phi, m_omega))")
 
     def test_projection(self):
-        camera = PinholeCameraPointCalc.init_from_coeffs(0, 0, 100, 0, 0, 0, 100, 5, 5)
-        x, y = camera._world_to_image_space(100, 0, 0)
+        camera = PinholeCamera()
+        camera.init_pinhole_from_coeffs(0, 0, 100, 0, 0, 0, 100)
+        x, y = camera.world_to_image_plane(100, 0, 0)
         assert x == camera.f
         stop = 1
 
@@ -60,7 +61,8 @@ class TestPointCalcs(unittest.TestCase):
         omega = np.deg2rad(1.5)
         phi = np.deg2rad(2.3)
         kappa = np.deg2rad(3.4)
-        camera = PinholeCameraPointCalc.init_from_coeffs(0, 0, 0, omega, phi, kappa, 100, 5, 5)
+        camera = PinholeCamera()
+        camera.init_pinhole_from_coeffs(0, 0, 0, omega, phi, kappa, 100)
 
         omega_1, phi_1, kappa_1 = photogram_utils.solve_for_omega_phi_kappa(camera.M)
 
