@@ -184,9 +184,9 @@ def solve_for_omega_phi_kappa(m_matrix,  # type: ndarray
     return omega, phi, kappa
 
 
-def solve_for_offsets(rough_M_matrix,
-                      ideal_M_matrix
-                      ):
+def solve_for_boresight_angle_offsets(rough_M_matrix,
+                                      ideal_M_matrix
+                                      ):
     m_rough_inv = np.linalg.inv(rough_M_matrix)
     offsets = m_rough_inv @ ideal_M_matrix
 
