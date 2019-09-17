@@ -36,15 +36,15 @@ class FixturedCamera:
                                 ):
         self.fixture_M = m_matrix
 
-    def set_fixture_by_roll_pitch_yaw(self,
-                                      roll,                     # type: float
-                                      pitch,                    # type: float
-                                      yaw,                      # type: float
-                                      roll_units="radians",     # type: str
-                                      pitch_units="radians",    # type: str
-                                      yaw_units="radians",      # type: str
-                                      order='rpy',              # type: str
-                                      ):
+    def set_fixture_orientation_by_roll_pitch_yaw(self,
+                                                  roll,  # type: float
+                                                  pitch,  # type: float
+                                                  yaw,  # type: float
+                                                  roll_units="radians",  # type: str
+                                                  pitch_units="radians",  # type: str
+                                                  yaw_units="radians",  # type: str
+                                                  order='rpy',  # type: str
+                                                  ):
         roll_radians = roll * ureg.parse_units(roll_units)
         pitch_radians = pitch * ureg.parse_units(pitch_units)
         yaw_radians = yaw * ureg.parse_units(yaw_units)
@@ -94,7 +94,7 @@ class FixturedCamera:
                                                              ):
         roll_radians = relative_roll * ureg.parse_expression(roll_units)
         pitch_radians = relative_pitch * ureg.parse_expression(pitch_units)
-        yaw_radians = relative_yaw * ureg.parse_expression(yaw_units)
+        yaw_radians = -relative_yaw * ureg.parse_expression(yaw_units)
         boresight_matrix = photogrammetry_utils.create_M_matrix(roll_radians, pitch_radians, yaw_radians, order=order)
         self.set_boresight_matrix(boresight_matrix)
 
@@ -108,9 +108,8 @@ class FixturedCamera:
         from this method will by RPY=3,0,0
         :return: [3x3] numpy matrix representing roll, pitch, yaw "M" Matrix
         """
-        camera_orientation_matrix = self.fixture_M @ self.boresight_matrix
         camera_point_in_space = [self.x_rel_to_fixture, self.y_rel_to_fixture, self.z_rel_to_fixture]
-        absolute_camera_location = camera_point_in_space @ camera_orientation_matrix
+        absolute_camera_location = camera_point_in_space @ self.fixture_M
         return absolute_camera_location
 
     def get_camera_absolute_M_matrix(self):
