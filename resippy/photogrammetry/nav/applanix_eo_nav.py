@@ -20,34 +20,35 @@ class ApplanixEONav(AbstractNav):
                        ellps,       # type: str
                        datum        # type: str
                        ):           # type: (...) -> None
-        self._nav_data = {
-            'gps_time': [],
-            'easting': [],
-            'northing': [],
-            'height': [],
-            'omega': [],
-            'phi': [],
-            'kappa': []
-        }
-        self._num_records = 0
-        self._record_length = 7
+        gps_time, easting, northing, height, omega, phi, kappa = [], [], [], [], [], [], []
 
         with open(filename) as f:
             for line in f:
                 line_parts = line.split()
-                print(line_parts)
 
                 try:
-                    self._nav_data['gps_time'].append(line_parts[1])
-                    self._nav_data['easting'].append(line_parts[2])
-                    self._nav_data['northing'].append(line_parts[3])
-                    self._nav_data['height'].append(line_parts[4])
-                    self._nav_data['omega'].append(line_parts[5])
-                    self._nav_data['phi'].append(line_parts[6])
-                    self._nav_data['kappa'].append(line_parts[7])
-                    self._num_records += 1
-                except IndexError:
+                    gps_time.append(float(line_parts[1]))
+                    easting.append(float(line_parts[2]))
+                    northing.append(float(line_parts[3]))
+                    height.append(float(line_parts[4]))
+                    omega.append(float(line_parts[5]))
+                    phi.append(float(line_parts[6]))
+                    kappa.append(float(line_parts[7]))
+                except (IndexError, ValueError):
                     pass
+
+        self._nav_data = {
+            'gps_time': np.array(gps_time),
+            'easting': np.array(easting),
+            'northing': np.array(northing),
+            'height': np.array(height),
+            'omega': np.array(omega),
+            'phi': np.array(phi),
+            'kappa': np.array(kappa)
+        }
+        
+        self._num_records = len(gps_time)
+        self._record_length = 7
 
         if not zone:
             self._projection = pyproj.Proj(proj=proj, ellps=ellps, datum=datum, preserve_units=True)
