@@ -53,7 +53,7 @@ class FixturedCamera:
         pitch_radians = pitch_radians.to(ureg['radians'])
         yaw_radians = yaw_radians.to(ureg['radians'])
 
-        m_matrix = photogrammetry_utils.create_M_matrix(roll_radians, pitch_radians, -1 * yaw_radians, order=order)
+        m_matrix = photogrammetry_utils.create_M_matrix(roll_radians, pitch_radians, yaw_radians, order=order)
         self.set_fixture_orientation(m_matrix)
 
 
@@ -94,22 +94,18 @@ class FixturedCamera:
                                                              ):
         roll_radians = relative_roll * ureg.parse_expression(roll_units)
         pitch_radians = relative_pitch * ureg.parse_expression(pitch_units)
-        yaw_radians = -relative_yaw * ureg.parse_expression(yaw_units)
+        yaw_radians = relative_yaw * ureg.parse_expression(yaw_units)
         boresight_matrix = photogrammetry_utils.create_M_matrix(roll_radians, pitch_radians, yaw_radians, order=order)
         self.set_boresight_matrix(boresight_matrix)
+        
+    def get_fixture_xyz(self):
+        return self.fixture_x, self.fixture_y, self.fixture_z
 
     def get_camera_absolute_xyz(self,
                                 ):        # type: (...) -> tuple
-        """
-        Returns the external (X, Y, Z) parameters of a camera relative to its fixture, and the absolute orientation
-        matrix of the camera in world space relative to the fixture orientation.  In other words, if the
-        fisgure is initially at (in degrees) RPY=1,0,0, and the boresight matrix is RPY=1,0,0    then then camera
-        orientation will be RPY=2,0,0.  If RPY for the fixture changes to RPY=2,0,0    then the camera orientation
-        from this method will by RPY=3,0,0
-        :return: [3x3] numpy matrix representing roll, pitch, yaw "M" Matrix
-        """
         camera_point_in_space = [self.x_rel_to_fixture, self.y_rel_to_fixture, self.z_rel_to_fixture]
-        absolute_camera_location = camera_point_in_space @ self.fixture_M
+        rotated_camera_x, rotated_camera_y, rotated_camera_z = camera_point_in_space @ self.fixture_M
+        absolute_camera_location = (self.fixture_x + rotated_camera_x, self.fixture_y + rotated_camera_y, self.fixture_z + rotated_camera_z)
         return absolute_camera_location
 
     def get_camera_absolute_M_matrix(self):

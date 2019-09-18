@@ -86,6 +86,14 @@ def create_M_matrix(omega_radians,      # type: float
                     kappa_radians,      # type: float
                     order='rpy'         # type: str
                     ):                  # type: (...) -> ndarray
+    """
+    Defined in Photogrammetry by Francis H. Moffitt and Edward M. Mikhail, Equation A-21 on page 598
+    :param omega_radians:
+    :param phi_radians:
+    :param kappa_radians:
+    :param order:
+    :return:
+    """
 
     m_matrix = np.zeros((3, 3))
 
