@@ -20,7 +20,7 @@ class ApplanixEONav(AbstractNav):
                        ellps,       # type: str
                        datum        # type: str
                        ):           # type: (...) -> None
-        gps_time, easting, northing, height, omega, phi, kappa = [], [], [], [], [], [], []
+        gps_time, easting, northing, height, omega, phi, kappa, lat, lon = [], [], [], [], [], [], [], [], []
 
         with open(filename) as f:
             for line in f:
@@ -34,6 +34,8 @@ class ApplanixEONav(AbstractNav):
                     omega.append(float(line_parts[5]))
                     phi.append(float(line_parts[6]))
                     kappa.append(float(line_parts[7]))
+                    lat.append(float(line_parts[8]))
+                    lon.append(float(line_parts[9]))
                 except (IndexError, ValueError):
                     pass
 
@@ -44,9 +46,11 @@ class ApplanixEONav(AbstractNav):
             'height': np.array(height),
             'omega': np.array(omega),
             'phi': np.array(phi),
-            'kappa': np.array(kappa)
+            'kappa': np.array(kappa),
+            'lat': np.array(lat),
+            'lon': np.array(lon)
         }
-        
+
         self._num_records = len(gps_time)
         self._record_length = 7
 
@@ -100,10 +104,9 @@ class ApplanixEONav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_lats_native(self,
-                         gps_times,     # type: np.ndarray,
-                         proj=None      # type: pyproj.Proj
-                         ):             # type: (...) -> np.ndarray
+    def _get_world_ys_native(self,
+                             gps_times  # type: np.ndarray,
+                             ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
@@ -117,9 +120,9 @@ class ApplanixEONav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_lons_native(self,
-                         gps_times  # type: np.ndarray
-                         ):         # type: (...) -> np.ndarray
+    def _get_world_xs_native(self,
+                             gps_times  # type: np.ndarray
+                             ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)

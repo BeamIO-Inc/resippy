@@ -13,8 +13,6 @@ class ApplanixSBETNav(AbstractNav):
                  ):     # type: (...) -> ApplanixSBETNav
         super(ApplanixSBETNav, self).__init__()
 
-        self._lla_projection = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84', preserve_units=True)
-
     def load_from_file(self,
                        filename,    # type: str
                        proj,        # type: str
@@ -89,44 +87,32 @@ class ApplanixSBETNav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_lats_native(self,
-                         gps_times  # type: np.ndarray
-                         ):         # type: (...) -> np.ndarray
+    def _get_world_ys_native(self,
+                             gps_times  # type: np.ndarray
+                             ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
 
-            x_utm_left = self._nav_data['x'][left_indexes]
-            x_utm_right = self._nav_data['x'][right_indexes]
-            x_utm = self._linear_interp(gps_times, xs, np.array([x_utm_left, x_utm_right]))
-
-            y_utm_left = self._nav_data['y'][left_indexes]
-            y_utm_right = self._nav_data['y'][right_indexes]
-            y_utm = self._linear_interp(gps_times, xs, np.array([y_utm_left, y_utm_right]))
-
-            __, lats = pyproj.transform(self._projection, self._lla_projection, x_utm, y_utm)
+            lats_left = self._nav_data['y'][left_indexes]
+            lats_right = self._nav_data['y'][right_indexes]
+            lats = self._linear_interp(gps_times, xs, np.array([lats_left, lats_right]))
 
             return lats
 
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_lons_native(self,
-                         gps_times  # type: np.ndarray
-                         ):         # type: (...) -> np.ndarray
+    def _get_world_xs_native(self,
+                             gps_times  # type: np.ndarray
+                             ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
 
-            x_utm_left = self._nav_data['x'][left_indexes]
-            x_utm_right = self._nav_data['x'][right_indexes]
-            x_utm = self._linear_interp(gps_times, xs, np.array([x_utm_left, x_utm_right]))
-
-            y_utm_left = self._nav_data['y'][left_indexes]
-            y_utm_right = self._nav_data['y'][right_indexes]
-            y_utm = self._linear_interp(gps_times, xs, np.array([y_utm_left, y_utm_right]))
-
-            lons, __ = pyproj.transform(self._projection, self._lla_projection, x_utm, y_utm)
+            lons_left = self._nav_data['x'][left_indexes]
+            lons_right = self._nav_data['x'][right_indexes]
+            lons = self._linear_interp(gps_times, xs, np.array([lons_left, lons_right]))
 
             return lons
 
