@@ -20,15 +20,15 @@ class AbstractNav:
         pass
 
     @abc.abstractmethod
-    def _get_world_ys_native(self,
-                             gps_times  # type: np.ndarray
-                             ):         # type: (...) -> np.ndarray
+    def _get_lats_native(self,
+                         gps_times  # type: np.ndarray
+                         ):         # type: (...) -> np.ndarray
         pass
 
     @abc.abstractmethod
-    def _get_world_xs_native(self,
-                             gps_times  # type: np.ndarray
-                             ):         # type: (...) -> np.ndarray
+    def _get_lons_native(self,
+                         gps_times  # type: np.ndarray
+                         ):         # type: (...) -> np.ndarray
         pass
 
     @abc.abstractmethod
@@ -63,10 +63,6 @@ class AbstractNav:
                           ):  # type: (...) -> int
         return self._record_length
 
-    def get_projection(self
-                       ):
-        return self._projection
-
     def get_nav_records(self,
                         gps_times   # type: np.ndarray
                         ):          # type: (...) -> np.ndarray
@@ -76,23 +72,23 @@ class AbstractNav:
 
         return self._format_output_array(records, descriptor)
 
-    def get_world_ys(self,
-                     gps_times  # type: np.ndarray
-                     ):         # type: (...) -> np.ndarray
+    def get_lats(self,
+                 gps_times  # type: np.ndarray
+                 ):         # type: (...) -> np.ndarray
         gps_times, descriptor = self._format_input_array(gps_times)
 
-        world_ys = self._get_world_ys_native(gps_times)
+        lats = self._get_lats_native(gps_times)
 
-        return self._format_output_array(world_ys, descriptor)
+        return self._format_output_array(lats, descriptor)
 
-    def get_world_xs(self,
-                     gps_times  # type: np.ndarray
-                     ):         # type: (...) -> np.ndarray
+    def get_lons(self,
+                 gps_times  # type: np.ndarray
+                 ):         # type: (...) -> np.ndarray
         gps_times, descriptor = self._format_input_array(gps_times)
 
-        world_xs = self._get_world_xs_native(gps_times)
+        lons = self._get_lons_native(gps_times)
 
-        return self._format_output_array(world_xs, descriptor)
+        return self._format_output_array(lons, descriptor)
 
     def get_alts(self,
                  gps_times  # type: np.ndarray
