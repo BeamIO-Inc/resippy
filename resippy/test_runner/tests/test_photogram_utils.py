@@ -110,7 +110,7 @@ class TestCrsTools(unittest.TestCase):
         assert np.isclose(k, -kappa)
         print("solved for case where omega is negative, phi is negative, kappa is negative.")
 
-    def test_offsets_solver(self):
+    def test_boresight_offsets_solver(self):
         roll = np.deg2rad(4)
         pitch = np.deg2rad(2)
         yaw = np.deg2rad(30)
@@ -123,7 +123,7 @@ class TestCrsTools(unittest.TestCase):
         m_matrix = photogram.create_M_matrix(roll, pitch, yaw)
         m_with_offsets = m_matrix @ offset_matrix
 
-        offsets_solved = photogram.solve_for_offsets(m_matrix, m_with_offsets)
+        offsets_solved = photogram.solve_for_boresight_angle_offsets(m_matrix, m_with_offsets)
         assert np.isclose(offsets_solved, offset_matrix).all()
         print("offsets solver test passed")
 

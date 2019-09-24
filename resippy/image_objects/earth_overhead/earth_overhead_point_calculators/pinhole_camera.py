@@ -87,11 +87,19 @@ class PinholeCamera:
         self.m32 = self.M[2, 1]
         self.m33 = self.M[2, 2]
 
-    def _world_to_image_space(self,
-                              world_x,  # type: ndarray
-                              world_y,  # type: ndarray
-                              world_z   # type: ndarray
-                              ):        # type: (...) -> (ndarray, ndarray)
+    def world_to_image_plane(self,
+                             world_x,  # type: ndarray
+                             world_y,  # type: ndarray
+                             world_z  # type: ndarray
+                             ):        # type: (...) -> (ndarray, ndarray)
+        """
+        From the book Photogrammetry, third edition, by Francis H. Moffitt and Edward M. Mikhail,
+        equation 6-15 on page 142
+        :param world_x: 
+        :param world_y: 
+        :param world_z: 
+        :return: 
+        """
         x = -1.0*self.f*(
                 (self.m11*(world_x - self.X) + self.m12*(world_y - self.Y) + self.m13*(world_z - self.Z)) /
                 (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z))

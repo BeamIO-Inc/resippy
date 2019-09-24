@@ -86,6 +86,14 @@ def create_M_matrix(omega_radians,      # type: float
                     kappa_radians,      # type: float
                     order='rpy'         # type: str
                     ):                  # type: (...) -> ndarray
+    """
+    Defined in Photogrammetry by Francis H. Moffitt and Edward M. Mikhail, Equation A-21 on page 598
+    :param omega_radians:
+    :param phi_radians:
+    :param kappa_radians:
+    :param order:
+    :return:
+    """
 
     m_matrix = np.zeros((3, 3))
 
@@ -184,9 +192,9 @@ def solve_for_omega_phi_kappa(m_matrix,  # type: ndarray
     return omega, phi, kappa
 
 
-def solve_for_offsets(rough_M_matrix,
-                      ideal_M_matrix
-                      ):
+def solve_for_boresight_angle_offsets(rough_M_matrix,
+                                      ideal_M_matrix
+                                      ):
     m_rough_inv = np.linalg.inv(rough_M_matrix)
     offsets = m_rough_inv @ ideal_M_matrix
 

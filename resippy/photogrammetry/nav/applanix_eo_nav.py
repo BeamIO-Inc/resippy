@@ -7,11 +7,11 @@ from resippy.photogrammetry.nav.abstract_nav import AbstractNav
 from resippy.utils.string_utils import convert_to_snake_case
 
 
-class ApplanixSBETNav(AbstractNav):
+class ApplanixEONav(AbstractNav):
 
     def __init__(self
-                 ):     # type: (...) -> ApplanixSBETNav
-        super(ApplanixSBETNav, self).__init__()
+                 ):     # type: (...) -> ApplanixEONav
+        super(ApplanixEONav, self).__init__()
 
     def load_from_file(self,
                        filename,    # type: str
@@ -20,22 +20,39 @@ class ApplanixSBETNav(AbstractNav):
                        ellps,       # type: str
                        datum        # type: str
                        ):           # type: (...) -> None
-        pipe_json = json.dumps([
-            {
-                'type': 'readers.sbet',
-                'filename': filename
-            }
-        ])
+        gps_time, easting, northing, height, omega, phi, kappa, lat, lon = [], [], [], [], [], [], [], [], []
 
-        sbet_pipeline = pdal.Pipeline(pipe_json)
-        sbet_pipeline.validate()
-        self._num_records = sbet_pipeline.execute()
+        with open(filename) as f:
+            for line in f:
+                line_parts = line.split()
 
-        data = sbet_pipeline.arrays[0]
-        self._record_length = len(data.dtype.names)
+                try:
+                    gps_time.append(float(line_parts[1]))
+                    easting.append(float(line_parts[2]))
+                    northing.append(float(line_parts[3]))
+                    height.append(float(line_parts[4]))
+                    omega.append(float(line_parts[5]))
+                    phi.append(float(line_parts[6]))
+                    kappa.append(float(line_parts[7]))
+                    lat.append(float(line_parts[8]))
+                    lon.append(float(line_parts[9]))
+                except (IndexError, ValueError):
+                    pass
 
-        # convert structured data array to dict
-        self._nav_data = {convert_to_snake_case(name): data[name] for name in data.dtype.names}
+        self._nav_data = {
+            'gps_time': np.array(gps_time),
+            'easting': np.array(easting),
+            'northing': np.array(northing),
+            'height': np.array(height),
+            'omega': np.array(omega),
+            'phi': np.array(phi),
+            'kappa': np.array(kappa),
+            'lat': np.array(lat),
+            'lon': np.array(lon)
+        }
+
+        self._num_records = len(gps_time)
+        self._record_length = 7
 
         if not zone:
             self._projection = pyproj.Proj(proj=proj, ellps=ellps, datum=datum, preserve_units=True)
@@ -88,17 +105,17 @@ class ApplanixSBETNav(AbstractNav):
         return None
 
     def _get_world_ys_native(self,
-                             gps_times  # type: np.ndarray
+                             gps_times  # type: np.ndarray,
                              ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
 
-            lats_left = self._nav_data['y'][left_indexes]
-            lats_right = self._nav_data['y'][right_indexes]
-            lats = self._linear_interp(gps_times, xs, np.array([lats_left, lats_right]))
+            northings_left = self._nav_data['northing'][left_indexes]
+            northings_right = self._nav_data['northing'][right_indexes]
+            northings = self._linear_interp(gps_times, xs, np.array([northings_left, northings_right]))
 
-            return lats
+            return northings
 
         # TODO: throw exception/error instead of returning None
         return None
@@ -110,11 +127,11 @@ class ApplanixSBETNav(AbstractNav):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
 
-            lons_left = self._nav_data['x'][left_indexes]
-            lons_right = self._nav_data['x'][right_indexes]
-            lons = self._linear_interp(gps_times, xs, np.array([lons_left, lons_right]))
+            eastings_left = self._nav_data['easting'][left_indexes]
+            eastings_right = self._nav_data['easting'][right_indexes]
+            eastings = self._linear_interp(gps_times, xs, np.array([eastings_left, eastings_right]))
 
-            return lons
+            return eastings
 
         # TODO: throw exception/error instead of returning None
         return None
@@ -126,11 +143,11 @@ class ApplanixSBETNav(AbstractNav):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
 
-            alts_left = self._nav_data['z'][left_indexes]
-            alts_right = self._nav_data['z'][right_indexes]
-            alts = self._linear_interp(gps_times, xs, np.array([alts_left, alts_right]))
+            heights_left = self._nav_data['height'][left_indexes]
+            heights_right = self._nav_data['height'][right_indexes]
+            heights = self._linear_interp(gps_times, xs, np.array([heights_left, heights_right]))
 
-            return alts
+            return heights
 
         # TODO: throw exception/error instead of returning None
         return None
@@ -142,11 +159,11 @@ class ApplanixSBETNav(AbstractNav):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
 
-            rolls_left = self._nav_data['roll'][left_indexes]
-            rolls_right = self._nav_data['roll'][right_indexes]
-            rolls = self._linear_interp(gps_times, xs, np.array([rolls_left, rolls_right]))
+            omegas_left = self._nav_data['omega'][left_indexes]
+            omegas_right = self._nav_data['omega'][right_indexes]
+            omegas = self._linear_interp(gps_times, xs, np.array([omegas_left, omegas_right]))
 
-            return rolls
+            return omegas
 
         # TODO: throw exception/error instead of returning None
         return None
@@ -158,11 +175,11 @@ class ApplanixSBETNav(AbstractNav):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
 
-            pitches_left = self._nav_data['pitch'][left_indexes]
-            pitches_right = self._nav_data['pitch'][right_indexes]
-            pitches = self._linear_interp(gps_times, xs, np.array([pitches_left, pitches_right]))
+            phis_left = self._nav_data['phi'][left_indexes]
+            phis_right = self._nav_data['phi'][right_indexes]
+            phis = self._linear_interp(gps_times, xs, np.array([phis_left, phis_right]))
 
-            return pitches
+            return phis
 
         # TODO: throw exception/error instead of returning None
         return None
@@ -174,11 +191,11 @@ class ApplanixSBETNav(AbstractNav):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)
 
-            azimuths_left = self._nav_data['azimuth'][left_indexes]
-            azimuths_right = self._nav_data['azimuth'][right_indexes]
-            azimuths = self._linear_interp(gps_times, xs, np.array([azimuths_left, azimuths_right]))
+            kappas_left = self._nav_data['kappa'][left_indexes]
+            kappas_right = self._nav_data['kappa'][right_indexes]
+            kappas = self._linear_interp(gps_times, xs, np.array([kappas_left, kappas_right]))
 
-            return azimuths
+            return kappas
 
         # TODO: throw exception/error instead of returning None
         return None
