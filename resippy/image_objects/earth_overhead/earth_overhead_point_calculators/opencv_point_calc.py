@@ -3,6 +3,7 @@ import numpy as np
 
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
     import AbstractEarthOverheadPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fixtured_camera import FixturedCamera
 from resippy.utils import photogrammetry_utils
 
 
@@ -32,30 +33,32 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         self._phi_radians = 0.0
         self._kappa_radians = 0.0
 
-        self._trans_matrix = None
-        self._rot_matrix = None
-
         # offsets
-        self._x_offset = 0.0
-        self._y_offset = 0.0
-        self._z_offset = 0.0
+        self._x_offset_meters = 0.0
+        self._y_offset_meters = 0.0
+        self._z_offset_meters = 0.0
+        self._omega_offset_radians = 0.0
+        self._phi_offset_radians = 0.0
+        self._kappa_offset_radians = 0.0
+
+        # fixture
+        self._fixture = FixturedCamera()
 
     @classmethod
     def init_from_params(cls,
-                         intrinsic_params,  # type: dict
-                         offset_params,     # type: dict
-                         ):                 # type: (...) -> OpenCVPointCalc
+                         params,    # type: dict
+                         ):         # type: (...) -> OpenCVPointCalc
         point_calc = cls()
 
         point_calc.set_projection(pyproj.Proj(proj='utm', zone=18, ellps='WGS84', datum='WGS84', preserve_units=True))
 
-        point_calc.init_intrinsic(intrinsic_params['fx_pixels'], intrinsic_params['fy_pixels'],
-                                  intrinsic_params['cx_pixels'], intrinsic_params['cy_pixels'],
-                                  intrinsic_params['k1'], intrinsic_params['k2'], intrinsic_params['k3'],
-                                  intrinsic_params['p1'], intrinsic_params['p2'],
-                                  intrinsic_params['pixel_pitch_microns'])
+        point_calc.init_intrinsic(params['fx_pixels'], params['fy_pixels'], params['cx_pixels'], params['cy_pixels'],
+                                  params['k1'], params['k2'], params['k3'], params['p1'], params['p2'],
+                                  params['pixel_pitch_microns'])
 
-        point_calc.init_offsets(offset_params['x_offset'], offset_params['y_offset'], offset_params['z_offset'])
+        point_calc.init_offsets(params['x_offset_meters'], params['y_offset_meters'], params['z_offset_meters'],
+                                params['omega_offset_radians'], params['phi_offset_radians'],
+                                params['kappa_offset_radians'])
 
         return point_calc
 
@@ -103,20 +106,27 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         self._phi_radians = phi_radians
         self._kappa_radians = kappa_radians
 
-        self._trans_matrix = np.array([[x_meters],
-                                       [y_meters],
-                                       [z_meters]], dtype=np.float64)
-
-        self._rot_matrix = photogrammetry_utils.create_M_matrix(omega_radians, phi_radians, kappa_radians)
+        self._fixture.set_fixture_xyz(x_meters, y_meters, z_meters)
+        self._fixture.set_fixture_orientation_by_roll_pitch_yaw(omega_radians, phi_radians, kappa_radians)
 
     def init_offsets(self,
-                     x_offset,  # type: float
-                     y_offset,  # type: float
-                     z_offset,  # type: float
-                     ):         # type: (...) -> None
-        self._x_offset = x_offset
-        self._y_offset = y_offset
-        self._z_offset = z_offset
+                     x_offset_meters,       # type: float
+                     y_offset_meters,       # type: float
+                     z_offset_meters,       # type: float
+                     omega_offset_radians,  # type: float
+                     phi_offset_radians,    # type: float
+                     kappa_offset_radians   # type: float
+                     ):                     # type: (...) -> None
+        self._x_offset_meters = x_offset_meters
+        self._y_offset_meters = y_offset_meters
+        self._z_offset_meters = z_offset_meters
+        self._omega_offset_radians = omega_offset_radians
+        self._phi_offset_radians = phi_offset_radians
+        self._kappa_offset_radians = kappa_offset_radians
+
+        self._fixture.set_relative_camera_xyz(x_offset_meters, y_offset_meters, z_offset_meters)
+        self._fixture.set_boresight_matrix_from_camera_relative_rpy_params(omega_offset_radians, phi_offset_radians,
+                                                                           kappa_offset_radians)
 
     def _lon_lat_alt_to_pixel_x_y_native(self,
                                          lons,          # type: np.ndarray
@@ -125,12 +135,15 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
                                          band=None      # type: int
                                          ):             # type: (...) -> (np.ndarray, np.ndarray)
         # https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
-        trans_xyz = np.ones((3, len(lons)))
-        trans_xyz[0, :] = lons - self._trans_matrix[0]
-        trans_xyz[1, :] = lats - self._trans_matrix[1]
-        trans_xyz[2, :] = alts - self._trans_matrix[2]
+        camera_rot = self._fixture.get_camera_absolute_M_matrix()
+        camera_xyz = self._fixture.get_camera_absolute_xyz()
 
-        cam_coords = np.matmul(self._rot_matrix, trans_xyz)
+        trans_xyz = np.ones((3, len(lons)))
+        trans_xyz[0, :] = lons - camera_xyz[0]
+        trans_xyz[1, :] = lats - camera_xyz[1]
+        trans_xyz[2, :] = alts - camera_xyz[2]
+
+        cam_coords = np.matmul(camera_rot, trans_xyz)
 
         x_prime = cam_coords[0, :] / cam_coords[2, :]
         y_prime = cam_coords[1, :] / cam_coords[2, :]
@@ -144,24 +157,10 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         y_double_prime = (y_prime * radial_distortion) + (self._p1 * (r_squared + 2.0 * y_prime * y_prime)) + \
                          (2.0 * self._p2 * x_prime * y_prime)
 
-        u = self._fx_pixels * x_double_prime + self._cx_pixels
-        v = -self._fy_pixels * y_double_prime + self._cy_pixels
+        u = -self._fx_pixels * x_double_prime + self._cx_pixels
+        v = self._fy_pixels * y_double_prime + self._cy_pixels
 
         return u, v
-
-        # object_points = np.ones((len(lons), 3), dtype=np.float64)
-        # object_points[:, 0] = lons
-        # object_points[:, 1] = lats
-        # object_points[:, 2] = alts
-        #
-        # rot_vec, __ = cv2.Rodrigues(self._rot)
-        #
-        # print(rot_vec)
-        #
-        # image_points, __ = cv2.projectPoints(object_points, rot_vec, self._trans, self._camera_matrix,
-        #                                      self._distortion_coeffs)
-        #
-        # return image_points[:, :, 0], image_points[:, :, 1]
 
     def _pixel_x_y_alt_to_lon_lat_native(self,
                                          pixel_xs,      # type: np.ndarray

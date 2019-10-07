@@ -76,13 +76,12 @@ class MicasenseImageFactory:
         def create_point_calc(band_fname, params):
             band_num = int(band_fname[band_fname.rfind('.')-1])
 
-            intrinsic_list = params['intrinsic']
-            intrinsic_params = [ip for ip in intrinsic_list if ip['band_number'] == band_num][0]
-
-            point_calc = OpenCVPointCalc.init_from_params(intrinsic_params, params['offsets'])
+            band_params = [p for p in params if p['band_number'] == band_num][0]
+            point_calc = OpenCVPointCalc.init_from_params(band_params)
 
             point_calc.reverse_x_pixels = True
             point_calc.reverse_y_pixels = True
+
             return point_calc
 
         point_calc_1 = create_point_calc(band_fname_dict['band1'], opencv_params)
