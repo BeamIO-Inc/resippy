@@ -4,12 +4,13 @@ import numpy as np
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
     import AbstractEarthOverheadPointCalc
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fixtured_camera import FixturedCamera
-from resippy.utils import photogrammetry_utils
 
 
 class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
 
     def __init__(self):
+        super(OpenCVPointCalc, self).__init__()
+
         # intrinsic params
         self._fx_pixels = 0
         self._fy_pixels = 0
@@ -157,7 +158,7 @@ class OpenCVPointCalc(AbstractEarthOverheadPointCalc):
         y_double_prime = (y_prime * radial_distortion) + (self._p1 * (r_squared + 2.0 * y_prime * y_prime)) + \
                          (2.0 * self._p2 * x_prime * y_prime)
 
-        u = -self._fx_pixels * x_double_prime + self._cx_pixels
+        u = self._fx_pixels * x_double_prime + self._cx_pixels
         v = self._fy_pixels * y_double_prime + self._cy_pixels
 
         return u, v
