@@ -113,4 +113,4 @@ class FixturedCamera:
         absolute orientation matrix
         :return:
         """
-        return self.fixture_M @ self.boresight_matrix
+        return self.boresight_matrix @ self.fixture_M
