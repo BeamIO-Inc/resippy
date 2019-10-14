@@ -23,7 +23,7 @@ setuptools.setup(
     install_requires=[
         'GDAL',
         'pyproj',
-        'numpy<1.16.0',
+        'numpy',
         'scipy',
         'scikit-image',
         'shapely',
