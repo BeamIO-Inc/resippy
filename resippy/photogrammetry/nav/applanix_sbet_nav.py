@@ -119,7 +119,9 @@ class ApplanixSBETNav(AbstractNav):
         # TODO: throw exception/error instead of returning None
         return None
 
-    def _get_alts_native(self, gps_times):
+    def _get_alts_native(self,
+                         gps_times  # type: np.ndarray
+                         ):         # type: (...) -> np.ndarray
         if self._gps_times_in_range(gps_times):
             left_indexes, right_indexes = self._get_indexes(gps_times)
             xs = self._get_xs(left_indexes, right_indexes)

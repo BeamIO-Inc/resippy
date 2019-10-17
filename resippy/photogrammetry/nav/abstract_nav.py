@@ -2,6 +2,7 @@ import abc
 import numbers
 import numpy as np
 from six import add_metaclass
+from pyproj import Proj
 
 
 @add_metaclass(abc.ABCMeta)
@@ -64,7 +65,7 @@ class AbstractNav:
         return self._record_length
 
     def get_projection(self
-                       ):
+                       ):   # type: (...) -> Proj
         return self._projection
 
     def get_nav_records(self,

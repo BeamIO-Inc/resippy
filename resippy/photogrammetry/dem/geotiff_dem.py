@@ -5,6 +5,7 @@ from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 from resippy.image_objects.earth_overhead.geotiff.geotiff_image import GeotiffImage
 import numpy as np
 from numpy import ndarray
+import gdal
 
 
 class GeotiffDem(AbstractDem):
@@ -28,6 +29,32 @@ class GeotiffDem(AbstractDem):
                           dst_epsg_code  # type: int
                           ):  # type: (...) -> None
         new_gtiff = GeotiffImage.reproject_vertical_datum(self.gtiff, dst_fname, dst_epsg_code)
+        self.gtiff.close_image()
+        self.set_geotiff_image(new_gtiff)
+
+    def convert_to_geoid_heights(self,
+                                 dst_fname,         # type: str
+                                 geoidgrid_fname    # type: str
+                                 ):  # type: (...) -> None
+        src_srs = self.gtiff.get_point_calculator().get_projection().srs
+        dst_srs = src_srs + ' +geoidgrids=' + geoidgrid_fname
+        ops = gdal.WarpOptions(srcSRS=src_srs, dstSRS=dst_srs)
+
+        new_gtiff = GeotiffImage.gdalwarp_geotiff_image(self.gtiff, ops, dst_fname)
+
+        self.gtiff.close_image()
+        self.set_geotiff_image(new_gtiff)
+
+    def convert_to_ellipsoid_heights(self,
+                                     dst_fname,         # type: str
+                                     geoidgrid_fname    # type: str
+                                     ):                 # type: (...) -> None
+        dst_srs = self.gtiff.get_point_calculator().get_projection().srs
+        src_srs = dst_srs + ' +geoidgrids=' + geoidgrid_fname
+        ops = gdal.WarpOptions(srcSRS=src_srs, dstSRS=dst_srs)
+
+        new_gtiff = GeotiffImage.gdalwarp_geotiff_image(self.gtiff, ops, dst_fname)
+
         self.gtiff.close_image()
         self.set_geotiff_image(new_gtiff)
 
