@@ -4,6 +4,7 @@ from resippy.image_objects.earth_overhead.geotiff.geotiff_image_factory import G
 from resippy.image_objects.earth_overhead.micasense.micasense_image_factory import MicasenseImageFactory
 from resippy.image_objects.envi.envi_image_factory import EnviImageFactory
 from resippy.image_objects.earth_overhead.digital_globe.DigitalGlobeImageFactory import DigitalGlobeImageFactory
+from resippy.image_objects.earth_overhead.mako.mako_image_factory import MakoImageFactory
 
 
 class ImageFactory:
@@ -25,3 +26,4 @@ class ImageFactory:
     micasense = MicasenseImageFactory
     envi = EnviImageFactory
     digital_globe = DigitalGlobeImageFactory
+    mako = MakoImageFactory
