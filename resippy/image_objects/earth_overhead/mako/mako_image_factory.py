@@ -15,8 +15,7 @@ class MakoImageFactory:
         image = MakoImage()
         image.set_dset(gdal.Open(envi_fnames['image'], gdal.GA_ReadOnly))
 
-        metadata = MakoMetadata()
-        metadata.init_from_header(envi_fnames['header'])
+        metadata = MakoMetadata.init_from_header(envi_fnames['header'])
         image.set_metadata(metadata)
 
         point_calc = OpenCVPointCalc.init_from_params(opencv_params)
