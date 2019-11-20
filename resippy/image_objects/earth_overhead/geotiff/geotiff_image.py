@@ -143,10 +143,11 @@ class GeotiffImage(AbstractEarthOverheadImage):
         dataset.FlushCache()
         dataset = None
 
-    def gdalwarp_geotiff_image(image,  # type: GeotiffImage
-                               warp_ops,  # type: gdal.WarpOptions
+    @staticmethod
+    def gdalwarp_geotiff_image(image,           # type: GeotiffImage
+                               warp_ops,        # type: gdal.WarpOptions
                                dst_fname=None,  # type: str
-                               ):            # type: (...) -> GeotiffImage
+                               ):               # type: (...) -> GeotiffImage
         src_dataset = image.get_dset()
         if src_dataset is None:
             src_dataset = image.get_gdal_mem_datset()

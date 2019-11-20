@@ -16,9 +16,10 @@ def get_all_folders_in_dir(directory        # type: str
     return list(filter(os.path.isdir, [os.path.join(directory, item) for item in os.listdir(directory)]))
 
 
-def get_all_files_in_dir(directory,         # type: str
-                         extensions=None    # type: Union[str, list]
-                         ):
+def get_all_files_in_dir(directory,                     # type: str
+                         extensions=None,               # type: Union[str, list]
+                         return_fullpaths=True          # type: bool
+                         ):                             # type: (...) -> list
     sanitized_extensions = []
     if type(extensions) == (type([])):
         for extension in extensions:
@@ -34,7 +35,34 @@ def get_all_files_in_dir(directory,         # type: str
     for extension in sanitized_extensions:
         fnames = glob.glob(directory + os.path.sep + "*." + extension)
         files = files + fnames
-    return files
+    if return_fullpaths:
+        return files
+    else:
+        basenames = []
+        for f in files:
+            basenames.append(os.path.basename(f))
+        return basenames
+
+
+def get_files_in_dir_that_start_with(directory,                 # type: str
+                                     starts_with,               # type: Union[str, list]
+                                     extensions=None,           # type: Union[str, list]
+                                     return_fullpaths=True      # type: bool
+                                     ):                         # type: (...) -> list
+    all_files = get_all_files_in_dir(directory, extensions)
+    all_basenames = [os.path.basename(x) for x in all_files]
+    if type(starts_with) == (type("")):
+        starts_with = [starts_with]
+    filtered_basenames = []
+    for starts_with_text in starts_with:
+        for basename in all_basenames:
+            if basename.startswith(starts_with_text):
+                filtered_basenames.append(basename)
+    if not return_fullpaths:
+        return filtered_basenames
+    else:
+        fullpaths = [os.path.join(directory, x) for x in filtered_basenames]
+        return fullpaths
 
 
 def get_path_from_subdirs(base_dir,     # type: str

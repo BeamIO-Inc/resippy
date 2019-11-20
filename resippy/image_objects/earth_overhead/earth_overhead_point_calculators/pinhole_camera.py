@@ -92,6 +92,14 @@ class PinholeCamera:
                              world_y,  # type: ndarray
                              world_z  # type: ndarray
                              ):        # type: (...) -> (ndarray, ndarray)
+        """
+        From the book Photogrammetry, third edition, by Francis H. Moffitt and Edward M. Mikhail,
+        equation 6-15 on page 142
+        :param world_x: 
+        :param world_y: 
+        :param world_z: 
+        :return: 
+        """
         x = -1.0*self.f*(
                 (self.m11*(world_x - self.X) + self.m12*(world_y - self.Y) + self.m13*(world_z - self.Z)) /
                 (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z))
