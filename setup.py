@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="resippy",
-    version="0.2.0",
+    version="0.3.0",
     author="BeamIO, Inc.",
     author_email="info@beamio.net",
     description="REmote Sensing and Image Processing in PYthon",
