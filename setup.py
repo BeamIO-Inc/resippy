@@ -23,14 +23,17 @@ setuptools.setup(
     install_requires=[
         'GDAL',
         'pyproj',
-        'numpy',
         'scipy',
         'scikit-image',
         'shapely',
-        'pint==0.9',
-        'imageio',
-        'seaborn',
+        'exifread',
         'colorutils',
+        'imageio',
+        'numpy',
+        'scikit-learn',
+        'opencv-python',
+        'pint',
+        'seaborn',
         'utm'
     ],
 )

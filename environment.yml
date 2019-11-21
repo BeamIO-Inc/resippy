@@ -21,9 +21,7 @@ dependencies:
     - numpy
     - opencv-python
     - pint
-    - pyexiftool
     - exifread
-    - pysolar
     - scipy
     - seaborn
     - utm
