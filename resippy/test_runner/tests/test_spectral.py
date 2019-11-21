@@ -411,9 +411,9 @@ class TestSpectralTools(unittest.TestCase):
         sam_den_right = np.sqrt(np.sum(np.multiply(
             flattened_image, flattened_image), axis=1))
 
-        np.testing.assert_allclose(ace_numerator, np.square(sam_numerator))
-        np.testing.assert_allclose(ace_den_left, np.square(sam_den_left))
-        np.testing.assert_allclose(ace_den_right, np.square(sam_den_right))
+        np.testing.assert_allclose(ace_numerator, np.square(sam_numerator), rtol=1.e-6)
+        np.testing.assert_allclose(ace_den_left, np.square(sam_den_left), rtol=1.e-6)
+        np.testing.assert_allclose(ace_den_right, np.square(sam_den_right), rtol=1.e-6)
 
         logging.debug(
             "sam and ace portions of numerators and denominators are "
@@ -440,8 +440,9 @@ class TestSpectralTools(unittest.TestCase):
             flattened_image, signal_to_embed, ace_mean, ace_inv_cov)
         sam_detection_result = sp1d.sam(flattened_image, signal_to_embed)
 
+        # TODO: use higher precision if we need better accuracy
         np.testing.assert_allclose(ace_detection_result, np.square(
-            sam_detection_result))
+            sam_detection_result), rtol=1.e-6)
         logging.debug(
             "SAM squared is equivalent to ACE if the inverse "
             "covariance is the identify matrix"

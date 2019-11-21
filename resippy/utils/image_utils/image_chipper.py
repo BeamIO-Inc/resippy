@@ -5,7 +5,7 @@ from numpy import ndarray
 from typing import Union
 import os
 import imageio
-import scipy.misc as scipy_misc
+import resippy.utils.image_utils.image_utils as image_utils
 
 
 def get_nchips(image_chips,     # type: ndarray
@@ -148,7 +148,7 @@ def write_chips_to_disk(image_chips,            # type: ndarray
     for i in range(n_chips):
         chip = image_chips[i, :, :, :]
         if output_chip_ny is not None:
-            chip = scipy_misc.imresize(chip, (output_chip_ny, output_chip_nx))
+            chip = image_utils.resize_image(chip, output_chip_ny, output_chip_nx)
         if remove_alpha is True and chip.shape[-1] == 4:
             chip = chip[:, :, 0:3]
         chip_fname = base_chip_fname + "_" + str(i).zfill(8)
