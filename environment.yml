@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - gdal
+  - cython
   - pdal
   - pip
   - psutil
@@ -13,13 +14,16 @@ dependencies:
   - scikit-image
   - scikit-learn
   - shapely
+  - exifread
   - pip:
     - colorutils
     - imageio
-    - numpy<1.16.0
+    - numpy
     - opencv-python
-    - pint==0.9
+    - pint
     - pyexiftool
+    - exifread
     - pysolar
     - scipy
     - seaborn
+    - utm

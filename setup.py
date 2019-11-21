@@ -31,5 +31,6 @@ setuptools.setup(
         'imageio',
         'seaborn',
         'colorutils',
+        'utm'
     ],
 )
