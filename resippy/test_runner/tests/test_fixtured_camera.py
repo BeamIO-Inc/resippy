@@ -34,9 +34,10 @@ class TestFixturedCamera(unittest.TestCase):
         fixtured_cam.set_boresight_matrix_from_camera_relative_rpy_params(0, -5, 0, roll_units='degrees')
         camera_M = fixtured_cam.get_camera_absolute_M_matrix()
         roll, pitch, yaw = photogram_utils.solve_for_omega_phi_kappa(camera_M)
-        assert np.isclose(roll, 0)
-        assert np.isclose(pitch, 0)
-        assert np.isclose(yaw, 0)
+        # TODO: use higher precision floats if we want better absolute accuracy here
+        assert np.isclose(roll, 0, atol=1.e-7)
+        assert np.isclose(pitch, 0, atol=1.e-7)
+        assert np.isclose(yaw, 0, atol=1.e-7)
         print("setting fixture pitch to 5 degrees and camera boresight pitch to -5 degrees results in a zero camera roation")
         print("pitch boresight test passed.")
 
