@@ -1,10 +1,7 @@
 import numpy as np
-import json
-import pdal
 import pyproj
 
 from resippy.photogrammetry.nav.abstract_nav import AbstractNav
-from resippy.utils.string_utils import convert_to_snake_case
 
 
 class ApplanixEONav(AbstractNav):

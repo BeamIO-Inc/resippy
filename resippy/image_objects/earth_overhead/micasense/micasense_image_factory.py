@@ -70,9 +70,9 @@ class MicasenseImageFactory:
         return micasense_image
 
     @staticmethod
-    def from_image_number_and_opencv(band_fname_dict,   # type: dict
-                                     opencv_params      # type: dict
-                                     ):                 # type: (...) -> MicasenseImage
+    def from_image_number_and_opencv_model(band_fname_dict,     # type: dict
+                                           opencv_params        # type: dict
+                                           ):                   # type: (...) -> MicasenseImage
         def create_point_calc(band_fname, params):
             band_num = int(band_fname[band_fname.rfind('.')-1])
 

@@ -66,8 +66,16 @@ def gps_timestamp_to_utc_timestamp(gps_timestamp    # type: float
 def utc_timestamp_to_gps_week_and_seconds(utc_timestamp     # type: float
                                           ):                # type: (...) -> (float, float)
     gps_timestamp = utc_timestamp_to_gps_timestamp(utc_timestamp)
+    return gps_timestamp_to_gps_week_and_seconds(gps_timestamp)
 
+
+def utc_timestamp_with_leap_to_gps_week_and_seconds(utc_timestamp_with_leap
+                                                    ):
+    gps_timestamp = utc_timestamp_with_leap - (_GPS_EPOCH.timestamp() - _UNIX_EPOCH.timestamp())
+    return gps_timestamp_to_gps_week_and_seconds(gps_timestamp)
+
+
+def gps_timestamp_to_gps_week_and_seconds(gps_timestamp):
     weeks = gps_timestamp / _SECONDS_IN_WEEK
     seconds_in_week = (weeks % 1) * _DAYS_IN_WEEK * _SECONDS_IN_DAY
-
     return math.floor(weeks), seconds_in_week
