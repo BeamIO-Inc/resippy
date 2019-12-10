@@ -8,8 +8,7 @@ import gdal
 import ogr
 import seaborn
 from seaborn.palettes import _ColorPalette
-import resippy.utils.numpy_and_array_utils as numpy_utils
-
+from PIL import Image
 
 def create_uniform_image_data(nx,  # type: int
                               ny,  # type: int
@@ -253,3 +252,13 @@ def blend_images(image_1,  # type: ndarray
                  image_1_percent=0.5  # type: float
                  ):  # type: (...) -> ndarray
     return image_1 * image_1_percent + image_2 * (1 - image_1_percent)
+
+
+def resize_image(image_to_resize,           # type: ndarray
+                 new_ny,                    # type: int
+                 new_nx,                    # type: int
+                 ):                         # type: (...) -> ndarray
+    pil_image = Image.fromarray(image_to_resize)
+    resized_pil_image = Image.Image.resize(pil_image, (new_nx, new_ny))
+    resized_numpy_image = np.array(resized_pil_image)
+    return resized_numpy_image

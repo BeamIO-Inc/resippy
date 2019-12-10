@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="resippy",
-    version="0.2.0",
+    version="0.3.0",
     author="BeamIO, Inc.",
     author_email="info@beamio.net",
     description="REmote Sensing and Image Processing in PYthon",
@@ -23,13 +23,17 @@ setuptools.setup(
     install_requires=[
         'GDAL',
         'pyproj',
-        'numpy',
         'scipy',
         'scikit-image',
         'shapely',
-        'pint==0.9',
-        'imageio',
-        'seaborn',
+        'exifread',
         'colorutils',
+        'imageio',
+        'numpy',
+        'scikit-learn',
+        'opencv-python',
+        'pint',
+        'seaborn',
+        'utm'
     ],
 )

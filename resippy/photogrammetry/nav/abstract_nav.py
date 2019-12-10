@@ -151,6 +151,9 @@ class AbstractNav:
     def _format_output_array(output_array,  # type: np.ndarray
                              descriptor     # type: dict
                              ):             # type: (...) -> np.ndarray
+        if output_array is None:
+            return None
+
         if descriptor['input_array_is_number']:
             return output_array[0]
         elif descriptor['input_array_is_2d']:
