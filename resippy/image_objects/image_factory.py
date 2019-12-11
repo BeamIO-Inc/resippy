@@ -5,6 +5,7 @@ from resippy.image_objects.earth_overhead.micasense.micasense_image_factory impo
 from resippy.image_objects.envi.envi_image_factory import EnviImageFactory
 from resippy.image_objects.earth_overhead.digital_globe.DigitalGlobeImageFactory import DigitalGlobeImageFactory
 from resippy.image_objects.earth_overhead.mako.mako_image_factory import MakoImageFactory
+from resippy.image_objects.earth_overhead.tamarisk.tamarisk_image_factory import TamariskImageFactory
 
 
 class ImageFactory:
@@ -27,3 +28,4 @@ class ImageFactory:
     envi = EnviImageFactory
     digital_globe = DigitalGlobeImageFactory
     mako = MakoImageFactory
+    tamarisk = TamariskImageFactory
