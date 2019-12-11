@@ -10,6 +10,7 @@ from pyproj import Proj
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
 from resippy.image_objects.earth_overhead.geotiff.geotiff_metadata import GeotiffMetadata
 from resippy.image_objects.earth_overhead.geotiff.geotiff_point_calc import GeotiffPointCalc
+import matplotlib.pyplot as plt
 
 
 class GeotiffImage(AbstractEarthOverheadImage):
