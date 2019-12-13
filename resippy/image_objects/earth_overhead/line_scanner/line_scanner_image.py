@@ -10,6 +10,7 @@ import resippy.utils.photogrammetry_utils as photogram_utils
 import scipy.interpolate as interp
 from resippy.image_objects.image_factory import GeotiffImageFactory
 from resippy.image_objects.earth_overhead.geotiff.geotiff_image import GeotiffImage
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.line_scanner import LineScannerPointCalc
 
 
 class LineScannerImage(AbstractEarthOverheadImage):
@@ -26,6 +27,7 @@ class LineScannerImage(AbstractEarthOverheadImage):
         super(AbstractEarthOverheadImage, self).__init__()
         self._dset = None
         self.read_with_gdal = True
+        self._point_calc = LineScannerPointCalc
 
     def ortho_image_patch(self,
                           input_image,
