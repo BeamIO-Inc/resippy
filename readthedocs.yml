@@ -7,6 +7,9 @@ formats: all
 
 python:
   version: 3.7
+  install:
+    - method: pip
+      path: .
 
 conda:
-  environment: environment.yml
+  environment: rtd_environment.yml
