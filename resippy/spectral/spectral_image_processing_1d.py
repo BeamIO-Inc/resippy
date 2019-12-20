@@ -70,27 +70,15 @@ def ace(spectral_image,             # type: ndarray
         inverse_covariance=None,    # type: ndarray
         image_mask=None,            # type: ndarray
         ):                          # type: (...) -> ndarray
-    """
+    """as described in http://www.cis.rit.edu/people/faculty/kerekes/pdfs/Cisz_Thesis.pdf equation 4.7
+    This method assumes that data has not been de-meaned.  If a spectral mean is not provided It will compute the mean and then subtract it.  If no inverse covariance is given it will compute it from the input spectral_image.
 
-    :param spectral_image: one-dimensional spectral image as a [mxn] numpy array, where m is the number or samples and
-    n is the number of spectral bands
-    :param target_spectra: spectrum of target we are attempting to detect in the image, as an n dimensional numpy array
-    where n is the number of spectral bands
+    :param spectral_image: one-dimensional spectral image as a [mxn] numpy array, where m is the number or samples and n is the number of spectral bands
+    :param target_spectra: spectrum of target we are attempting to detect in the image, as an n dimensional numpy array where n is the number of spectral bands
     :param spectral_mean: optional spectral mean, as an n dimensional numpy array
     :param inverse_covariance: optional inverse covariance, as a [n x n] numpy array
-    :param image_mask: optional image mask, which will be used to mask out pixels while computing the spectral mean
-    and spectral covariance, if they are not provided as inputs
+    :param image_mask: optional image mask, which will be used to mask out pixels while computing the spectral mean and spectral covariance, if they are not provided as inputs
     :return: numpy array of size m, where m is the number of samples.
-
-    as described in
-    http://www.cis.rit.edu/people/faculty/kerekes/pdfs/Cisz_Thesis.pdf
-    equation 4.7
-
-    This method assumes that data has not
-    been de-meaned.  If a spectral mean is not provided
-    It will compute the mean and then subtract it.  If no inverse
-    covariance is given it will compute it from the input
-    spectral_image.
     """
 
     if spectral_mean is None:
