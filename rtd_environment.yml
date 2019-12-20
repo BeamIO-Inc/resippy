@@ -1,0 +1,5 @@
+name: resippy
+channels:
+  - defaults
+dependencies:
+  - libgdal=3.*
