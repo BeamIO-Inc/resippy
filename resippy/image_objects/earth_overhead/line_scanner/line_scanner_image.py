@@ -65,7 +65,7 @@ class LineScannerImage(AbstractEarthOverheadImage):
         y = np.ravel(world_y_coords)
         z = np.ravel(patch_image_data)
 
-        zi = interp.griddata((x, y), z, (ground_x_grid, ground_y_grid), method='linear')
+        zi = interp.griddata((x, y), z, (ground_x_grid, ground_y_grid), method='nearest')
         gtiff_image = GeotiffImageFactory.from_numpy_array(zi, geot, point_calc.get_projection())
         return gtiff_image
 
