@@ -22,15 +22,7 @@ class EnviImage(AbstractImage):
         envi_image = cls()
         envi_image.set_dset(gdal.Open(image_file_path, gdal.GA_ReadOnly))
 
-        # try to guess the header file name if one is not provided
-        if header_file_path is None:
-            header_guesses = [image_file_path + ".hdr",
-                              image_file_path[0:-4] + ".hdr"]
-            for header_guess in header_guesses:
-                if os.path.exists(header_guess):
-                    header_file_path = header_guess
-
-        metadata = EnviMetadata.init_from_header(header_file_path)
+        metadata = EnviMetadata.init_from_file(image_file_path)
         envi_image.set_metadata(metadata)
         return envi_image
 

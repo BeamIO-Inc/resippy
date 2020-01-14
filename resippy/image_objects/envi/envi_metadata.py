@@ -9,11 +9,11 @@ class EnviMetadata(AbstractImageMetadata):
         envi_header = {}
 
     @classmethod
-    def init_from_header(cls, header_fname):
-        header = envi_utils.read_envi_header(header_fname)
+    def init_from_file(cls, envi_fname):
+        header = envi_utils.read_envi_header(envi_fname)
         envi_metadata = cls()
-        envi_metadata.set_npix_x(header['samples'])
-        envi_metadata.set_npix_y(header['lines'])
-        envi_metadata.set_n_bands(header['bands'])
+        envi_metadata.set_npix_x(int(header['samples']))
+        envi_metadata.set_npix_y(int(header['lines']))
+        envi_metadata.set_n_bands(int(header['bands']))
         envi_metadata.envi_header = header
         return envi_metadata

@@ -1,7 +1,8 @@
-from resippy.utils import string_utils
+import os
+
+from osgeo import gdal
 import numpy as np
 
-import os
 
 ENVI_DTYPES_TO_NUMPY = {"1": np.uint8,
                         "2": np.int16,
@@ -33,142 +34,11 @@ def numpy_dtype_to_envi_dtype(envi_dtype,       # type: int
             return int(key)
 
 
-def read_envi_header(header_fname,      # type: str
+def read_envi_header(envi_fname,        # type: str
                      ):                 # type:(...)-> dict
-    valid_entries = ['acquisition time',
-                     'band names',
-                     'bands',
-                     'bbl',
-                     'byte order',
-                     'class lookup',
-                     'class names',
-                     'classes',
-                     'cloud cover',
-                     'complex function',
-                     'coordinate system string',
-                     'data gain values',
-                     'data ignore value',
-                     'data offset values',
-                     'data reflectance gain values',
-                     'data reflectance offset values',
-                     'data type',
-                     'default bands',
-                     'default stretch',
-                     'dem band',
-                     'dem file',
-                     'description',
-                     'file type',
-                     'fwhm',
-                     'geo points',
-                     'header offset',
-                     'interleave',
-                     'lines',
-                     'map info',
-                     'pixel size',
-                     'projection info',
-                     'read procedures',
-                     'reflectance scale factor',
-                     'rpc info',
-                     'samples',
-                     'security tag',
-                     'sensor type',
-                     'solar irradiance',
-                     'spectra names',
-                     'sun azimuth',
-                     'sun elevation',
-                     'wavelength',
-                     'wavelength units',
-                     'x start',
-                     'y start',
-                     'z plot average',
-                     'z plot range',
-                     'z plot titles']
-
-    with open(header_fname, 'r') as content_file:
-        header_text = content_file.read()
-
-    header_text = string_utils.cleanup_newlines(header_text)
-
-    envi_header_dict = {}
-
-    def is_equals_entry(all_text):
-        bracket_index = all_text.find("{")
-        equals_index = all_text.find("=")
-        newline_index = all_text.find(os.linesep)
-        if equals_index == -1:
-            return False
-        if bracket_index < newline_index and bracket_index != -1:
-            return False
-        elif equals_index < newline_index:
-            return True
-
-    def is_bracket_entry(all_text):
-        bracket_index = all_text.find("{")
-        newline_index = all_text.find(os.linesep)
-        if bracket_index == -1:
-            return False
-        elif bracket_index < newline_index:
-            return True
-        else:
-            return False
-
-    def entry_has_newline(all_text):
-        newline_index = all_text.find(os.linesep)
-        if newline_index != -1:
-            return True
-
-    while header_text is not "":
-
-        key = ""
-        val = ""
-
-        if is_bracket_entry(header_text):
-            right_brace_index = header_text.find('}')
-            entry_text = header_text[0:right_brace_index]
-            key, val = str.split(entry_text, '=', 1)
-            header_text = header_text[right_brace_index + 1:]
-
-        elif is_equals_entry(header_text):
-            linesep_index = header_text.find(os.linesep)
-            entry_text = header_text[0:linesep_index]
-            key, val = entry_text.split('=')
-            header_text = header_text[linesep_index + 1:]
-
-        elif entry_has_newline(header_text):
-            newline_index = header_text.find(os.linesep)
-            header_text = header_text[newline_index+1:]
-
-        else:
-            header_text = header_text[1:]
-
-        key = str.rstrip(key)
-        key = str.lstrip(key)
-        envi_header_dict[key] = str.strip(val)
-
-    if "" in envi_header_dict.keys():
-        del envi_header_dict[""]
-
-    def bracket_entry_to_ndarray(bracket_text           # type: str
-                                 ):
-        bracket_text = bracket_text.replace(os.linesep, "").replace(" ", "").replace('{', "").replace('}', "")
-        bracket_strs = bracket_text.split(",")
-        bracket_floats = [float(s) for s in bracket_strs]
-        return np.array(bracket_floats)
-
-    bracket_ndarr_entries = ['fwhm', 'wavelength']
-    equals_int_entries = ['samples', 'lines', 'bands', 'header offset', 'data type', 'byte order', 'x start',
-                            'y start']
-
-    for header_key in envi_header_dict:
-        header_val = envi_header_dict[header_key]
-        if str.lower(header_key) in bracket_ndarr_entries:
-            header_val = bracket_entry_to_ndarray(header_val)
-            envi_header_dict[header_key] = header_val
-        if str.lower(header_key) in equals_int_entries:
-            header_val = header_val.replace(' ', '')
-            header_val = int(header_val)
-            envi_header_dict[header_key] = header_val
-    return envi_header_dict
+    im = gdal.Open(envi_fname)
+    metadata = im.GetMetadata(domain='ENVI')
+    return metadata
 
 
 # TODO this is a hack to get a baseline writer working without relying on GDAL
