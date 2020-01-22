@@ -51,23 +51,36 @@ def _get_gps_leapsecond_offset(timestamp    # type: float
     return _get_leapseconds(timestamp) - _get_leapseconds(_GPS_EPOCH.timestamp())
 
 
-def utc_timestamp_to_gps_timestamp(utc_timestamp    # type: float
+def utc_timestamp_to_gps_timestamp(utc_timestamp,   # type: float
+                                   leap=True        # type: bool
                                    ):               # type: (...) -> float
-    return utc_timestamp - (_GPS_EPOCH.timestamp() - _UNIX_EPOCH.timestamp()) + \
-           _get_gps_leapsecond_offset(utc_timestamp).total_seconds()
+    gps_timestamp = utc_timestamp - (_GPS_EPOCH.timestamp() - _UNIX_EPOCH.timestamp())
+
+    if leap:
+        gps_timestamp += _get_gps_leapsecond_offset(utc_timestamp).total_seconds()
+
+    return gps_timestamp
 
 
-def gps_timestamp_to_utc_timestamp(gps_timestamp    # type: float
+def gps_timestamp_to_utc_timestamp(gps_timestamp,   # type: float
+                                   leap=True        # type: bool
                                    ):               # type: (...) -> float
-    utc_timestamp_with_leap = gps_timestamp + (_GPS_EPOCH.timestamp() - _UNIX_EPOCH.timestamp())
-    return utc_timestamp_with_leap - _get_gps_leapsecond_offset(utc_timestamp_with_leap).total_seconds()
+    utc_timestamp = gps_timestamp + (_GPS_EPOCH.timestamp() - _UNIX_EPOCH.timestamp())
+
+    if leap:
+        utc_timestamp -= _get_gps_leapsecond_offset(utc_timestamp).total_seconds()
+
+    return utc_timestamp
 
 
-def utc_timestamp_to_gps_week_and_seconds(utc_timestamp     # type: float
+def utc_timestamp_to_gps_week_and_seconds(utc_timestamp,    # type: float
+                                          leap=True         # type: bool
                                           ):                # type: (...) -> (float, float)
-    gps_timestamp = utc_timestamp_to_gps_timestamp(utc_timestamp)
+    gps_timestamp = utc_timestamp_to_gps_timestamp(utc_timestamp, leap)
+    return gps_timestamp_to_gps_week_and_seconds(gps_timestamp)
 
+
+def gps_timestamp_to_gps_week_and_seconds(gps_timestamp):
     weeks = gps_timestamp / _SECONDS_IN_WEEK
     seconds_in_week = (weeks % 1) * _DAYS_IN_WEEK * _SECONDS_IN_DAY
-
     return math.floor(weeks), seconds_in_week
