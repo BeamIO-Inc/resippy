@@ -9,8 +9,14 @@ class LineScannerImageFactory:
     @staticmethod
     def from_numpy_array_and_point_calc(image_data,  # type: ndarray
                                         point_calc,  # type: AbstractEarthOverheadPointCalc
-                                        ):  # type: (...) -> Line
-        physical_camera = LineScannerImage()
-        physical_camera.set_image_data(image_data)
-        physical_camera.set_point_calculator(point_calc)
-        return physical_camera
+                                        ):           # type: (...) -> LineScannerImage
+        image = LineScannerImage()
+        image.set_image_data(image_data)
+        image.set_point_calculator(point_calc)
+        return image
+
+    @staticmethod
+    def from_file(fname                 # type: str
+                  ):                    # type: (...) -> LineScannerImage
+        image = LineScannerImage.init_from_file(fname)
+        return image
