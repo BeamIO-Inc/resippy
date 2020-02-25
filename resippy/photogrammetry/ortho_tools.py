@@ -113,12 +113,19 @@ def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEa
     if bands is None:
         bands = list(range(overhead_image.get_metadata().get_n_bands()))
 
+    full_image_data = overhead_image.get_image_data()
+
     images = []
     if overhead_image.get_point_calculator().bands_coregistered() is not True:
         for band in bands:
             pixels_x, pixels_y = overhead_image.get_point_calculator(). \
                 lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=band, world_proj=world_proj)
-            image_data = overhead_image.read_band_from_disk(band)
+
+            if full_image_data is None:
+                image_data = overhead_image.read_band_from_disk(band)
+            else:
+                image_data = full_image_data[:, :, band]
+
             im_tp = image_data.dtype
 
             regridded = image_utils.grid_warp_image_band(image_data, pixels_x, pixels_y,
@@ -129,8 +136,13 @@ def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEa
         pixels_x, pixels_y = overhead_image.get_point_calculator(). \
             lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=0, world_proj=world_proj)
         for band in bands:
-            image_data = overhead_image.read_band_from_disk(band)
+            if full_image_data is None:
+                image_data = overhead_image.read_band_from_disk(band)
+            else:
+                image_data = full_image_data[:, :, band]
+
             im_tp = image_data.dtype
+            
             regridded = image_utils.grid_warp_image_band(image_data, pixels_x, pixels_y,
                                                          nodata_val=nodata_val, interpolation=interpolation)
             regridded = regridded.astype(im_tp)
