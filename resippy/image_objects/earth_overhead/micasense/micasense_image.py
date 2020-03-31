@@ -44,7 +44,8 @@ class MicasenseImage(AbstractEarthOverheadImage):
         __, seconds_in_week = time_utils.utc_timestamp_to_gps_week_and_seconds(utc_timestamp)
 
         timestamp_decimal_str = str(exif_data['EXIF SubSecTime'])
-        timestamp_decimal = float('0.{}'.format(int(timestamp_decimal_str)))
+        sign = 1.0 if int(timestamp_decimal_str) >= 0 else -1.0
+        timestamp_decimal = sign * float('0.{}'.format(int(timestamp_decimal_str)))
 
         output_dict = {'gps_timestamp': seconds_in_week + timestamp_decimal}
 
