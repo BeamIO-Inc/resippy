@@ -23,3 +23,14 @@ def rgb_image_point_mask_to_pixel_locations(image,                  # type: ndar
         image = np.sum(image, axis=2)
         pixel_ys, pixel_xs = np.where(image > 0)
         return pixel_ys, pixel_xs
+
+
+def combine_image_masks(image_masks,        # type: [np.ndarray]
+                        ):
+    combined_mask = image_masks[0]
+    if len(image_masks) == 1:
+        pass
+    else:
+        for mask in image_masks[1:]:
+            combined_mask = np.bitwise_or(combined_mask, mask)
+    return combined_mask
