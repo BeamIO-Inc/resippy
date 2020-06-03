@@ -18,7 +18,6 @@ class MicasenseImage(AbstractEarthOverheadImage):
     def read_all_image_data_from_disk(self):  # type: (...) -> ndarray
         imgs = [imread(fname) for fname in self.band_fnames]
         all_image_data = np.dstack(imgs)
-
         return all_image_data
 
     def read_band_from_disk(self,

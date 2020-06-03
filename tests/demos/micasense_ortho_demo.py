@@ -4,7 +4,7 @@ import resippy.photogrammetry.crs_defs as crs_defs
 import resippy.photogrammetry.ortho_tools as ortho_tools
 from resippy.photogrammetry.dem.dem_factory import DemFactory
 from resippy.image_objects.image_factory import ImageFactory
-from resippy.test_runner import demo_data_base_dir, demo_data_save_dir
+from tests import demo_data_base_dir, demo_data_save_dir
 from resippy.utils import file_utils as file_utils
 
 import numpy as np
@@ -12,7 +12,7 @@ import os
 
 
 # choose a gsd
-gsd_m = 0.5
+gsd_m = 0.05
 # constants calculated from https://msi.nga.mil/MSISiteContent/StaticFiles/Calculators/degree.html
 # based on approx latitude of center of images
 gsd_lon = gsd_m / 81417.0

@@ -75,6 +75,16 @@ class AbstractEarthOverheadPointCalc:
         """
         pass
 
+    def lon_lat_to_pixel_x_y(self,
+                             lons,  # type: ndarray
+                             lats,  # type: ndarray
+                             dem=None,  # type: AbstractDem
+                             world_proj=None, # type: Proj
+                             band=None,     # type: int
+                             ):             # type: (...) -> (ndarray, ndarray)
+        alts = dem.get_elevations(lons, lats, world_proj)
+        return self.lon_lat_alt_to_pixel_x_y(lons, lats, alts, world_proj, band)
+
     def lon_lat_alt_to_pixel_x_y(self,
                                  lons,  # type: ndarray
                                  lats,  # type: ndarray
