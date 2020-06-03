@@ -117,27 +117,29 @@ def combine_image_masks(image_masks,        # type: [np.ndarray]
     return combined_mask
 
 
-def compute_image_histogram_within_world_polygons(image,            # type: AbstractEarthOverheadImage
-                                                  band_num,         # type: int
-                                                  world_polygons,      # type: []
-                                                  world_proj,       # type: Proj
-                                                  dem=None,         # type: AbstractDem
+def compute_image_histogram_within_world_polygons(image_object,  # type: AbstractEarthOverheadImage
+                                                  band_num,  # type: int
+                                                  world_polygons,  # type: []
+                                                  world_proj,  # type: Proj
+                                                  dem=None,  # type: AbstractDem
+                                                  bins=100,
+                                                  range=None,
+                                                  normed=None,
+                                                  weights=None,
+                                                  density=None,
                                                   ):
     image_masks = []
-
     for world_poly in world_polygons:
-        image_poly = world_poly_to_image_poly(world_poly, micasense_image, band_num, dem, world_proj)
-        image_mask = world_poly_to_image_mask(world_poly, micasense_image, band_num, dem, world_proj)
+        image_mask = world_poly_to_image_mask(world_poly, image_object, band_num, dem, world_proj)
         image_masks.append(image_mask)
 
     combined_mask = combine_image_masks(image_masks)
 
     test_im = micasense_image.read_band_from_disk(0)
-    blended = image_utils.blend_images(test_im, combined_mask)
     # get only the pixels within the image mask
     pixels_for_histogram = test_im[np.where(combined_mask)]
-    hist = np.histogram(pixels_for_histogram, bins=100)
-    stop = 1
+    hist = np.histogram(pixels_for_histogram, bins=bins, range=range, normed=normed, weights=weights, density=density)
+    return hist
 
 
 def main():
@@ -147,7 +149,9 @@ def main():
         features = json.load(f)["features"]
     for feature in features:
         world_polygons.append(feature['geometry']['coordinates'][0][0])
-    compute_image_histogram_within_world_polygons(micasense_image)
+    hist = compute_image_histogram_within_world_polygons(micasense_image, 0, world_polygons, crs_defs.PROJ_4326, dem=const_elevation_dem)
+    plt.plot(hist[0])
+    plt.show()
 
 
 if __name__ == '__main__':
