@@ -3,19 +3,20 @@ from resippy.image_objects.image_factory import ImageFactory
 import numpy as np
 import os
 import json
-from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
+from resippy.image_objects.earth_overhead.geotiff.geotiff_image import GeotiffImage
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
 from resippy.photogrammetry.dem.constant_elevation_dem import ConstantElevationDem
 from pyproj import Proj
 import matplotlib.pyplot as plt
 from resippy.photogrammetry import projection_tools
-from resippy.utils.image_utils import image_mask_utils
 import time
+from resippy.utils.image_utils import geotiff_cropper
+from shapely.geometry import Polygon
 
 
-def compute_image_histogram_within_world_polygons(image_object,  # type: AbstractEarthOverheadImage
+def compute_image_histogram_within_world_polygon(geotiff_fname,  # type: str
                                                   band_num,  # type: int
-                                                  world_polygons,  # type: []
+                                                  world_poly,  # type: np.ndarray
                                                   world_proj,  # type: Proj
                                                   dem=None,  # type: AbstractDem
                                                   bins=100,
@@ -23,6 +24,7 @@ def compute_image_histogram_within_world_polygons(image_object,  # type: Abstrac
                                                   normed=None,
                                                   weights=None,
                                                   density=None,
+                                                 tmp_fname=None,
                                                   ):
     """
 
@@ -45,16 +47,17 @@ def compute_image_histogram_within_world_polygons(image_object,  # type: Abstrac
     if dem is None:
         dem = ConstantElevationDem()
 
-    image_masks = []
-    for world_poly in world_polygons:
-        image_mask = projection_tools.world_poly_to_image_mask(world_poly, image_object, band_num, dem, world_proj)
-        image_masks.append(image_mask)
+    shapely_poly = Polygon(world_poly)
+    if tmp_fname is None:
+        tmp_fname = "/tmp/tmp_gtiff.tif"
 
-    combined_mask = image_mask_utils.combine_image_masks(image_masks)
+    geotiff_cropper.crop_geotiff_w_world_polygon(geotiff_fname, tmp_fname, shapely_poly, world_proj)
 
+    image_object = ImageFactory.geotiff.from_file(tmp_fname)
+    image_mask = projection_tools.world_poly_to_image_mask(world_poly, image_object, band_num, dem, world_proj)
     test_im = image_object.read_band_from_disk(0)
     # get only the pixels within the image mask
-    pixels_for_histogram = test_im[np.where(combined_mask)]
+    pixels_for_histogram = test_im[np.where(image_mask)]
     hist = np.histogram(pixels_for_histogram, bins=bins, range=range, normed=normed, weights=weights, density=density)
     return hist
 
@@ -64,17 +67,12 @@ def main():
     geotiff_fname = os.path.expanduser("~/Data/test_ndvi_stats/NDVI.data.tif")
     geojson_fname = os.path.expanduser("~/Data/test_ndvi_stats/ndvi_test.geojson")
 
-    # get the image object
-    ndvi_image = ImageFactory.geotiff.from_file(geotiff_fname)
-
     # get polygons
-    world_polygons = []
     with open(geojson_fname) as f:
         features = json.load(f)["features"]
-    for feature in features:
-        world_polygons.append(feature['geometry']['coordinates'][0][0])
+    world_polygon = features[0]['geometry']['coordinates'][0][0]
     tic = time.time()
-    hist = compute_image_histogram_within_world_polygons(ndvi_image, 0, world_polygons, crs_defs.PROJ_4326, bins=100)
+    hist = compute_image_histogram_within_world_polygon(geotiff_fname, 0, world_polygon, crs_defs.PROJ_4326, bins=100)
     toc = time.time()
     print("finished computing masked stats in: " + str(toc-tic) + " seconds")
     plt.plot(hist[0])
