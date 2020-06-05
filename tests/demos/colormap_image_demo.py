@@ -1,7 +1,7 @@
 import resippy.utils.image_utils.image_utils as image_utils
 import resippy.utils.file_utils as file_utils
-from resippy.test_runner import demo_data_base_dir
-from resippy.test_runner import demo_data_save_dir
+from tests import demo_data_base_dir
+from tests import demo_data_save_dir
 import imageio
 import os
 import numpy as np

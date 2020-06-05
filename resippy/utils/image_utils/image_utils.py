@@ -9,6 +9,8 @@ import ogr
 import seaborn
 from seaborn.palettes import _ColorPalette
 from PIL import Image
+import matplotlib.pyplot as plt
+
 
 def create_uniform_image_data(nx,  # type: int
                               ny,  # type: int
@@ -150,7 +152,80 @@ def create_detection_image_from_scores(score_values, upper_left_yx_tuples, chip_
     return detection_image
 
 
-# TODO: add support for discrete color steps, rather than just continous
+def apply_colormap_to_grayscale_image2(grayscale_image,  # type: ndarray
+                                       color_palette=None,  # type: ndarray
+                                       min_cutoff=None,
+                                       max_cutoff=None,
+                                       ):
+
+    if min_cutoff is not None:
+        grayscale_image[np.where(grayscale_image < min_cutoff)] = min_cutoff
+    if max_cutoff is not None:
+        grayscale_image[np.where(grayscale_image > max_cutoff)] = max_cutoff
+
+    n_colors_in_colormap = np.shape(color_palette)[0]
+    n_color_bins = n_colors_in_colormap - 1
+    ny, nx = grayscale_image.shape
+    colormapped_image = np.zeros((ny, nx, 3))
+
+    grayscale_min = np.min(grayscale_image)
+    grayscale_max = np.max(grayscale_image)
+
+    bin_cutoff_vals = np.linspace(grayscale_min, grayscale_max, n_colors_in_colormap)
+
+    red_image = np.zeros_like(grayscale_image)
+    green_image = np.zeros_like(grayscale_image)
+    blue_image = np.zeros_like(grayscale_image)
+
+    for i in range(n_color_bins):
+        gray_min = bin_cutoff_vals[i]
+        gray_max = bin_cutoff_vals[i+1]
+        bin_range = gray_max - gray_min
+        tmp_img = np.zeros_like(grayscale_image)
+
+        red_min = color_palette[i, 0]
+        red_max = color_palette[i+1, 0]
+
+        green_min = color_palette[i, 1]
+        green_max = color_palette[i+1, 1]
+
+        blue_min = color_palette[i, 2]
+        blue_max = color_palette[i+1, 2]
+
+        red_slope = (red_max - red_min) / bin_range
+        green_slope = (green_max - green_min) / bin_range
+        blue_slope = (blue_max - blue_min) / bin_range
+
+        red_intersect = red_min - red_slope*gray_min
+        green_intersect = green_min - green_slope*gray_min
+        blue_intersect = blue_min - blue_slope*blue_min
+
+        red_map = tmp_img * red_slope + red_intersect
+        green_map = tmp_img * green_slope + green_intersect
+        blue_map = tmp_img * blue_slope + blue_intersect
+
+        gt_indices = np.where(grayscale_image >= gray_min)
+        lt_indices = np.where(grayscale_image <= gray_max)
+
+        gt_index_map = np.zeros_like(grayscale_image, dtype=np.int8)
+        lt_index_map = np.zeros_like(grayscale_image, dtype=np.int8)
+
+        gt_index_map[gt_indices] = 1
+        lt_index_map[lt_indices] = 1
+
+        combined_map = np.bitwise_and(gt_index_map, lt_index_map)
+        combined_indices = np.where(combined_map > 0)
+
+        red_image[combined_indices] = red_map[combined_indices]
+        green_image[combined_indices] = green_map[combined_indices]
+        blue_image[combined_indices] = blue_map[combined_indices]
+
+    colormapped_image[:, :, 0] = red_image
+    colormapped_image[:, :, 1] = green_image
+    colormapped_image[:, :, 2] = blue_image
+    return colormapped_image
+
+
 def apply_colormap_to_grayscale_image(grayscale_image,  # type: ndarray
                                       color_palette=None,  # type: Union[_ColorPalette, ndarray]
                                       continuous=True,  # type: bool
@@ -262,3 +337,14 @@ def resize_image(image_to_resize,           # type: ndarray
     resized_pil_image = Image.Image.resize(pil_image, (new_nx, new_ny))
     resized_numpy_image = np.array(resized_pil_image)
     return resized_numpy_image
+
+
+def resize_image_by_percent(image_to_resize,           # type: ndarray
+                            percent,                    # type: float
+                            ):                         # type: (...) -> ndarray
+    pil_image = Image.fromarray(image_to_resize)
+    original_ny = image_to_resize.shape[0]
+    original_nx = image_to_resize.shape[1]
+    new_ny = int(original_ny * percent)
+    new_nx = int(original_nx * percent)
+    return resize_image(image_to_resize, new_ny, new_nx)
