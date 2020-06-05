@@ -12,6 +12,7 @@ from resippy.utils.image_utils import geotiff_cropper
 from shapely.geometry import Polygon
 from resippy.utils.image_utils import image_utils
 import imageio
+from PIL import Image
 
 
 def compute_image_histogram_within_world_polygon(geotiff_fname,  # type: str
@@ -78,12 +79,18 @@ def apply_ndvi_colormap(geotiff_fname,  # type: str
     geotiff_cropper.crop_geotiff_w_world_polygon(geotiff_fname, tmp_fname, shapely_poly, world_proj)
     image_object = ImageFactory.geotiff.from_file(tmp_fname)
     # image_object = ImageFactory.geotiff.from_file(geotiff_fname)
-    # image_mask = projection_tools.world_poly_to_image_mask(world_poly, image_object, 0, ConstantElevationDem(), world_proj)
+    image_mask = projection_tools.world_poly_to_image_mask(world_poly, image_object, 0, ConstantElevationDem(), world_proj)
 
     grayscale_image = image_object.read_band_from_disk(0)
 
     ndvi_image = image_utils.apply_colormap_to_grayscale_image2(grayscale_image, ndvi_colormap, min_cutoff=min, max_cutoff=max)
-    imageio.imsave(output_fname, ndvi_image)
+    ndvi_w_transparency = np.zeros((ndvi_image.shape[0], ndvi_image.shape[1], 4), dtype=np.uint8)
+    ndvi_w_transparency[:, :, 0:3] = ndvi_image
+    image_mask = np.asarray(image_mask, dtype=np.uint8)
+    ndvi_w_transparency[:, :, 3] = image_mask*200 + 55
+    pil_image = Image.fromarray(ndvi_w_transparency)
+    pil_image.save(output_fname)
+    #imageio.imsave(output_fname, ndvi_image)
 
 
 def main():

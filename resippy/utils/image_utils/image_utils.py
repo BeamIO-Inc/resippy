@@ -166,22 +166,21 @@ def apply_colormap_to_grayscale_image2(grayscale_image,  # type: ndarray
     n_colors_in_colormap = np.shape(color_palette)[0]
     n_color_bins = n_colors_in_colormap - 1
     ny, nx = grayscale_image.shape
-    colormapped_image = np.zeros((ny, nx, 3))
+    colormapped_image = np.zeros((ny, nx, 3), dtype=np.uint8)
 
     grayscale_min = np.min(grayscale_image)
     grayscale_max = np.max(grayscale_image)
 
     bin_cutoff_vals = np.linspace(grayscale_min, grayscale_max, n_colors_in_colormap)
 
-    red_image = np.zeros_like(grayscale_image)
-    green_image = np.zeros_like(grayscale_image)
-    blue_image = np.zeros_like(grayscale_image)
+    red_image = np.zeros_like(grayscale_image, dtype=np.uint8)
+    green_image = np.zeros_like(grayscale_image, dtype=np.uint8)
+    blue_image = np.zeros_like(grayscale_image, dtype=np.uint8)
 
     for i in range(n_color_bins):
         gray_min = bin_cutoff_vals[i]
         gray_max = bin_cutoff_vals[i+1]
         bin_range = gray_max - gray_min
-        tmp_img = np.zeros_like(grayscale_image)
 
         red_min = color_palette[i, 0]
         red_max = color_palette[i+1, 0]
@@ -200,9 +199,9 @@ def apply_colormap_to_grayscale_image2(grayscale_image,  # type: ndarray
         green_intersect = green_min - green_slope*gray_min
         blue_intersect = blue_min - blue_slope*blue_min
 
-        red_map = tmp_img * red_slope + red_intersect
-        green_map = tmp_img * green_slope + green_intersect
-        blue_map = tmp_img * blue_slope + blue_intersect
+        red_map = grayscale_image * red_slope + red_intersect
+        green_map = grayscale_image * green_slope + green_intersect
+        blue_map = grayscale_image * blue_slope + blue_intersect
 
         gt_indices = np.where(grayscale_image >= gray_min)
         lt_indices = np.where(grayscale_image <= gray_max)
