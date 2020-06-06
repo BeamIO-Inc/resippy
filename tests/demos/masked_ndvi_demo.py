@@ -60,9 +60,9 @@ def compute_image_histogram_within_world_polygon(geotiff_fname,  # type: str
 
 
 def apply_ndvi_colormap(geotiff_fname,  # type: str
-                        world_poly,  # type: np.ndarray
                         world_proj,  # type: Proj
                         output_fname,
+                        world_poly=None,  # type: np.ndarray
                         tmp_fname=None,     # type: str
                         min=0,
                         max=1
@@ -76,19 +76,24 @@ def apply_ndvi_colormap(geotiff_fname,  # type: str
     if tmp_fname is None:
         tmp_fname = "/tmp/tmp_gtiff.tif"
 
-    geotiff_cropper.crop_geotiff_w_world_polygon(geotiff_fname, tmp_fname, shapely_poly, world_proj)
-    image_object = ImageFactory.geotiff.from_file(tmp_fname)
-    # image_object = ImageFactory.geotiff.from_file(geotiff_fname)
-    image_mask = projection_tools.world_poly_to_image_mask(world_poly, image_object, 0, ConstantElevationDem(), world_proj)
+    if world_poly is not None:
+        geotiff_cropper.crop_geotiff_w_world_polygon(geotiff_fname, tmp_fname, shapely_poly, world_proj)
+        image_object = ImageFactory.geotiff.from_file(tmp_fname)
+        image_mask = projection_tools.world_poly_to_image_mask(world_poly, image_object, 0, ConstantElevationDem(), world_proj)
+    else:
+        image_object = ImageFactory.geotiff.from_file(geotiff_fname)
 
     grayscale_image = image_object.read_band_from_disk(0)
 
     ndvi_image = image_utils.apply_colormap_to_grayscale_image2(grayscale_image, ndvi_colormap, min_cutoff=min, max_cutoff=max)
-    ndvi_w_transparency = np.zeros((ndvi_image.shape[0], ndvi_image.shape[1], 4), dtype=np.uint8)
-    ndvi_w_transparency[:, :, 0:3] = ndvi_image
-    image_mask = np.asarray(image_mask, dtype=np.uint8)
-    ndvi_w_transparency[:, :, 3] = image_mask*200 + 55
-    pil_image = Image.fromarray(ndvi_w_transparency)
+    if world_poly is not None:
+        ndvi_colorized = np.zeros((ndvi_image.shape[0], ndvi_image.shape[1], 4), dtype=np.uint8)
+        ndvi_colorized[:, :, 0:3] = ndvi_image
+        image_mask = np.asarray(image_mask, dtype=np.uint8)
+        ndvi_colorized[:, :, 3] = image_mask*0 + 255
+    else:
+        ndvi_colorized = ndvi_image
+    pil_image = Image.fromarray(ndvi_colorized)
     pil_image.save(output_fname)
     #imageio.imsave(output_fname, ndvi_image)
 
@@ -107,7 +112,8 @@ def main():
     # toc = time.time()
     # print("finished computing masked stats in: " + str(toc-tic) + " seconds")
 
-    apply_ndvi_colormap(geotiff_fname, world_polygon, crs_defs.PROJ_4326, os.path.expanduser("~/Downloads/ndvi_image2.png"))
+    apply_ndvi_colormap(geotiff_fname, crs_defs.PROJ_4326, os.path.expanduser("~/Downloads/ndvi_image_w_poly.png"), world_poly=world_polygon)
+    apply_ndvi_colormap(geotiff_fname, crs_defs.PROJ_4326, os.path.expanduser("~/Downloads/ndvi_image.jpg"))
 
 
 if __name__ == '__main__':
