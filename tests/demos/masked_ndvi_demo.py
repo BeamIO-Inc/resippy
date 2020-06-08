@@ -65,7 +65,8 @@ def apply_ndvi_colormap(geotiff_fname,  # type: str
                         world_poly=None,  # type: np.ndarray
                         tmp_fname=None,     # type: str
                         min=0,
-                        max=1
+                        max=1,
+                        transparent_zero_vals=True,     # type: bool
                         ):
     ndvi_colormap = np.zeros((3, 3))
     ndvi_colormap[0, :] = [255, 32, 0]
@@ -92,15 +93,29 @@ def apply_ndvi_colormap(geotiff_fname,  # type: str
         image_mask = np.asarray(image_mask, dtype=np.uint8)
         ndvi_colorized[:, :, 3] = image_mask*0 + 255
     else:
+        ndvi_colorized = np.zeros((ndvi_image.shape[0], ndvi_image.shape[1], 4), dtype=np.uint8)
+        ndvi_colorized[:, :, 0:3] = ndvi_image
+
+    # create transparent layer where there are zero values in the original image
+    if transparent_zero_vals:
+        ndvi_colorized[:, :, 3] = 255
+        ndvi_colorized[np.where(grayscale_image == 0)] = 0
+    else:
         ndvi_colorized = ndvi_image
-    pil_image = Image.fromarray(ndvi_colorized)
-    pil_image.save(output_fname)
-    #imageio.imsave(output_fname, ndvi_image)
+
+    if output_fname[-4:].lower() == ".tif":
+        colorized_geotiff_image = ImageFactory.geotiff.from_numpy_array(ndvi_colorized,
+                                                                        image_object.get_point_calculator().get_geot(),
+                                                                        image_object.get_point_calculator().get_projection())
+        colorized_geotiff_image.write_to_disk(output_fname)
+    else:
+        pil_image = Image.fromarray(ndvi_colorized)
+        pil_image.save(output_fname)
 
 
 def main():
     # set up fnames
-    geotiff_fname = os.path.expanduser("~/Data/test_ndvi_stats/NDVI.data.tif")
+    geotiff_fname = os.path.expanduser("~/Downloads/gndvi2.tif")
     geojson_fname = os.path.expanduser("~/Data/test_ndvi_stats/ndvi_test.geojson")
 
     # get polygons
@@ -112,8 +127,8 @@ def main():
     # toc = time.time()
     # print("finished computing masked stats in: " + str(toc-tic) + " seconds")
 
-    apply_ndvi_colormap(geotiff_fname, crs_defs.PROJ_4326, os.path.expanduser("~/Downloads/ndvi_image_w_poly.png"), world_poly=world_polygon)
-    apply_ndvi_colormap(geotiff_fname, crs_defs.PROJ_4326, os.path.expanduser("~/Downloads/ndvi_image.jpg"))
+    # apply_ndvi_colormap(geotiff_fname, crs_defs.PROJ_4326, os.path.expanduser("~/Downloads/ndvi_image_w_poly.png"), world_poly=world_polygon)
+    apply_ndvi_colormap(geotiff_fname, crs_defs.PROJ_4326, os.path.expanduser("~/Downloads/gndvi2_colorized.tif"), transparent_zero_vals=False)
 
 
 if __name__ == '__main__':
