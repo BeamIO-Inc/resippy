@@ -82,29 +82,30 @@ class Pix4dPointCalc(AbstractEarthOverheadPointCalc):
         point_calc = Pix4dPointCalc()
 
         image_key_basename = os.path.basename(image_key)
-        point_calc.image_key = image_key_basename
-        point_calc.r_matrix = all_params[image_key_basename]['camera_rotation_r']
-        point_calc.camera_translation = all_params[image_key_basename]['external_params'][0:3]
+        image_key = [k for k in all_params.keys() if image_key_basename in k][0]
+        point_calc.image_key = image_key
+        point_calc.r_matrix = all_params[image_key]['camera_rotation_r']
+        point_calc.camera_translation = all_params[image_key]['external_params'][0:3]
 
-        pixels_per_mm = all_params[image_key_basename]["n_x_pixels"] / all_params[image_key_basename]["internal_params"]["fpa_width_mm"]
-        f_pixels = all_params[image_key_basename]["internal_params"]["F"] * pixels_per_mm
-        principal_point_x_pixels = all_params[image_key_basename]["internal_params"]["Px"] * pixels_per_mm
-        principal_point_y_pixels = all_params[image_key_basename]["internal_params"]["Py"] * pixels_per_mm
+        pixels_per_mm = all_params[image_key]["n_x_pixels"] / all_params[image_key]["internal_params"]["fpa_width_mm"]
+        f_pixels = all_params[image_key]["internal_params"]["F"] * pixels_per_mm
+        principal_point_x_pixels = all_params[image_key]["internal_params"]["Px"] * pixels_per_mm
+        principal_point_y_pixels = all_params[image_key]["internal_params"]["Py"] * pixels_per_mm
 
         point_calc.principal_point_x_pixels = principal_point_x_pixels
         point_calc.principal_point_y_pixels = principal_point_y_pixels
-        point_calc.npix_x = all_params[image_key_basename]['n_x_pixels']
-        point_calc.npix_y = all_params[image_key_basename]['n_y_pixels']
+        point_calc.npix_x = all_params[image_key]['n_x_pixels']
+        point_calc.npix_y = all_params[image_key]['n_y_pixels']
         point_calc.f_pixels = f_pixels
-        point_calc.tangential_distortion_1 = all_params[image_key_basename]['tangential_distortion'][0]
-        point_calc.tangential_distortion_2 = all_params[image_key_basename]['tangential_distortion'][1]
-        point_calc.radial_distortion_1 = all_params[image_key_basename]['radial_distortion'][0]
-        point_calc.radial_distortion_2 = all_params[image_key_basename]['radial_distortion'][1]
-        point_calc.radial_distortion_3 = all_params[image_key_basename]['radial_distortion'][1]
+        point_calc.tangential_distortion_1 = all_params[image_key]['tangential_distortion'][0]
+        point_calc.tangential_distortion_2 = all_params[image_key]['tangential_distortion'][1]
+        point_calc.radial_distortion_1 = all_params[image_key]['radial_distortion'][0]
+        point_calc.radial_distortion_2 = all_params[image_key]['radial_distortion'][1]
+        point_calc.radial_distortion_3 = all_params[image_key]['radial_distortion'][1]
         point_calc.distortion_model = distortion_model
 
-        approximate_lon = all_params[image_key_basename]['external_params'][0]
-        approximate_lat = all_params[image_key_basename]['external_params'][1]
+        approximate_lon = all_params[image_key]['external_params'][0]
+        approximate_lat = all_params[image_key]['external_params'][1]
 
         point_calc.set_approximate_lon_lat_center(approximate_lon, approximate_lat)
         point_calc.set_projection(all_params['projection'])
