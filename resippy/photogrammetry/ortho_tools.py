@@ -90,7 +90,7 @@ def get_pixel_lon_lats(overhead_image,  # type: AbstractEarthOverheadImage
 def mask_image(image, nodata_val=0):
     """
     Mask tiff images to make the nodata_val region transparent. One alpha channel is added to the image.
-    Value of 0 for alpha: full transparency
+    Value of 0 for alpha: full transparent
     Value of 255 for alpha: fully opaque
 
     :param image: a single or multi-band (orthorectified) image.
