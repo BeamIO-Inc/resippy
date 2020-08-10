@@ -93,8 +93,8 @@ def mask_image(image, nodata_val=0):
     Value of 0 for alpha: full transparent
     Value of 255 for alpha: fully opaque
 
-    # Note: Given that by default black pixels in channel 0 / band 1 are masked, masking gets broken for relatively darker
-    images.
+    # Note: Given that by default black pixels in channel 0 / band 1 are masked, masking gets broken
+    for relatively darker images.
 
     :param image: a single or multi-band (orthorectified) image.
     :return: input image with an added alpha layer which masks nodata_val region.
