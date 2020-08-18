@@ -1,5 +1,4 @@
 import gdal
-import os
 
 from resippy.image_objects.earth_overhead.mako.mako_image import MakoImage
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.opencv_point_calc import OpenCVPointCalc
