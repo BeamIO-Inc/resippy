@@ -60,3 +60,23 @@ class AbstractEarthOverheadImage(AbstractImage):
         :return: None
         """
         self._point_calc = point_calc
+
+    @property
+    def pointcalc(self):  # type: (...) -> AbstractEarthOverheadPointCalc
+        return self._point_calc
+
+    @pointcalc.setter
+    def pointcalc(self,
+                  val,  # type: AbstractEarthOverheadPointCalc
+                  ):
+        self._point_calc = val
+
+    @property
+    def metadata(self):  # type: (...) -> AbstractImageMetadata
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self,
+                 val,  # type: AbstractImageMetadata
+                 ):
+        self._metadata = val

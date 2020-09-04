@@ -1,6 +1,6 @@
 import resippy.photogrammetry.ortho_tools as ortho_tools
 from resippy.image_objects.image_factory import ImageFactory
-from resippy.test_runner import demo_data_base_dir, demo_data_save_dir
+from tests.demo_tests import demo_data_base_dir, demo_data_save_dir
 from resippy.utils import file_utils as file_utils
 
 import os

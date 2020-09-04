@@ -56,7 +56,6 @@ class FixturedCamera:
         m_matrix = photogrammetry_utils.create_M_matrix(roll_radians, pitch_radians, yaw_radians, order=order)
         self.set_fixture_orientation(m_matrix)
 
-
     def set_relative_camera_xyz(self,
                                 x_relative_to_fixture_center,       # type: float
                                 y_relative_to_fixture_center,       # type: float

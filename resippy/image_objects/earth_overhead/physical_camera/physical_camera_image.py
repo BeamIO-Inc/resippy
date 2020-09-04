@@ -25,9 +25,13 @@ class PhysicalCameraImage(AbstractEarthOverheadImage):
     def read_band_from_disk(self,
                             band_number     # type: int
                             ):              # type: (...) -> ndarray
-        if self.read_with_gdal:
-            band = self._dset.GetRasterBand(band_number + 1)
-        return band.ReadAsArray()
+        image_data = self.get_image_band(band_number)
+        if image_data is not None:
+            return image_data
+        else:
+            if self.read_with_gdal:
+                band = self._dset.GetRasterBand(band_number + 1)
+            return band.ReadAsArray()
 
     def set_gdal_dset(self,
                       dset  # type: gdal.Dataset

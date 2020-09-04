@@ -161,7 +161,6 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
                                flip_x=False,                            # type: bool
                                flip_y=False,                            # type: bool
                                ):                                       # type: (...) -> IdealPinholeFpaLocalUtmPointCalc
- 
 
         utm_point_calc = IdealPinholeFpaLocalUtmPointCalc()
 

@@ -10,6 +10,7 @@ import seaborn
 from seaborn.palettes import _ColorPalette
 from PIL import Image
 
+
 def create_uniform_image_data(nx,  # type: int
                               ny,  # type: int
                               nbands=1,  # type: int
