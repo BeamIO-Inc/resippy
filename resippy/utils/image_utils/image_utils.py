@@ -10,6 +10,7 @@ import seaborn
 from seaborn.palettes import _ColorPalette
 from PIL import Image
 
+
 def create_uniform_image_data(nx,  # type: int
                               ny,  # type: int
                               nbands=1,  # type: int
@@ -119,6 +120,17 @@ def gdal_grid_image_band(image_to_warp,  # type: ndarray
     dst_dataset = None
 
     print("done")
+
+
+def normalize_grayscale_image(input_image, new_min, new_max, output_dtype=None):
+    image_min = np.min(input_image)
+    image_max = np.max(input_image)
+    image_zero_to_one = (input_image - image_min)/(image_max-image_min)
+    normalized_image = image_zero_to_one * (new_max - new_min) + new_min
+    if output_dtype is None:
+        return normalized_image
+    else:
+        return np.array(normalized_image, dtype=output_dtype)
 
 
 def is_grayscale(image_2d  # type: ndarray
