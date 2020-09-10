@@ -4,9 +4,11 @@ import numpy
 from tests.demo_tests import demo_data_base_dir, demo_data_save_dir
 from resippy.image_objects.image_factory import GeotiffImageFactory
 from resippy.utils.physical_camera_simulator import PhysicalCameraSimulator
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.ideal_pinhole_fpa_local_utm_point_calc import IdealPinholeFpaLocalUtmPointCalc
 from resippy.utils.boresighter import SiftBoresighter
 import pickle
 from resippy.utils import file_utils
+from resippy.photogrammetry import ortho_tools
 import matplotlib.pyplot as plt
 
 
@@ -75,6 +77,7 @@ def create_simulated_image_objects(lons, lats, alts, rolls, pitches, yaws):
         simulated_image_objects.append(flightline_image_obj)
     return simulated_image_objects
 
+boresighter = SiftBoresighter()
 
 antiparallel_flight_image_objects = create_simulated_image_objects(antiparallel_passes_xyzrpy[0],
                                                                    antiparallel_passes_xyzrpy[1],
@@ -90,19 +93,97 @@ perpendicular_flight_image_objects = create_simulated_image_objects(flightline_p
                                                                     flightline_passes_xyzrpy[4],
                                                                     flightline_passes_xyzrpy[5])
 
-boresighter = SiftBoresighter()
+
+antipar_out_1 = ortho_tools.create_full_ortho_gtiff_image(antiparallel_flight_image_objects[0])
+antipar_out_1.write_to_disk(os.path.expanduser("~/Downloads/antipar_out_1_zero_boresights.tif"))
+
+antipar_back_1 = ortho_tools.create_full_ortho_gtiff_image(antiparallel_flight_image_objects[1])
+antipar_back_1.write_to_disk(os.path.expanduser("~/Downloads/antipar_back_1_zero_boresights.tif"))
+
+antipar_out_1_w_boresights = boresighter.create_boresight_corrected_image_object(antiparallel_flight_image_objects[0],
+                                                                                 boresight_roll_offset_deg,
+                                                                                 boresight_pitch_offset_deg,
+                                                                                 boresight_yaw_offset_deg)
+antipar_out_1_w_boresights_gtiff = ortho_tools.create_full_ortho_gtiff_image(antipar_out_1_w_boresights)
+antipar_out_1_w_boresights_gtiff.write_to_disk(os.path.expanduser("~/Downloads/antipar_out_1_correct_boresights.tif"))
+
+antipar_back_1_w_boresights = boresighter.create_boresight_corrected_image_object(antiparallel_flight_image_objects[1],
+                                                                                  boresight_roll_offset_deg,
+                                                                                  boresight_pitch_offset_deg,
+                                                                                  boresight_yaw_offset_deg)
+antipar_back_1_w_boresights_gtiff = ortho_tools.create_full_ortho_gtiff_image(antipar_back_1_w_boresights)
+antipar_back_1_w_boresights_gtiff.write_to_disk(os.path.expanduser("~/Downloads/antipar_back_1_correct_boresights.tif"))
 
 rolls, pitches = boresighter.compute_search_space_rolls_and_pitches(antiparallel_flight_image_objects[0],
                                                                     antiparallel_flight_image_objects[1])
 
-antiparallel_detection_planes = boresighter.create_boresight_detection_planes(antiparallel_flight_image_objects[0],
-                                                                              antiparallel_flight_image_objects[1],
-                                                                              rolls, pitches,
-                                                                              numpy.array([-1, -1.3, -1.6, 0, 0.3, 0.6, 1]))
+yaws = numpy.linspace(-20, 20, 7)
+yaws = numpy.deg2rad(yaws)
+antipar_pickle_path = os.path.join(save_dir, "antipar.pkl")
+perpendicular_pickle_path = os.path.join(save_dir, "perp.pkl")
+if not os.path.exists(antipar_pickle_path):
+    antiparallel_detection_planes = boresighter.create_boresight_detection_planes(antiparallel_flight_image_objects[0],
+                                                                                  antiparallel_flight_image_objects[1],
+                                                                                  rolls, pitches, yaws)
 
-perpendicular_detection_planes = boresighter.create_boresight_detection_planes(perpendicular_flight_image_objects[0],
-                                                                               perpendicular_flight_image_objects[1],
-                                                                               rolls, pitches,
-                                                                               numpy.array([-1, -1.3, -1.6, 0, 0.3, 0.6, 1]))
+    perpendicular_detection_planes = boresighter.create_boresight_detection_planes(perpendicular_flight_image_objects[0],
+                                                                                   perpendicular_flight_image_objects[1],
+                                                                                   rolls, pitches, yaws)
+
+    pickle.dump(antiparallel_detection_planes, open(antipar_pickle_path, "wb"))
+    pickle.dump(perpendicular_detection_planes, open(perpendicular_pickle_path, "wb"))
+
+else:
+    antiparallel_detection_planes = pickle.load(open(antipar_pickle_path, "rb"))
+    perpendicular_detection_planes = pickle.load(open(perpendicular_pickle_path, "rb"))
+
+
+def create_detection_plane_geotiffs(detection_plane_number):
+    antipar_plane = antiparallel_detection_planes[detection_plane_number]
+    antipar_pitch_index, antipar_roll_index = numpy.where(antipar_plane == antipar_plane.min())
+    antipar_pitch = pitches[antipar_pitch_index]
+    antipar_roll = rolls[antipar_roll_index]
+    yaw = yaws[detection_plane_number]
+
+    antipar_roll = numpy.rad2deg(antipar_roll)
+    antipar_pitch = numpy.rad2deg(antipar_pitch)
+    yaw = numpy.rad2deg(yaw)
+    antipar_out_1_w_boresights = boresighter.create_boresight_corrected_image_object(
+        antiparallel_flight_image_objects[0],
+        antipar_roll,
+        antipar_pitch,
+        yaw)
+    antipar_out_1_w_boresights_gtiff = ortho_tools.create_full_ortho_gtiff_image(antipar_out_1_w_boresights)
+    antipar_out_1_w_boresights_gtiff.write_to_disk(
+        os.path.expanduser("~/Downloads/antipar_out_1_detection_plane_" + str(detection_plane_number) + ".tif"))
+
+    antipar_back_1_w_boresights = boresighter.create_boresight_corrected_image_object(
+        antiparallel_flight_image_objects[1],
+        antipar_roll,
+        antipar_pitch,
+        yaw)
+    antipar_back_1_w_boresights_gtiff = ortho_tools.create_full_ortho_gtiff_image(antipar_back_1_w_boresights)
+    antipar_back_1_w_boresights_gtiff.write_to_disk(
+        os.path.expanduser("~/Downloads/antipar_back_1_detection_plane_" + str(detection_plane_number) + ".tif"))
+
+    perp_out_1_w_boresights = boresighter.create_boresight_corrected_image_object(
+        perpendicular_flight_image_objects[0],
+        antipar_roll,
+        antipar_pitch,
+        yaw)
+    perp_out_1_w_boresights_gtiff = ortho_tools.create_full_ortho_gtiff_image(perp_out_1_w_boresights)
+    perp_out_1_w_boresights_gtiff.write_to_disk(
+        os.path.expanduser("~/Downloads/perp_out_1_detection_plane_" + str(detection_plane_number) + ".tif"))
+
+    perp_back_1_w_boresights = boresighter.create_boresight_corrected_image_object(
+        perpendicular_flight_image_objects[1],
+        antipar_roll,
+        antipar_pitch,
+        yaw)
+    perp_back_1_w_boresights_gtiff = ortho_tools.create_full_ortho_gtiff_image(perp_back_1_w_boresights)
+    perp_back_1_w_boresights_gtiff.write_to_disk(
+        os.path.expanduser("~/Downloads/perp_back_1_detection_plane_" + str(detection_plane_number) + ".tif"))
+
+create_detection_plane_geotiffs(5)
 
 stop = 1
