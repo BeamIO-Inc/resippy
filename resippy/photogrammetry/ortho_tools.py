@@ -9,6 +9,7 @@ from numpy.core.multiarray import ndarray
 from shapely.geometry import MultiPoint, Polygon
 from shapely.ops import unary_union
 from pyproj import Proj
+from scipy.ndimage import map_coordinates
 
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
 from resippy.image_objects.earth_overhead.geotiff.geotiff_image_factory import GeotiffImageFactory
@@ -21,6 +22,8 @@ from resippy.utils import proj_utils
 from pyproj import transform
 from resippy.photogrammetry.dem.dem_factory import DemFactory
 from resippy.utils.image_utils import image_utils as image_utils
+
+import matplotlib.pyplot as plt
 
 
 def get_pixel_values(image_object,  # type: AbstractEarthOverheadImage
@@ -108,7 +111,7 @@ def create_full_ortho_gtiff_image(overhead_image,  # type: AbstractEarthOverhead
                                   output_proj=None,  # type: Proj
                                   bands=None,  # type: [int]
                                   nodata_val=0,  # type: float
-                                  interpolation="nearest",  # type: str
+                                  spline_order=1,  # type: str
                                   ):  # type: (...) -> GeotiffImage
     extent = get_extent(overhead_image, dem, bands=bands)
     native_lon, native_lat = extent.bounds[0], extent.bounds[1]
@@ -145,11 +148,86 @@ def create_full_ortho_gtiff_image(overhead_image,  # type: AbstractEarthOverhead
                                                     dem=dem,
                                                     bands=bands,
                                                     nodata_val=nodata_val,
-                                                    interpolation=interpolation)
+                                                    spline_order=spline_order)
 
 
 # TODO more testing on non 4326 projections
 def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEarthOverheadImage
+                                             ortho_nx_pix,  # type: int
+                                             ortho_ny_pix,  # type: int
+                                             world_polygon,  # type: Polygon
+                                             world_proj=crs_defs.PROJ_4326,  # type: Proj
+                                             dem=None,  # type: AbstractDem
+                                             bands=None,  # type: List[int]
+                                             nodata_val=0,  # type: float
+                                             output_fname=None,  # type: str
+                                             spline_order=0  # type: str
+                                             ):  # type:  (...) -> GeotiffImage
+
+    envelope = world_polygon.envelope
+    minx, miny, maxx, maxy = envelope.bounds
+    image_ground_grid_x, image_ground_grid_y = create_ground_grid(minx, maxx, miny, maxy, ortho_nx_pix, ortho_ny_pix)
+    geo_t = world_poly_to_geo_t(envelope, ortho_nx_pix, ortho_ny_pix)
+
+    if dem is None:
+        dem = DemFactory.constant_elevation(0)
+        dem.set_projection(crs_defs.PROJ_4326)
+    alts = dem.get_elevations(image_ground_grid_x, image_ground_grid_y, world_proj)
+
+    if bands is None:
+        bands = list(range(overhead_image.get_metadata().get_n_bands()))
+
+    images = []
+    if overhead_image.get_point_calculator().bands_coregistered() is not True:
+        for band in bands:
+            pixels_x, pixels_y = overhead_image.get_point_calculator(). \
+                lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=band, world_proj=world_proj)
+            image_data = overhead_image.read_band_from_disk(band)
+            im_tp = image_data.dtype
+
+            regridded = map_coordinates(image_data,
+                                        [image_utils.flatten_image_band(pixels_y),
+                                         image_utils.flatten_image_band(pixels_x)],
+                                        order=spline_order)
+
+            regridded = image_utils.unflatten_image_band(regridded, ortho_nx_pix, ortho_ny_pix)
+            regridded = regridded.astype(im_tp)
+            images.append(regridded)
+    else:
+        pixels_x, pixels_y = overhead_image.get_point_calculator(). \
+            lon_lat_alt_to_pixel_x_y(image_ground_grid_x, image_ground_grid_y, alts, band=0, world_proj=world_proj)
+        for band in bands:
+            image_data = overhead_image.get_image_band(band)
+            if image_data is None:
+                image_data = overhead_image.read_band_from_disk(band)
+            im_tp = image_data.dtype
+
+            regridded = map_coordinates(image_data,
+                                        [image_utils.flatten_image_band(pixels_y),
+                                         image_utils.flatten_image_band(pixels_x)],
+                                        order=spline_order)
+
+            regridded = image_utils.unflatten_image_band(regridded, ortho_nx_pix, ortho_ny_pix)
+
+            regridded = regridded.astype(im_tp)
+
+            regridded[np.where(pixels_x <= 0)] = nodata_val
+            regridded[np.where(pixels_x >= overhead_image.metadata.get_npix_x() - 2)] = nodata_val
+
+            regridded[np.where(pixels_y <= 0)] = nodata_val
+            regridded[np.where(pixels_y >= overhead_image.metadata.get_npix_y() - 2)] = nodata_val
+            images.append(regridded)
+
+    orthorectified_image = np.stack(images, axis=2)
+    gtiff_image = GeotiffImageFactory.from_numpy_array(orthorectified_image, geo_t, world_proj)
+    gtiff_image.get_metadata().set_nodata_val(nodata_val)
+    if output_fname is not None:
+        gtiff_image.write_to_disk(output_fname)
+
+    return gtiff_image
+
+
+def create_ortho_gtiff_image_world_to_sensor_backup(overhead_image,  # type: AbstractEarthOverheadImage
                                              ortho_nx_pix,  # type: int
                                              ortho_ny_pix,  # type: int
                                              world_polygon,  # type: Polygon

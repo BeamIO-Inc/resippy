@@ -241,14 +241,19 @@ class AbstractEarthOverheadPointCalc:
             machine_pixels_lat_y_diff = machine_lat_pixels_y - machine_pixel_lon_lat[1]
 
             # find the first index where a shift in longitude is greater than 1 pixel
-            lon_gt1_pixel_index = (np.where(np.square(machine_pixels_lon_x_diff) +
-                                            np.square(machine_pixels_lon_y_diff) > np.square(d_pixel))[0])[0]
-            d_lon = machine_d_lons[lon_gt1_pixel_index] - approximate_lon
+            # TODO: this is broken in some cases.  fix and add unit tests.
+            if np.isnan(machine_pixels_lon_x_diff).max() and np.isnan(machine_pixels_lon_x_diff).max():
+                d_lon = 2
+                d_lat = 2
+            else:
+                lon_gt1_pixel_index = (np.where(np.square(machine_pixels_lon_x_diff) +
+                                                np.square(machine_pixels_lon_y_diff) > np.square(d_pixel))[0])[0]
+                d_lon = machine_d_lons[lon_gt1_pixel_index] - approximate_lon
 
-            # find the first index where a shift in longitude is greater than 1 pixel
-            lat_gt1_pixel_index = (np.where(np.square(machine_pixels_lat_x_diff) +
-                                            np.square(machine_pixels_lat_y_diff) > np.square(d_pixel))[0])[0]
-            d_lat = machine_d_lats[lat_gt1_pixel_index] - approximate_lat
+                # find the first index where a shift in longitude is greater than 1 pixel
+                lat_gt1_pixel_index = (np.where(np.square(machine_pixels_lat_x_diff) +
+                                                np.square(machine_pixels_lat_y_diff) > np.square(d_pixel))[0])[0]
+                d_lat = machine_d_lats[lat_gt1_pixel_index] - approximate_lat
 
         for i in range(max_iter):
             pixel_x_estimate, pixel_y_estimate = self.lon_lat_alt_to_pixel_x_y(lons, lats, alts, band=band)
@@ -285,7 +290,6 @@ class AbstractEarthOverheadPointCalc:
                 break
 
         return lons, lats
-
 
     def _pixel_x_y_to_lon_lat_ray_caster_native(self,
                                                 pixels_x,  # type: ndarray

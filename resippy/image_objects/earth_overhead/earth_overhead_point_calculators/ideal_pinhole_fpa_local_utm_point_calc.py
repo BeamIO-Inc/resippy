@@ -8,6 +8,7 @@ from pyproj import transform
 from pyproj import Proj
 from resippy.utils.units import ureg
 from numpy import ndarray
+import numpy
 
 
 class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
@@ -197,3 +198,11 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
         utm_point_calc._flip_y = flip_y
         utm_point_calc._pinhole_camera = pinhole_camera
         return utm_point_calc
+
+    def compute_ifov_x(self, output_units="microradians"):
+        ifov = numpy.arctan(self._pixel_pitch_x_meters/self._pinhole_camera.f) * ureg.parse_expression('radians')
+        return ifov.to(output_units).magnitude
+
+    def compute_ifov_y(self, output_units="microradians"):
+        ifov = numpy.arctan(self._pixel_pitch_y_meters/self._pinhole_camera.f) * ureg.parse_expression('radians')
+        return ifov.to(output_units).magnitude

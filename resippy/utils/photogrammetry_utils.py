@@ -184,6 +184,10 @@ def solve_for_omega_phi_kappa(m_matrix,  # type: ndarray
     cos_phi = np.cos(phi)
     kappa = np.arccos(m11 / cos_phi)
     omega = np.arccos(m33 / cos_phi)
+    # if np.isnan(kappa):
+    #     kappa = 0
+    # if np.isnan(omega):
+    #     omega = 0
     if m32 > 0:
         omega = -omega
     if m21 > 0:

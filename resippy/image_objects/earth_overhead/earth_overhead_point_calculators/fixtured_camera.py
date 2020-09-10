@@ -91,9 +91,9 @@ class FixturedCamera:
                                                              yaw_units='radians',  # type; str
                                                              order='rpy',
                                                              ):
-        roll_radians = relative_roll * ureg.parse_expression(roll_units)
-        pitch_radians = relative_pitch * ureg.parse_expression(pitch_units)
-        yaw_radians = relative_yaw * ureg.parse_expression(yaw_units)
+        roll_radians = relative_roll * ureg.parse_expression(roll_units).to("radians").magnitude
+        pitch_radians = relative_pitch * ureg.parse_expression(pitch_units).to("radians").magnitude
+        yaw_radians = relative_yaw * ureg.parse_expression(yaw_units).to("radians").magnitude
         boresight_matrix = photogrammetry_utils.create_M_matrix(roll_radians, pitch_radians, yaw_radians, order=order)
         self.set_boresight_matrix(boresight_matrix)
         

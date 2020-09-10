@@ -9,6 +9,7 @@ from pyproj import Proj
 
 import numpy
 from scipy.ndimage import map_coordinates
+import matplotlib.pyplot as plt
 
 
 class PhysicalCameraSimulator:
@@ -139,7 +140,7 @@ class PhysicalCameraSimulator:
                                                [image_utils.flatten_image_band(gtiff_y_vals),
                                                 image_utils.flatten_image_band(gtiff_x_vals)])
 
-        simulated_image_band = image_utils.unflatten_image_band(simulated_image_band, self._npix_y, self._npix_x)
+        simulated_image_band = image_utils.unflatten_image_band(simulated_image_band, self._npix_x, self._npix_y)
         simulated_image_data = numpy.reshape(simulated_image_band, (self._npix_y, self._npix_x, 1))
         metadata = PhysicalCameraMetadata()
         metadata.set_npix_x(self._npix_x)
