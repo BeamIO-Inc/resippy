@@ -155,6 +155,24 @@ def create_full_ortho_gtiff_image(overhead_image,  # type: AbstractEarthOverhead
                                                     nodata_val=nodata_val,
                                                     spline_order=spline_order)
 
+def mask_image(image, nodata_val=0):
+    """
+    Mask tiff images to make the nodata_val region transparent. One alpha channel is added to the image.
+    Value of 0 for alpha: full transparent
+    Value of 255 for alpha: fully opaque
+
+    # Note: Given that by default black pixels in channel 0 / band 1 are masked, masking gets broken
+    for relatively darker images.
+
+    :param image: a single or multi-band (orthorectified) image.
+    :return: input image with an added alpha layer which masks nodata_val region.
+    """
+    layer = image[:, :, 0]  # Take band 0 as the reference layer to mask the image.
+    alpha = layer.copy()
+    alpha[layer == nodata_val] = 0
+    alpha[layer != nodata_val] = 255
+    image = np.dstack((image, alpha))
+    return image
 
 # TODO more testing on non 4326 projections
 def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEarthOverheadImage
@@ -166,7 +184,8 @@ def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEa
                                              bands=None,  # type: List[int]
                                              nodata_val=0,  # type: float
                                              output_fname=None,  # type: str
-                                             spline_order=0  # type: str
+                                             spline_order=0,  # type: str
+                                             mask_no_data_region=False,  # type: bool
                                              ):  # type:  (...) -> GeotiffImage
 
     envelope = world_polygon.envelope
@@ -224,6 +243,10 @@ def create_ortho_gtiff_image_world_to_sensor(overhead_image,  # type: AbstractEa
             images.append(regridded)
 
     orthorectified_image = np.stack(images, axis=2)
+
+    if mask_no_data_region:
+        orthorectified_image = mask_image(orthorectified_image, nodata_val)
+
     gtiff_image = GeotiffImageFactory.from_numpy_array(orthorectified_image, geo_t, world_proj)
     gtiff_image.get_metadata().set_nodata_val(nodata_val)
     if output_fname is not None:
@@ -241,7 +264,8 @@ def create_ortho_gtiff_image_world_to_sensor_backup(overhead_image,  # type: Abs
                                              bands=None,  # type: List[int]
                                              nodata_val=0,  # type: float
                                              output_fname=None,  # type: str
-                                             interpolation='nearest'  # type: str
+                                             interpolation='nearest',  # type: str
+                                             mask_no_data_region=False, # type: bool
                                              ):  # type:  (...) -> GeotiffImage
 
     envelope = world_polygon.envelope
@@ -283,6 +307,9 @@ def create_ortho_gtiff_image_world_to_sensor_backup(overhead_image,  # type: Abs
             images.append(regridded)
 
     orthorectified_image = np.stack(images, axis=2)
+    if mask_no_data_region:
+        orthorectified_image = mask_image(orthorectified_image, nodata_val)
+
     gtiff_image = GeotiffImageFactory.from_numpy_array(orthorectified_image, geo_t, world_proj)
     gtiff_image.get_metadata().set_nodata_val(nodata_val)
     if output_fname is not None:
