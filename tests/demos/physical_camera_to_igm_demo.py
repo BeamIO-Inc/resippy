@@ -18,11 +18,11 @@ lon_center, lat_center = gtiff_basemap_image_obj.get_point_calculator().pixel_x_
     gtiff_basemap_image_obj.get_metadata().get_npix_y() / 2,
     0)
 
-sensor_alt = 20000
+sensor_alt = 1000
 
 camera_npix_x = 640
 camera_npix_y = 480
-flen = 60
+flen = 3
 
 yaw = 0.00000001
 

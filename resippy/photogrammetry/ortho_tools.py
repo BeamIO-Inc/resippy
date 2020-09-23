@@ -97,12 +97,10 @@ def create_igm_image(overhead_image,    # type: AbstractEarthOverheadImage
         dem = DemFactory.constant_elevation()
     pixels_x, pixels_y = image_utils.create_pixel_grid(overhead_image.metadata.get_npix_x(),
                                                        overhead_image.metadata.get_npix_y())
-    # lons, lats = get_pixel_lon_lats(overhead_image, dem)
     lons, lats, alts = overhead_image.pointcalc.pixel_x_y_to_lon_lat_alt(pixels_x,
                                                                          pixels_y,
                                                                          dem,
                                                                          dem_sample_distance=dem_sample_distance)
-    alts = dem.get_elevations(lons, lats, world_proj=overhead_image.pointcalc.get_projection())
     igm_image = IgmImage.from_params(overhead_image.get_image_data(),
                                      lons,
                                      lats,
