@@ -359,7 +359,7 @@ class AbstractEarthOverheadPointCalc:
         lats_matrix = np.tile((lats_min_alt - lats_max_alt), (n_steps_per_ray, 1)).transpose() * \
                       lats_matrix + np.tile(lats_max_alt, (n_steps_per_ray, 1)).transpose()
 
-        all_elevations = dem.get_elevations(np.array(lons_matrix), np.array(lats_matrix))
+        all_elevations = dem.get_elevations(np.array(lons_matrix), np.array(lats_matrix), world_proj=self.get_projection())
 
         ray = np.linspace(max_alt, min_alt, n_steps_per_ray)
         first_ray_intersect_indices = np.zeros(n_pixels_to_project, dtype=np.int)

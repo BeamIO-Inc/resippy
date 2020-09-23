@@ -18,7 +18,7 @@ class IgmImage(AbstractEarthOverheadImage):
                     ):
         igm_image = cls()
         igm_image._image_data = image_data
-        igm_image._point_calc = IGMPointCalc(lons, lats, alts, projection)
+        igm_image._point_calc = IGMPointCalc(lons, lats, alts, projection)  # type: IGMPointCalc
         n_y, n_x = lons.shape
         metadata = IgmMetadata.from_params(n_x, n_y, n_bands)
         igm_image.set_metadata(metadata)

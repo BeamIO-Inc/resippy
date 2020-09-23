@@ -18,6 +18,7 @@ class DemFactory:
         # attempt to get nodata value from the gtiff file itself
         if nodata_value is None:
             nodata_value = gtiff.get_metadata().get_nodata_val()
+        # TODO: optimization needed here, takes a very long time for large datasets
         gtiff_dem.remove_nodata_values(nodata_value)
         if interpolation_method == 'bilinear':
             gtiff_dem.set_interpolation_to_bilinear()
