@@ -42,15 +42,11 @@ class TestCrsTools(unittest.TestCase):
 
         world_z = 100
 
-        fpa_coords = list(image_utils.create_pixel_grid(640, 480))
-        fpa_coords[0] = fpa_coords[0] - 640/2 + 0.5
-        fpa_coords[1] = fpa_coords[1] - 480/2 + 0.5
-        pp = 5*ureg.parse_expression('micrometer')
-        fpa_coords_meters_x = (fpa_coords[0] * pp).to('meters').magnitude
-        fpa_coords_meters_y = (fpa_coords[1] * pp).to('meters').magnitude
+        pp = 5*ureg.parse_expression('micrometer').to('meters').magnitude
+        fpa_coords_meters = image_utils.create_image_plane_grid(640, 480, pp, pp)
 
-        fpa_coords_meters_x = fpa_coords_meters_x.ravel()
-        fpa_coords_meters_y = fpa_coords_meters_y.ravel()
+        fpa_coords_meters_x = fpa_coords_meters[0].ravel()
+        fpa_coords_meters_y = fpa_coords_meters[1].ravel()
         world_x, world_y = pinhole_camera.image_to_world_plane(fpa_coords_meters_x,
                                                                fpa_coords_meters_y,
                                                                world_z)

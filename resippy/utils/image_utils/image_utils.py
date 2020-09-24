@@ -78,6 +78,19 @@ def create_pixel_grid(nx_pixels,  # type: int
     return xx, yy
 
 
+def create_image_plane_grid(nx_points,  # type: int
+                            ny_points,  # type: int
+                            x_spacing,  # type: float
+                            y_spacing,  # type: float
+                            ):
+    xx, yy = create_pixel_grid(nx_points, ny_points)
+    xx = xx * x_spacing
+    yy = yy * y_spacing
+    xx = xx - xx.max()/2
+    yy = yy - yy.max()/2
+    return xx, yy
+
+
 # TODO needs testing
 def gdal_grid_image_band(image_to_warp,  # type: ndarray
                          output_fname,  # type: str
