@@ -102,12 +102,27 @@ class PinholeCamera:
         """
         x = -1.0*self.f*(
                 (self.m11*(world_x - self.X) + self.m12*(world_y - self.Y) + self.m13*(world_z - self.Z)) /
-                (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z))
-        )
+                (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z)))
 
         y = -1.0*self.f*(
                 (self.m21*(world_x - self.X) + self.m22*(world_y - self.Y) + self.m23*(world_z - self.Z)) /
-                (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z))
-        )
+                (self.m31*(world_x - self.X) + self.m32*(world_y - self.Y) + self.m33*(world_z - self.Z)))
 
+        return x, y
+
+    def image_to_world_plane(self, image_x, image_y, world_z):
+        """
+        From the book Photogrammetry, third edition, by Francis H. Moffitt and Edward M. Mikhail,
+        equation 6-16 on page 142
+        :param image_x:
+        :param image_y:
+        :param world_z:
+        :return:
+        """
+        x = (world_z - self.Z)*(
+                (self.m11 * image_x + self.m21 * image_y - self.m31 * self.f) /
+                (self.m13 * image_x + self.m23 * image_y - self.m33 * self.f)) + self.X
+        y = (world_z - self.Z) * (
+                (self.m12 * image_x + self.m22 * image_y - self.m32 * self.f) /
+                (self.m13 * image_x + self.m23 * image_y - self.m33 * self.f)) + self.Y
         return x, y
