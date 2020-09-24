@@ -19,13 +19,14 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
         self._lon_lat_center_approximate = None     # type: tuple
         self._pixel_pitch_x_meters = None           # type: float
         self._pixel_pitch_y_meters = None           # type: float
-        self._npix_x = None                         # type: float
-        self._npix_y = None                         # type: float
+        self._npix_x = None                         # type: int
+        self._npix_y = None                         # type: int
         self._flip_x = False                        # type: bool
         self._flip_y = False                        # type: bool
 
-    def _pixel_x_y_alt_to_lon_lat_native(self, pixel_xs, pixel_ys, alts=None, band=None):
-        pass
+    def _pixel_x_y_alt_to_lon_lat_native(self, pixel_xs, pixel_ys, alts, band=None):
+        image_plane_xs, image_plane_ys = self.pixel_coords_to_image_plane_coords(pixel_xs, pixel_ys)
+        return self._pinhole_camera.image_to_world_plane(image_plane_xs, image_plane_ys, alts)
 
     def _lon_lat_alt_to_pixel_x_y_native(self,
                                          lons,          # type: ndarray
@@ -33,9 +34,15 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
                                          alts,          # type: ndarray
                                          band=None      # type: int
                                          ):
-        half_fpa_x_meters = (self._npix_x * self._pixel_pitch_x_meters)/2.0
-        half_fpa_y_meters = (self._npix_y * self._pixel_pitch_y_meters)/2.0
         fpa_coords_meters_x, fpa_coords_meters_y = self._pinhole_camera.world_to_image_plane(lons, lats, alts)
+        return self.image_plane_coords_to_pixel_coords(fpa_coords_meters_x, fpa_coords_meters_y)
+
+    def image_plane_coords_to_pixel_coords(self,
+                                           fpa_coords_meters_x,  # type: ndarray
+                                           fpa_coords_meters_y,  # type: ndarray
+                                           ):
+        half_fpa_x_meters = (self._npix_x * self._pixel_pitch_x_meters) / 2.0
+        half_fpa_y_meters = (self._npix_y * self._pixel_pitch_y_meters) / 2.0
         if self._flip_x:
             fpa_coords_meters_x = -1.0 * fpa_coords_meters_x
         if self._flip_y:
@@ -43,6 +50,17 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
         fpa_coords_pixels_x = (fpa_coords_meters_x + half_fpa_x_meters) / self._pixel_pitch_x_meters
         fpa_coords_pixels_y = (fpa_coords_meters_y + half_fpa_y_meters) / self._pixel_pitch_y_meters
         return fpa_coords_pixels_x, fpa_coords_pixels_y
+
+    def pixel_coords_to_image_plane_coords(self, pixel_coords_x, pixel_coords_y):
+        half_fpa_x_meters = (self._npix_x * self._pixel_pitch_x_meters) / 2.0
+        half_fpa_y_meters = (self._npix_y * self._pixel_pitch_y_meters) / 2.0
+        if self._flip_x:
+            pixel_coords_x = -1.0 * pixel_coords_x
+        if self._flip_y:
+            pixel_coords_y = -1.0 * pixel_coords_y
+        image_plane_coords_x = pixel_coords_x * self._pixel_pitch_x_meters - half_fpa_x_meters
+        image_plane_coords_y = pixel_coords_y * self._pixel_pitch_y_meters - half_fpa_y_meters
+        return image_plane_coords_x, image_plane_coords_y
 
     @classmethod
     def init_from_wgs84_params(cls,

@@ -6,7 +6,7 @@ class BrownConradyDistortionModel:
     """
     Brown-Conrady distortion model from:
     equation 1 of the following paper:
-    http://researchspace.csir.co.za/dspace/bitstream/handle/10204/3168/De%20Villiers_2008.pdf;jsessionid=B41EFF302203856EDED1CE5A0F7F661A?sequence=1
+    http://researchspace.csir.co.za/dspace/bitstream/handle/10204/3168/De%20Villiers_2008.pdf
     """
     def __init__(self,
                  x_center,  # type: float
