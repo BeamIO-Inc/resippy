@@ -1,7 +1,7 @@
 from __future__ import division
 
 import unittest
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.pinhole_camera import PinholeCamera
 import numpy as np
 import resippy.utils.photogrammetry_utils as photogram_utils
 
@@ -55,7 +55,6 @@ class TestPointCalcs(unittest.TestCase):
         camera.init_pinhole_from_coeffs(0, 0, 100, 0, 0, 0, 100)
         x, y = camera.world_to_image_plane(100, 0, 0)
         assert x == camera.f
-        stop = 1
 
     def test_relative_orientation(self):
         omega = np.deg2rad(1.5)

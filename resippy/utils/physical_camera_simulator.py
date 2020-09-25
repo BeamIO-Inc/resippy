@@ -1,5 +1,5 @@
 from resippy.image_objects.image_factory import GeotiffImageFactory
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fixtured_camera import FixturedCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.fixtured_camera import FixturedCamera
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.ideal_pinhole_fpa_local_utm_point_calc import IdealPinholeFpaLocalUtmPointCalc
 from resippy.utils import photogrammetry_utils
 from resippy.utils.image_utils import image_utils
@@ -9,7 +9,6 @@ from pyproj import Proj
 
 import numpy
 from scipy.ndimage import map_coordinates
-import matplotlib.pyplot as plt
 
 
 class PhysicalCameraSimulator:

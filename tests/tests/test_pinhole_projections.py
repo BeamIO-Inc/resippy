@@ -1,9 +1,11 @@
 import numpy
 import unittest
 from resippy.utils import proj_utils
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.pinhole_camera import PinholeCamera
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.ideal_pinhole_fpa_local_utm_point_calc import IdealPinholeFpaLocalUtmPointCalc
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fpa_distortion_mapped_point_calc import FpaDistortionMappedPointCalc
 from resippy.utils.image_utils import image_utils
+from resippy.utils.lens_distortion_utils.distortion_models.brown_conrady import BrownConradyDistortionModel
 from resippy.utils.units import ureg
 from pyproj import transform
 from resippy.photogrammetry import crs_defs
@@ -20,6 +22,9 @@ linear_units = 'meters'
 omega = 5.230489
 phi = 4.98789734
 kappa = 23.203784
+# omega = 0
+# phi = 0
+# kappa = 0
 angle_units = 'degrees'
 
 
@@ -86,6 +91,53 @@ class TestCrsTools(unittest.TestCase):
         assert numpy.isclose(pixels_x, pixel_grid[0]).all()
         assert numpy.isclose(pixels_y, pixel_grid[1]).all()
         print("Projections to ground and back match original pixel locations")
+
+    def test_distortion_mapped_fpa_camera(self):
+        nx_pixels = 640
+        ny_pixels = 480
+        pp_meters = 5e-6
+        world_z = 100
+        distortion_camera = FpaDistortionMappedPointCalc()
+        distortion_camera.set_xyz_using_wgs84_coords(center_lon_dd, center_lat_dd, center_alt)
+        distortion_camera.set_roll_pitch_yaw(omega, phi, kappa, units=angle_units)
+        distortion_camera.set_boresight_offsets(0, 0, 0)
+        distortion_camera.set_mounting_position_on_fixture(0, 0, 0.0000000)
+
+        dist_model = BrownConradyDistortionModel(0, 0, [0, 0], [0, 0])
+        distorted_grid_x, distorted_grid_y = image_utils.create_image_plane_grid(nx_pixels, ny_pixels, pp_meters, pp_meters)
+        undistorted_grid_x, undistorted_grid_y = dist_model.compute_undistorted_image_plane_locations(distorted_grid_x,
+                                                                                                      distorted_grid_y)
+        distortion_camera.set_distorted_fpa_image_plane_points(undistorted_grid_x, undistorted_grid_y)
+        distortion_camera.set_focal_length(focal_length, focal_length_units)
+
+        pixel_grid = image_utils.create_pixel_grid(nx_pixels, ny_pixels)
+
+        lons, lats = distortion_camera._pixel_x_y_alt_to_lon_lat_native(pixel_grid[0], pixel_grid[1], world_z)
+
+        camera = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params(center_lon_dd,
+                                                                         center_lat_dd,
+                                                                         center_alt,
+                                                                         omega,
+                                                                         phi,
+                                                                         kappa,
+                                                                         npix_x=nx_pixels,
+                                                                         npix_y=ny_pixels,
+                                                                         pixel_pitch_x=pp_meters,
+                                                                         pixel_pitch_y=pp_meters,
+                                                                         focal_length=focal_length,
+                                                                         alt_units=linear_units,
+                                                                         omega_units=angle_units,
+                                                                         phi_units=angle_units,
+                                                                         kappa_units=angle_units,
+                                                                         pixel_pitch_x_units='meters',
+                                                                         pixel_pitch_y_units='meters',
+                                                                         focal_length_units=focal_length_units)
+        lons_ideal, lats_ideal = camera.pixel_x_y_alt_to_lon_lat(pixel_grid[0], pixel_grid[1], world_z)
+
+        assert numpy.isclose(lons, lons_ideal).all()
+        assert numpy.isclose(lats, lats_ideal).all()
+
+        print("fpa distortion model results with zero modeled distortion matches simple fpa pinhole model going from pixel to ground.")
 
 
 if __name__ == '__main__':

@@ -17,9 +17,6 @@ class PinholeCamera:
         self.X = None       # type: float
         self.Y = None       # type: float
         self.Z = None       # type: float
-        self.omega = None   # type: float
-        self.phi = None     # type: float
-        self.kappa = None   # type: float
         self.f = None       # type: float
         self.M = None       # type: ndarray
 
@@ -68,12 +65,49 @@ class PinholeCamera:
         self.X = x_meters.magnitude
         self.Y = y_meters.magnitude
         self.Z = z_meters.magnitude
-        self.omega = omega_radians.magnitude
-        self.phi = phi_radians.magnitude
-        self.kappa = kappa_radians.magnitude
         self.f = focal_length_meters.magnitude
 
         self.M = photogrammetry_utils.create_M_matrix(omega_radians, phi_radians, kappa_radians)
+
+        self.m11 = self.M[0, 0]
+        self.m12 = self.M[0, 1]
+        self.m13 = self.M[0, 2]
+
+        self.m21 = self.M[1, 0]
+        self.m22 = self.M[1, 1]
+        self.m23 = self.M[1, 2]
+
+        self.m31 = self.M[2, 0]
+        self.m32 = self.M[2, 1]
+        self.m33 = self.M[2, 2]
+
+    def init_pinhole_from_m_matrix(self,
+                                 X,                         # type: float
+                                 Y,                         # type: float
+                                 Z,                         # type: float
+                                 m_matrix,                  # type: ndarray
+                                 focal_length,              # type: float
+                                 x_units='meters',          # type: str
+                                 y_units='meters',          # type: str
+                                 z_units='meters',          # type: str
+                                 focal_length_units='mm',    # type: str
+                                 ):                         # type: (...) -> None
+        x = X * ureg.parse_expression(x_units)
+        y = Y * ureg.parse_expression(y_units)
+        z = Z * ureg.parse_expression(z_units)
+
+        x_meters = x.to(ureg['meters'])
+        y_meters = y.to(ureg['meters'])
+        z_meters = z.to(ureg['meters'])
+
+        focal_length_meters = focal_length * (ureg.parse_expression(focal_length_units)).to(ureg['meters'])
+
+        self.X = x_meters.magnitude
+        self.Y = y_meters.magnitude
+        self.Z = z_meters.magnitude
+        self.f = focal_length_meters.magnitude
+
+        self.M = m_matrix
 
         self.m11 = self.M[0, 0]
         self.m12 = self.M[0, 1]

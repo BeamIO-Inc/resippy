@@ -1,8 +1,8 @@
 from __future__ import division
 
 import unittest
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fixtured_camera import FixturedCamera
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.fixtured_camera import FixturedCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.pinhole_camera import PinholeCamera
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.ideal_pinhole_fpa_local_utm_point_calc import IdealPinholeFpaLocalUtmPointCalc
 import resippy.utils.photogrammetry_utils as photogram_utils
 import numpy as np
@@ -51,8 +51,8 @@ class TestFixturedCamera(unittest.TestCase):
         assert np.isclose(roll, 0)
         assert np.isclose(pitch, 0)
         assert np.isclose(yaw, 0)
-        print("setting fixture yaw to 5 degrees and camera boresight yaw to -5 degrees results in a zero camera roation")
-        print("pitch boresight test passed.")
+        print("setting fixture yaw to 5 degrees and camera boresight yaw to -5 degrees results in a zero camera rotation")
+        print("yaw boresight test passed.")
 
     def test_fixture_yaw_boresight2(self):
         fixtured_cam_1 = FixturedCamera()

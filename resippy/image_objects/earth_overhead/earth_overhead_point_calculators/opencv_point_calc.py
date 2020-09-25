@@ -3,7 +3,7 @@ import numpy as np
 
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc \
     import AbstractEarthOverheadPointCalc
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fixtured_camera import FixturedCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.fixtured_camera import FixturedCamera
 
 
 class OpenCVPointCalc(AbstractEarthOverheadPointCalc):

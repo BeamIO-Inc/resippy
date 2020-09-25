@@ -1,6 +1,6 @@
 from __future__ import division
 
-from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.pinhole_camera import PinholeCamera
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.pinhole_camera import PinholeCamera
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
 from resippy.photogrammetry import crs_defs
 from resippy.utils import proj_utils
@@ -47,8 +47,8 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
             fpa_coords_meters_x = -1.0 * fpa_coords_meters_x
         if self._flip_y:
             fpa_coords_meters_y = -1.0 * fpa_coords_meters_y
-        fpa_coords_pixels_x = (fpa_coords_meters_x + half_fpa_x_meters) / self._pixel_pitch_x_meters
-        fpa_coords_pixels_y = (fpa_coords_meters_y + half_fpa_y_meters) / self._pixel_pitch_y_meters
+        fpa_coords_pixels_x = (fpa_coords_meters_x + half_fpa_x_meters - self._pixel_pitch_x_meters/2) / self._pixel_pitch_x_meters
+        fpa_coords_pixels_y = (fpa_coords_meters_y + half_fpa_y_meters - self._pixel_pitch_y_meters/2) / self._pixel_pitch_y_meters
         return fpa_coords_pixels_x, fpa_coords_pixels_y
 
     def pixel_coords_to_image_plane_coords(self, pixel_coords_x, pixel_coords_y):
@@ -58,8 +58,8 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
             pixel_coords_x = -1.0 * pixel_coords_x
         if self._flip_y:
             pixel_coords_y = -1.0 * pixel_coords_y
-        image_plane_coords_x = pixel_coords_x * self._pixel_pitch_x_meters - half_fpa_x_meters
-        image_plane_coords_y = pixel_coords_y * self._pixel_pitch_y_meters - half_fpa_y_meters
+        image_plane_coords_x = pixel_coords_x * self._pixel_pitch_x_meters - half_fpa_x_meters + self._pixel_pitch_x_meters/2
+        image_plane_coords_y = pixel_coords_y * self._pixel_pitch_y_meters - half_fpa_y_meters + self._pixel_pitch_y_meters/2
         return image_plane_coords_x, image_plane_coords_y
 
     @classmethod

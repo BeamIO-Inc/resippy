@@ -75,7 +75,7 @@ def create_pixel_grid(nx_pixels,  # type: int
     x = np.arange(0, nx_pixels, (1.0 / scale_factor))
     y = np.arange(0, ny_pixels, (1.0 / scale_factor))
     xx, yy = np.meshgrid(x, y, sparse=False)
-    return xx, yy
+    return xx.astype(int), yy.astype(int)
 
 
 def create_image_plane_grid(nx_points,  # type: int
