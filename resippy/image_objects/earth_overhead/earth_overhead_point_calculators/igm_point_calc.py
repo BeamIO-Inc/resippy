@@ -42,7 +42,7 @@ class IGMPointCalc(AbstractEarthOverheadPointCalc):
         return self._lats
 
     @property
-    def alts_image(self):
+    def alt_image(self):
         return self._alts
 
     def _pixel_x_y_alt_to_lon_lat_native(self, pixel_xs, pixel_ys, alts=None, band=None):
