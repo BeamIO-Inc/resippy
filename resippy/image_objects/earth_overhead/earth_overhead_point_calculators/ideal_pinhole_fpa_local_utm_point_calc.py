@@ -54,12 +54,12 @@ class IdealPinholeFpaLocalUtmPointCalc(AbstractEarthOverheadPointCalc):
     def pixel_coords_to_image_plane_coords(self, pixel_coords_x, pixel_coords_y):
         half_fpa_x_meters = (self._npix_x * self._pixel_pitch_x_meters) / 2.0
         half_fpa_y_meters = (self._npix_y * self._pixel_pitch_y_meters) / 2.0
-        if self._flip_x:
-            pixel_coords_x = -1.0 * pixel_coords_x
-        if self._flip_y:
-            pixel_coords_y = -1.0 * pixel_coords_y
         image_plane_coords_x = pixel_coords_x * self._pixel_pitch_x_meters - half_fpa_x_meters + self._pixel_pitch_x_meters/2
         image_plane_coords_y = pixel_coords_y * self._pixel_pitch_y_meters - half_fpa_y_meters + self._pixel_pitch_y_meters/2
+        if self._flip_x:
+            image_plane_coords_x = -1.0 * image_plane_coords_x
+        if self._flip_y:
+            image_plane_coords_y = -1.0 * image_plane_coords_y
         return image_plane_coords_x, image_plane_coords_y
 
     @classmethod

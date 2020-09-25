@@ -10,24 +10,27 @@ from resippy.photogrammetry.dem.dem_factory import DemFactory
 gtiff_fname = os.path.join(demo_data_base_dir, "image_data/digital_globe/WashingtonDC_View-Ready_Stereo_50cm/056082264010/056082264010_01_P001_PAN/12SEP21160917-P2AS_R3C2-056082264010_01_P001.TIF")
 gtiff_basemap_image_obj = GeotiffImageFactory.from_file(gtiff_fname)
 
-dem_fname = os.path.join(demo_data_base_dir, "dems/washingtonDC/Normalized_DSM_2018/nDSM_resampled.tif")
-dem = DemFactory.from_gtiff_file(dem_fname)
+# dem_fname = os.path.join(demo_data_base_dir, "dems/washingtonDC/Normalized_DSM_2018/nDSM_resampled.tif")
+# dem = DemFactory.from_gtiff_file(dem_fname)
+dem = DemFactory.constant_elevation()
 
 lon_center, lat_center = gtiff_basemap_image_obj.get_point_calculator().pixel_x_y_alt_to_lon_lat(
-    gtiff_basemap_image_obj.get_metadata().get_npix_x() / 2,
-    gtiff_basemap_image_obj.get_metadata().get_npix_y() / 2,
+    gtiff_basemap_image_obj.metadata.get_npix_x() / 2,
+    gtiff_basemap_image_obj.metadata.get_npix_y() / 2,
     0)
 
-sensor_alt = 1000
+sensor_alt = 20000
 
 camera_npix_x = 640
 camera_npix_y = 480
-flen = 3
+flen = 60
 
-yaw = 0.00000001
+roll = 0
+pitch = 0
+yaw = 0
 
 simulator = PhysicalCameraSimulator(gtiff_fname, flen, camera_npix_x, camera_npix_y)
-pass1_image_obj = simulator.create_overhead_image_object(lon_center, lat_center, sensor_alt, 0, 0, yaw)
+pass1_image_obj = simulator.create_overhead_image_object(lon_center, lat_center, sensor_alt, roll, pitch, yaw)
 
 igm_image = ortho_tools.create_igm_image(pass1_image_obj, dem, dem_sample_distance=10)
 

@@ -2,7 +2,7 @@ import os
 
 from tests.demo_tests import demo_data_base_dir
 from resippy.image_objects.image_factory import GeotiffImageFactory
-from resippy.utils.physical_camera_simulator import PhysicalCameraSimulator
+from resippy.utils.linescanner_simulator import LinescannerSimulator
 from resippy.photogrammetry import ortho_tools
 from resippy.photogrammetry.dem.dem_factory import DemFactory
 
