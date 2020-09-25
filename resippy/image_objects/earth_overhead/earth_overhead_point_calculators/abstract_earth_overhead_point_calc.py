@@ -7,6 +7,7 @@ from pyproj import transform as proj_transform
 import numpy as np
 import numbers
 from resippy.photogrammetry.dem.abstract_dem import AbstractDem
+from resippy.photogrammetry.dem.constant_elevation_dem import ConstantElevationDem
 import resippy.utils.image_utils.image_utils as image_utils
 from six import add_metaclass
 
@@ -343,52 +344,59 @@ class AbstractEarthOverheadPointCalc:
         lons_max_alt, lats_max_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, max_alt, band=band)
         lons_min_alt, lats_min_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, min_alt, band=band)
 
-        # TODO this operation becomes very expensive at very fine DEM resolutions
-        # TODO create implementation for a raster DEM that works faster
-        # TODO the time consuming operations are obtaining lon/lats for many points as the DEM resolution becomes finer
+        if type(dem) == ConstantElevationDem:
+            intersected_lons = lons_max_alt
+            intersected_lats = lats_max_alt
+            intersected_alts = dem.get_elevations(intersected_lons, intersected_lats)
 
-        ray_horizontal_lens = np.sqrt(
-            np.square(lons_max_alt - lons_min_alt) + np.square(lats_max_alt - lats_min_alt))
-        n_steps_per_ray = int(np.ceil(np.max(ray_horizontal_lens) / dem_sample_distance) + 1)
+        else:
 
-        lons_matrix = np.zeros((n_pixels_to_project, n_steps_per_ray)) + np.linspace(0, 1, n_steps_per_ray)
-        lats_matrix = np.zeros((n_pixels_to_project, n_steps_per_ray)) + np.linspace(0, 1, n_steps_per_ray)
+            # TODO this operation becomes very expensive at very fine DEM resolutions
+            # TODO create implementation for a raster DEM that works faster
+            # TODO the time consuming operations are obtaining lon/lats for many points as the DEM resolution becomes finer
 
-        lons_matrix = np.tile((lons_min_alt - lons_max_alt), (n_steps_per_ray, 1)).transpose() * \
-                      lons_matrix + np.tile(lons_max_alt, (n_steps_per_ray, 1)).transpose()
-        lats_matrix = np.tile((lats_min_alt - lats_max_alt), (n_steps_per_ray, 1)).transpose() * \
-                      lats_matrix + np.tile(lats_max_alt, (n_steps_per_ray, 1)).transpose()
+            ray_horizontal_lens = np.sqrt(
+                np.square(lons_max_alt - lons_min_alt) + np.square(lats_max_alt - lats_min_alt))
+            n_steps_per_ray = int(np.ceil(np.max(ray_horizontal_lens) / dem_sample_distance) + 1)
 
-        all_elevations = dem.get_elevations(np.array(lons_matrix), np.array(lats_matrix), world_proj=self.get_projection())
+            lons_matrix = np.zeros((n_pixels_to_project, n_steps_per_ray)) + np.linspace(0, 1, n_steps_per_ray)
+            lats_matrix = np.zeros((n_pixels_to_project, n_steps_per_ray)) + np.linspace(0, 1, n_steps_per_ray)
 
-        ray = np.linspace(max_alt, min_alt, n_steps_per_ray)
-        first_ray_intersect_indices = np.zeros(n_pixels_to_project, dtype=np.int)
-        ray_step_indices = list(range(n_steps_per_ray))
-        ray_step_indices.reverse()
-        for i in ray_step_indices:
-            does_ray_intersect = all_elevations[:, i] > ray[i]
-            first_ray_intersect_indices[np.where(does_ray_intersect)] = i
+            lons_matrix = np.tile((lons_min_alt - lons_max_alt), (n_steps_per_ray, 1)).transpose() * \
+                          lons_matrix + np.tile(lons_max_alt, (n_steps_per_ray, 1)).transpose()
+            lats_matrix = np.tile((lats_min_alt - lats_max_alt), (n_steps_per_ray, 1)).transpose() * \
+                          lats_matrix + np.tile(lats_max_alt, (n_steps_per_ray, 1)).transpose()
 
-        all_pixel_indices = np.arange(0, n_pixels_to_project, dtype=int)
+            all_elevations = dem.get_elevations(np.array(lons_matrix), np.array(lats_matrix), world_proj=self.get_projection())
 
-        first_ray_intersect_indices = first_ray_intersect_indices - 1
-        second_ray_intersect_indices = first_ray_intersect_indices + 1
-        b_rays = ray[first_ray_intersect_indices]
-        b_alts = all_elevations[all_pixel_indices, first_ray_intersect_indices]
+            ray = np.linspace(max_alt, min_alt, n_steps_per_ray)
+            first_ray_intersect_indices = np.zeros(n_pixels_to_project, dtype=np.int)
+            ray_step_indices = list(range(n_steps_per_ray))
+            ray_step_indices.reverse()
+            for i in ray_step_indices:
+                does_ray_intersect = all_elevations[:, i] > ray[i]
+                first_ray_intersect_indices[np.where(does_ray_intersect)] = i
 
-        m_rays = ray[1] - ray[0]
-        m_alts = all_elevations[all_pixel_indices, second_ray_intersect_indices] - b_alts
+            all_pixel_indices = np.arange(0, n_pixels_to_project, dtype=int)
 
-        xs = (b_alts - b_rays) / (m_rays - m_alts)
-        intersected_lons = (lons_matrix[all_pixel_indices, second_ray_intersect_indices] -
-                            lons_matrix[all_pixel_indices, first_ray_intersect_indices]) * xs + \
-                           lons_matrix[all_pixel_indices, first_ray_intersect_indices]
-        intersected_lats = (lats_matrix[all_pixel_indices, second_ray_intersect_indices] -
-                            lats_matrix[all_pixel_indices, first_ray_intersect_indices]) * xs + \
-                           lats_matrix[all_pixel_indices, first_ray_intersect_indices]
-        intersected_alts = (all_elevations[all_pixel_indices, second_ray_intersect_indices] -
-                            all_elevations[all_pixel_indices, first_ray_intersect_indices]) * xs + \
-                           all_elevations[all_pixel_indices, first_ray_intersect_indices]
+            first_ray_intersect_indices = first_ray_intersect_indices - 1
+            second_ray_intersect_indices = first_ray_intersect_indices + 1
+            b_rays = ray[first_ray_intersect_indices]
+            b_alts = all_elevations[all_pixel_indices, first_ray_intersect_indices]
+
+            m_rays = ray[1] - ray[0]
+            m_alts = all_elevations[all_pixel_indices, second_ray_intersect_indices] - b_alts
+
+            xs = (b_alts - b_rays) / (m_rays - m_alts)
+            intersected_lons = (lons_matrix[all_pixel_indices, second_ray_intersect_indices] -
+                                lons_matrix[all_pixel_indices, first_ray_intersect_indices]) * xs + \
+                               lons_matrix[all_pixel_indices, first_ray_intersect_indices]
+            intersected_lats = (lats_matrix[all_pixel_indices, second_ray_intersect_indices] -
+                                lats_matrix[all_pixel_indices, first_ray_intersect_indices]) * xs + \
+                               lats_matrix[all_pixel_indices, first_ray_intersect_indices]
+            intersected_alts = (all_elevations[all_pixel_indices, second_ray_intersect_indices] -
+                                all_elevations[all_pixel_indices, first_ray_intersect_indices]) * xs + \
+                               all_elevations[all_pixel_indices, first_ray_intersect_indices]
 
         if is2d:
             intersected_lons = image_utils.unflatten_image_band(intersected_lons, nx, ny)
@@ -396,7 +404,6 @@ class AbstractEarthOverheadPointCalc:
             intersected_alts = image_utils.unflatten_image_band(intersected_alts, nx, ny)
 
         return intersected_lons, intersected_lats, intersected_alts
-
 
     def pixel_x_y_to_lon_lat_alt(self,
                                  pixels_x,  # type: ndarray
