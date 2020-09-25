@@ -107,7 +107,7 @@ class TestCrsTools(unittest.TestCase):
         distorted_grid_x, distorted_grid_y = image_utils.create_image_plane_grid(nx_pixels, ny_pixels, pp_meters, pp_meters)
         undistorted_grid_x, undistorted_grid_y = dist_model.compute_undistorted_image_plane_locations(distorted_grid_x,
                                                                                                       distorted_grid_y)
-        distortion_camera.set_distorted_fpa_image_plane_points(undistorted_grid_x, undistorted_grid_y)
+        distortion_camera.set_undistorted_fpa_image_plane_points(undistorted_grid_x, undistorted_grid_y)
         distortion_camera.set_focal_length(focal_length, focal_length_units)
 
         pixel_grid = image_utils.create_pixel_grid(nx_pixels, ny_pixels)

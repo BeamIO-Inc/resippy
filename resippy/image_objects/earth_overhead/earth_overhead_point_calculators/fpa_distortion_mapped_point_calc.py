@@ -109,9 +109,9 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
     def set_mounting_position_on_fixture(self, x, y, z, units='meters'):
         self._fixture.set_relative_camera_xyz(x, y, z, x_units=units, y_units=units, z_units=units)
 
-    def set_distorted_fpa_image_plane_points(self,
-                                             undistorted_x_grid,    # type: ndarray
-                                             undistorted_y_grid,    # type: ndarray
-                                             ):
+    def set_undistorted_fpa_image_plane_points(self,
+                                               undistorted_x_grid,  # type: ndarray
+                                               undistorted_y_grid,  # type: ndarray
+                                               ):
         self._undistorted_x_grid = undistorted_x_grid
         self._undistorted_y_grid = undistorted_y_grid

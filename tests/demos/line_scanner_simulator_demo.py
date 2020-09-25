@@ -1,10 +1,15 @@
 import os
 
+import numpy
 from tests.demo_tests import demo_data_base_dir
 from resippy.image_objects.image_factory import GeotiffImageFactory
 from resippy.utils.linescanner_simulator import LinescannerSimulator
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.line_scanner_point_calc import LineScannerPointCalc
+from resippy.utils.image_utils import image_utils
 from resippy.photogrammetry import ortho_tools
 from resippy.photogrammetry.dem.dem_factory import DemFactory
+from pyproj import transform
+from resippy.photogrammetry import crs_defs
 
 
 gtiff_fname = os.path.join(demo_data_base_dir, "image_data/digital_globe/WashingtonDC_View-Ready_Stereo_50cm/056082264010/056082264010_01_P001_PAN/12SEP21160917-P2AS_R3C2-056082264010_01_P001.TIF")
@@ -17,16 +22,40 @@ lon_center, lat_center = gtiff_basemap_image_obj.get_point_calculator().pixel_x_
     gtiff_basemap_image_obj.get_metadata().get_npix_y() / 2,
     0)
 
-sensor_alt = 1000
+n_lines = 600
+sensor_alt = 20000
 
-camera_npix_x = 640
 camera_npix_y = 480
-flen = 3
+flen = 60
+pp = 5e-6
 
-yaw = 0.00000001
+lon_start = gtiff_basemap_image_obj.pointcalc.pixel_x_y_alt_to_lon_lat(gtiff_basemap_image_obj.metadata.get_npix_x()*0.25, 0, 0)[0]
+lon_end = gtiff_basemap_image_obj.pointcalc.pixel_x_y_alt_to_lon_lat(gtiff_basemap_image_obj.metadata.get_npix_x()*0.75, 0, 0)[0]
 
-simulator = PhysicalCameraSimulator(gtiff_fname, flen, camera_npix_x, camera_npix_y)
-pass1_image_obj = simulator.create_overhead_image_object(lon_center, lat_center, sensor_alt, 0, 0, yaw)
+lons = numpy.linspace(lon_start, lon_end, n_lines)
+lats = numpy.ones(n_lines) * lat_center
+alts = numpy.ones(n_lines) * sensor_alt
+
+lons_dd = []
+lats_dd = []
+for lon, lat in zip(lons, lats):
+    lon_dd, lat_dd = transform(gtiff_basemap_image_obj.pointcalc.get_projection(), crs_defs.PROJ_4326, lon, lat)
+    lons_dd.append(lon_dd)
+    lats_dd.append(lat_dd)
+
+rolls = numpy.zeros(n_lines)
+pitches = numpy.zeros(n_lines)
+yaws = numpy.zeros(n_lines)
+
+image_plane_grid_x, image_plane_grid_y = image_utils.create_image_plane_grid(1, camera_npix_y, x_spacing=pp, y_spacing=pp)
+
+point_calc = LineScannerPointCalc()
+point_calc.set_camera_model(image_plane_grid_x, image_plane_grid_y, flen, focal_length_units='mm')
+point_calc.set_xyz_with_wgs84_coords(lons_dd, lats_dd, alts)
+point_calc.set_roll_pitch_yaws(rolls, pitches, yaws, units='degrees')
+
+simulator = LinescannerSimulator(gtiff_fname, point_calc)
+pass1_image_obj = simulator.create_overhead_image_object()
 
 igm_image = ortho_tools.create_igm_image(pass1_image_obj, dem, dem_sample_distance=10)
 
