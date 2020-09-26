@@ -20,7 +20,7 @@ class LinescannerSimulator:
 
     def create_overhead_image_object(self):
         pixel_grid_x, pixel_grid_y = image_utils.create_pixel_grid(len(self._point_calc.local_lons),
-                                                                   self._point_calc.n_cross_track_pixels)
+                                                                   self._point_calc._npix_y)
         pass1_lons, pass1_lats = self._point_calc.pixel_x_y_alt_to_lon_lat(pixel_grid_x, pixel_grid_y, pixel_grid_x * 0)
 
         gtiff_x_vals, gtiff_y_vals = self._gtiff_image_object.get_point_calculator().lon_lat_alt_to_pixel_x_y(

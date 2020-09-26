@@ -22,8 +22,8 @@ lon_center, lat_center = gtiff_basemap_image_obj.get_point_calculator().pixel_x_
     gtiff_basemap_image_obj.get_metadata().get_npix_y() / 2,
     0)
 
-n_lines = 200
-camera_npix_y = 100
+n_lines = 600
+camera_npix_y = 480
 sensor_alt = 20000
 
 flen = 60
@@ -32,8 +32,11 @@ pp = 5e-6
 lon_start = gtiff_basemap_image_obj.pointcalc.pixel_x_y_alt_to_lon_lat(gtiff_basemap_image_obj.metadata.get_npix_x()*0.25, 0, 0)[0]
 lon_end = gtiff_basemap_image_obj.pointcalc.pixel_x_y_alt_to_lon_lat(gtiff_basemap_image_obj.metadata.get_npix_x()*0.75, 0, 0)[0]
 
+lat_start = gtiff_basemap_image_obj.pointcalc.pixel_x_y_alt_to_lon_lat(0, gtiff_basemap_image_obj.metadata.get_npix_y()*0.45, 0)[1]
+lat_end = gtiff_basemap_image_obj.pointcalc.pixel_x_y_alt_to_lon_lat(0, gtiff_basemap_image_obj.metadata.get_npix_y()*0.55, 0)[1]
+
 lons = numpy.linspace(lon_start, lon_end, n_lines)
-lats = numpy.ones(n_lines) * lat_center
+lats = numpy.linspace(lat_start, lat_end, n_lines)
 alts = numpy.ones(n_lines) * sensor_alt
 
 lons_dd, lats_dd = transform(gtiff_basemap_image_obj.pointcalc.get_projection(), crs_defs.PROJ_4326, lons, lats)
@@ -42,17 +45,15 @@ rolls = numpy.zeros(n_lines)
 pitches = numpy.zeros(n_lines)
 yaws = numpy.zeros(n_lines)
 
-image_plane_grid_x, image_plane_grid_y = image_utils.create_image_plane_grid(1, camera_npix_y, x_spacing=pp, y_spacing=pp)
-
 point_calc = LineScannerPointCalc()
-point_calc.set_camera_model(image_plane_grid_x, image_plane_grid_y, flen, focal_length_units='mm')
+point_calc.set_camera_model_w_ideal_pinhole_model(camera_npix_y, flen, pp, focal_length_units='mm', pixel_pitch_units='meters')
 point_calc.set_xyz_with_wgs84_coords(lons_dd, lats_dd, alts, 'meters')
 point_calc.set_roll_pitch_yaws(rolls, pitches, yaws, units='degrees')
 
 simulator = LinescannerSimulator(gtiff_fname, point_calc)
-pass1_image_obj = simulator.create_overhead_image_object()
+simulated_image_obj = simulator.create_overhead_image_object()
 
-igm_image = ortho_tools.create_igm_image(pass1_image_obj, dem, dem_sample_distance=10)
+igm_image = ortho_tools.create_igm_image(simulated_image_obj, dem, dem_sample_distance=10)
 
 image_lons = igm_image.pointcalc.lon_image
 image_lats = igm_image.pointcalc.lat_image

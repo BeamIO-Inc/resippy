@@ -8,6 +8,7 @@ from resippy.utils.units import ureg
 from resippy.utils import proj_utils
 from resippy.photogrammetry import crs_defs
 
+from resippy.utils.image_utils import image_utils
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fpa_distortion_mapped_point_calc import FpaDistortionMappedPointCalc
 
@@ -29,7 +30,6 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         self._yaws = []         # type: [float]
         self.roll_pitch_yaw_units = None
         self._roll_pitch_yaw_order = None
-        self.n_cross_track_pixels = None       # type: int
 
         self._mount_offset_x_meters = 0
         self._mount_offset_y_meters = 0
@@ -47,18 +47,31 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         self._npix_x = None
         self._npix_y = None
 
-    def set_camera_model(self,
-                         undistorted_image_plane_x_grid,  # type: ndarray
-                         undistorted_image_plane_y_grid,  # type: ndarray
-                         focal_length,          # type: float
-                         focal_length_units     # type: str
-                         ):
+    def set_camera_model_w_undistorted_image_plane_grid(self,
+                                                        undistorted_image_plane_x_grid,  # type: ndarray
+                                                        undistorted_image_plane_y_grid,  # type: ndarray
+                                                        focal_length,  # type: float
+                                                        focal_length_units  # type: str
+                                                        ):
         self._undistorted_x_grid = undistorted_image_plane_x_grid
         self._undistorted_y_grid = undistorted_image_plane_y_grid
         self._focal_length = focal_length
         self._focal_length_units = focal_length_units
-        self.n_cross_track_pixels = undistorted_image_plane_x_grid.shape[0]
         self._npix_y = len(undistorted_image_plane_x_grid)
+
+    def set_camera_model_w_ideal_pinhole_model(self,
+                                               n_pixels,
+                                               focal_length,
+                                               pixel_pitch,
+                                               focal_length_units,
+                                               pixel_pitch_units):
+        self._npix_y = n_pixels
+        self._focal_length = focal_length
+        self._focal_length_units = focal_length_units
+        pp_meters = (pixel_pitch * ureg(pixel_pitch_units)).to('meters').magnitude
+        image_plane_grid = image_utils.create_image_plane_grid(1, n_pixels, pp_meters, pp_meters)
+        self._undistorted_x_grid = image_plane_grid[0]
+        self._undistorted_y_grid = image_plane_grid[1]
 
     def _lon_lat_alt_to_pixel_x_y_native(self, lons, lats, alts, band=None):
         pass
