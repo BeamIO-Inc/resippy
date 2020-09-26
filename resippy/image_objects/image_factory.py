@@ -5,7 +5,7 @@ from resippy.image_objects.earth_overhead.micasense.micasense_image_factory impo
 from resippy.image_objects.envi.envi_image_factory import EnviImageFactory
 from resippy.image_objects.earth_overhead.digital_globe.DigitalGlobeImageFactory import DigitalGlobeImageFactory
 from resippy.image_objects.earth_overhead.physical_camera.physical_camera_image_factory import PhysicalCameraImageFactory
-
+from resippy.image_objects.earth_overhead.linescanner.linescanner_image_factory import LinescannerImageFactory
 
 class ImageFactory:
     """
@@ -27,3 +27,4 @@ class ImageFactory:
     envi = EnviImageFactory
     digital_globe = DigitalGlobeImageFactory
     physical_camera = PhysicalCameraImageFactory
+    linescanner = LinescannerImageFactory

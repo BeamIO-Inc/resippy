@@ -22,10 +22,10 @@ lon_center, lat_center = gtiff_basemap_image_obj.get_point_calculator().pixel_x_
     gtiff_basemap_image_obj.get_metadata().get_npix_y() / 2,
     0)
 
-n_lines = 600
+n_lines = 200
+camera_npix_y = 100
 sensor_alt = 20000
 
-camera_npix_y = 480
 flen = 60
 pp = 5e-6
 
@@ -36,12 +36,7 @@ lons = numpy.linspace(lon_start, lon_end, n_lines)
 lats = numpy.ones(n_lines) * lat_center
 alts = numpy.ones(n_lines) * sensor_alt
 
-lons_dd = []
-lats_dd = []
-for lon, lat in zip(lons, lats):
-    lon_dd, lat_dd = transform(gtiff_basemap_image_obj.pointcalc.get_projection(), crs_defs.PROJ_4326, lon, lat)
-    lons_dd.append(lon_dd)
-    lats_dd.append(lat_dd)
+lons_dd, lats_dd = transform(gtiff_basemap_image_obj.pointcalc.get_projection(), crs_defs.PROJ_4326, lons, lats)
 
 rolls = numpy.zeros(n_lines)
 pitches = numpy.zeros(n_lines)
@@ -51,7 +46,7 @@ image_plane_grid_x, image_plane_grid_y = image_utils.create_image_plane_grid(1, 
 
 point_calc = LineScannerPointCalc()
 point_calc.set_camera_model(image_plane_grid_x, image_plane_grid_y, flen, focal_length_units='mm')
-point_calc.set_xyz_with_wgs84_coords(lons_dd, lats_dd, alts)
+point_calc.set_xyz_with_wgs84_coords(lons_dd, lats_dd, alts, 'meters')
 point_calc.set_roll_pitch_yaws(rolls, pitches, yaws, units='degrees')
 
 simulator = LinescannerSimulator(gtiff_fname, point_calc)
@@ -64,6 +59,6 @@ image_lats = igm_image.pointcalc.lat_image
 image_alts = igm_image.pointcalc.alt_image
 
 gtiff_image = ortho_tools.create_full_ortho_gtiff_image(igm_image)
-gtiff_image.write_to_disk(os.path.expanduser("~/Downloads/gtiff_from_igm.tif"))
+gtiff_image.write_to_disk(os.path.expanduser("~/Downloads/gtiff_from_linescan_igm.tif"))
 
 print("Check your downloads folder for the simulated camera results.")

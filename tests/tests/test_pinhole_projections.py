@@ -100,7 +100,7 @@ class TestCrsTools(unittest.TestCase):
         distortion_camera = FpaDistortionMappedPointCalc()
         distortion_camera.set_xyz_using_wgs84_coords(center_lon_dd, center_lat_dd, center_alt)
         distortion_camera.set_roll_pitch_yaw(omega, phi, kappa, units=angle_units)
-        distortion_camera.set_boresight_offsets(0, 0, 0)
+        distortion_camera.set_boresight_roll_pitch_yaw_offsets(0, 0, 0)
         distortion_camera.set_mounting_position_on_fixture(0, 0, 0.0000000)
 
         dist_model = BrownConradyDistortionModel(0, 0, [0, 0], [0, 0])

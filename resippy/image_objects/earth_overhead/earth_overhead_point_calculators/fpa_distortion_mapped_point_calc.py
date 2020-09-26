@@ -66,7 +66,6 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
 
         native_proj = proj_utils.decimal_degrees_to_local_utm_proj(sensor_lon_decimal_degrees,
                                                                    sensor_lat_decimal_degrees)
-        alt_meters = (sensor_altitude * ureg.parse_units(alt_units)).to('meters').magnitude
         proj_4326 = crs_defs.PROJ_4326
 
         sensor_x_local, sensor_y_local = transform(proj_4326,
@@ -75,7 +74,16 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
                                                    sensor_lat_decimal_degrees)
 
         self.set_projection(native_proj)
-        self._fixture.set_fixture_xyz(sensor_x_local, sensor_y_local, alt_meters)
+        self.set_xyz_using_local_coords(sensor_x_local, sensor_y_local, sensor_altitude, alt_units=alt_units)
+
+    def set_xyz_using_local_coords(self,
+                                   sensor_lon,  # type: float
+                                   sensor_lat,  # type: float
+                                   sensor_altitude,  # type: float
+                                   alt_units='meters',  # type: str
+                                   ):  # type: (...) -> IdealPinholeFpaLocalUtmPointCalc
+        alt_meters = (sensor_altitude * ureg.parse_units(alt_units)).to('meters').magnitude
+        self._fixture.set_fixture_xyz(sensor_lon, sensor_lat, alt_meters)
 
     def set_roll_pitch_yaw(self,
                            roll,
@@ -91,13 +99,13 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
                                                                 yaw_units=units,
                                                                 order=order)
 
-    def set_boresight_offsets(self,
-                              boresight_roll,
-                              boresight_pitch,
-                              boresight_yaw,
-                              units='radians',
-                              order='rpy',
-                              ):
+    def set_boresight_roll_pitch_yaw_offsets(self,
+                                             boresight_roll,
+                                             boresight_pitch,
+                                             boresight_yaw,
+                                             units='radians',
+                                             order='rpy',
+                                             ):
         self._fixture.set_boresight_matrix_from_camera_relative_rpy_params(boresight_roll,
                                                                            boresight_pitch,
                                                                            boresight_yaw,
