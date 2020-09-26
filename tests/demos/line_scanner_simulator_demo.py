@@ -36,19 +36,21 @@ lat_start = gtiff_basemap_image_obj.pointcalc.pixel_x_y_alt_to_lon_lat(0, gtiff_
 lat_end = gtiff_basemap_image_obj.pointcalc.pixel_x_y_alt_to_lon_lat(0, gtiff_basemap_image_obj.metadata.get_npix_y()*0.55, 0)[1]
 
 lons = numpy.linspace(lon_start, lon_end, n_lines)
-lats = numpy.linspace(lat_start, lat_end, n_lines)
+lats = numpy.linspace(lat_start, lat_start, n_lines)
 alts = numpy.ones(n_lines) * sensor_alt
 
 lons_dd, lats_dd = transform(gtiff_basemap_image_obj.pointcalc.get_projection(), crs_defs.PROJ_4326, lons, lats)
 
-rolls = numpy.zeros(n_lines)
+roll_setup = numpy.linspace(0, 2*numpy.pi, len(lons))
+rolls = numpy.sin(roll_setup) * 0.25
 pitches = numpy.zeros(n_lines)
 yaws = numpy.zeros(n_lines)
+rpy_units = 'degrees'
 
 point_calc = LineScannerPointCalc()
 point_calc.set_camera_model_w_ideal_pinhole_model(camera_npix_y, flen, pp, focal_length_units='mm', pixel_pitch_units='meters')
 point_calc.set_xyz_with_wgs84_coords(lons_dd, lats_dd, alts, 'meters')
-point_calc.set_roll_pitch_yaws(rolls, pitches, yaws, units='degrees')
+point_calc.set_roll_pitch_yaws(rolls, pitches, yaws, units=rpy_units)
 
 simulator = LinescannerSimulator(gtiff_fname, point_calc)
 simulated_image_obj = simulator.create_overhead_image_object()
