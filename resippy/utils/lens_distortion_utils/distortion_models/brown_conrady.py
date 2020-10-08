@@ -12,12 +12,12 @@ class BrownConradyDistortionModel:
                  x_center,  # type: float
                  y_center,  # type: float
                  radial_distortion_coefficients,  # type: ndarray
-                 tangential_distortion_coefficient,  # type: ndarray
+                 tangential_distortion_coefficients,  # type: ndarray
                  ):
         self._xc = x_center
         self._yc = y_center
         self._k = radial_distortion_coefficients
-        self._p = tangential_distortion_coefficient
+        self._p = tangential_distortion_coefficients
 
     def compute_undistorted_image_plane_locations(self,
                                                   distorted_x_image_points,  # type: ndarray
