@@ -96,23 +96,23 @@ class PhysicalCameraSimulator:
         camera_1_m_matrix = fixtured_camera.get_camera_absolute_M_matrix()
         omega, phi, kappa = photogrammetry_utils.solve_for_omega_phi_kappa(camera_1_m_matrix)
 
-        point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params(lon,
-                                                                             lat,
-                                                                             alt,
-                                                                             self.world_projection,
-                                                                             omega,
-                                                                             phi,
-                                                                             kappa,
-                                                                             self._npix_x,
-                                                                             self._npix_y,
-                                                                             self._pixel_pitch_x,
-                                                                             self._pixel_pitch_y,
-                                                                             self._focal_length,
-                                                                             alt_units=self._external_orientation_spatial_units,
-                                                                             pixel_pitch_x_units=self._pixel_pitch_units,
-                                                                             pixel_pitch_y_units=self._pixel_pitch_units,
-                                                                             focal_length_units=self._focal_length_units,
-                                                                             flip_y=True)
+        point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params_and_roll_pitch_yaw(lon,
+                                                                                                lat,
+                                                                                                alt,
+                                                                                                self.world_projection,
+                                                                                                omega,
+                                                                                                phi,
+                                                                                                kappa,
+                                                                                                self._npix_x,
+                                                                                                self._npix_y,
+                                                                                                self._pixel_pitch_x,
+                                                                                                self._pixel_pitch_y,
+                                                                                                self._focal_length,
+                                                                                                alt_units=self._external_orientation_spatial_units,
+                                                                                                pixel_pitch_x_units=self._pixel_pitch_units,
+                                                                                                pixel_pitch_y_units=self._pixel_pitch_units,
+                                                                                                focal_length_units=self._focal_length_units,
+                                                                                                flip_y=True)
         return point_calc
 
     def create_overhead_image_object(self,

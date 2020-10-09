@@ -128,8 +128,8 @@ def create_full_ortho_gtiff_image(overhead_image,  # type: AbstractEarthOverhead
         native_lons, native_lats = get_pixel_lon_lats(overhead_image,
                                                       dem,
                                                       bands,
-                                                      pixels_x=[0, nx-1, 0],
-                                                      pixels_y=[0, 0, ny-1])
+                                                      pixels_x=np.asarray([0, nx-1, 0]),
+                                                      pixels_y=np.asarray([0, 0, ny-1]))
         local_lons, local_lats = transform(overhead_image.pointcalc.get_projection(), local_proj, native_lons, native_lats)
         distance_along_x = math.sqrt((local_lons[1] - local_lons[0]) ** 2 + (local_lats[1] - local_lats[0]) ** 2)
         distance_along_y = math.sqrt((local_lons[2] - local_lons[0]) ** 2 + (local_lats[2] - local_lats[0]) ** 2)

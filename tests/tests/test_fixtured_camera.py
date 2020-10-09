@@ -106,10 +106,10 @@ class TestFixturedCamera(unittest.TestCase):
         lon = -77.677624
         sensor_alt = 100
 
-        temp_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params(lon, lat, sensor_alt,
-                                                                                 0, 0, 0,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        temp_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params_and_roll_pitch_yaw(lon, lat, sensor_alt,
+                                                                                                     0, 0, 0,
+                                                                                                     1000, 1000,
+                                                                                                     5, 5, 1)
 
         fixture_local_lon, fixture_local_lat = temp_point_calc.get_approximate_lon_lat_center()
 
@@ -129,11 +129,11 @@ class TestFixturedCamera(unittest.TestCase):
         pinhole_cam.init_pinhole_from_coeffs(camera_x, camera_y, camera_z, omega, phi, kappa,
                                              1, focal_length_units='meters')
 
-        fpa_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params(camera_x, camera_y, camera_z,
-                                                                                 temp_point_calc.get_projection(),
-                                                                                 omega, phi, kappa,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        fpa_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params_and_roll_pitch_yaw(camera_x, camera_y, camera_z,
+                                                                                                    temp_point_calc.get_projection(),
+                                                                                                    omega, phi, kappa,
+                                                                                                    1000, 1000,
+                                                                                                    5, 5, 1)
 
         fpa_center_lon, fpa_center_lat = fpa_point_calc.pixel_x_y_alt_to_lon_lat(500, 500, 0)
 
@@ -152,10 +152,10 @@ class TestFixturedCamera(unittest.TestCase):
         lon = -77.677624
         sensor_alt = 100
 
-        temp_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params(lon, lat, sensor_alt,
-                                                                                 0, 0, 0,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        temp_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params_and_roll_pitch_yaw(lon, lat, sensor_alt,
+                                                                                                     0, 0, 0,
+                                                                                                     1000, 1000,
+                                                                                                     5, 5, 1)
 
         fixture_local_lon, fixture_local_lat = temp_point_calc.get_approximate_lon_lat_center()
 
@@ -175,11 +175,11 @@ class TestFixturedCamera(unittest.TestCase):
         pinhole_cam.init_pinhole_from_coeffs(camera_x, camera_y, camera_z, omega, phi, kappa,
                                              1, focal_length_units='meters')
 
-        fpa_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params(camera_x, camera_y, camera_z,
-                                                                                 temp_point_calc.get_projection(),
-                                                                                 omega, phi, kappa,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        fpa_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params_and_roll_pitch_yaw(camera_x, camera_y, camera_z,
+                                                                                                    temp_point_calc.get_projection(),
+                                                                                                    omega, phi, kappa,
+                                                                                                    1000, 1000,
+                                                                                                    5, 5, 1)
 
         fpa_center_lon, fpa_center_lat = fpa_point_calc.pixel_x_y_alt_to_lon_lat(500, 500, 0)
 
@@ -202,10 +202,10 @@ class TestFixturedCamera(unittest.TestCase):
         lon = -77.677624
         sensor_alt = 100
 
-        temp_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params(lon, lat, sensor_alt,
-                                                                                 0, 0, 0,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        temp_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params_and_roll_pitch_yaw(lon, lat, sensor_alt,
+                                                                                                     0, 0, 0,
+                                                                                                     1000, 1000,
+                                                                                                     5, 5, 1)
 
         fixture_local_lon, fixture_local_lat = temp_point_calc.get_approximate_lon_lat_center()
 
@@ -225,11 +225,11 @@ class TestFixturedCamera(unittest.TestCase):
         pinhole_cam.init_pinhole_from_coeffs(camera_x, camera_y, camera_z, omega, phi, kappa,
                                              1, focal_length_units='meters')
 
-        fpa_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params(camera_x, camera_y, camera_z,
-                                                                                 temp_point_calc.get_projection(),
-                                                                                 omega, phi, kappa,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        fpa_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params_and_roll_pitch_yaw(camera_x, camera_y, camera_z,
+                                                                                                    temp_point_calc.get_projection(),
+                                                                                                    omega, phi, kappa,
+                                                                                                    1000, 1000,
+                                                                                                    5, 5, 1)
 
         fpa_center_lon, fpa_center_lat = fpa_point_calc.pixel_x_y_alt_to_lon_lat(500, 500, 0)
 
@@ -252,10 +252,10 @@ class TestFixturedCamera(unittest.TestCase):
         lon = -77.677624
         sensor_alt = 100
 
-        temp_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params(lon, lat, sensor_alt,
-                                                                                 0, 0, 0,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        temp_point_calc = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params_and_roll_pitch_yaw(lon, lat, sensor_alt,
+                                                                                                     0, 0, 0,
+                                                                                                     1000, 1000,
+                                                                                                     5, 5, 1)
 
         fixture_local_lon, fixture_local_lat = temp_point_calc.get_approximate_lon_lat_center()
 
@@ -275,17 +275,17 @@ class TestFixturedCamera(unittest.TestCase):
         pinhole_cam.init_pinhole_from_coeffs(camera_x, camera_y, camera_z, omega, phi, kappa,
                                              1, focal_length_units='meters')
 
-        fpa_point_calc1 = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params(camera_x, camera_y, camera_z,
-                                                                                 temp_point_calc.get_projection(),
-                                                                                 omega, phi, 0,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        fpa_point_calc1 = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params_and_roll_pitch_yaw(camera_x, camera_y, camera_z,
+                                                                                                     temp_point_calc.get_projection(),
+                                                                                                     omega, phi, 0,
+                                                                                                     1000, 1000,
+                                                                                                     5, 5, 1)
 
-        fpa_point_calc2 = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params(camera_x, camera_y, camera_z,
-                                                                                 temp_point_calc.get_projection(),
-                                                                                 omega, phi, kappa,
-                                                                                 1000, 1000,
-                                                                                 5, 5, 1)
+        fpa_point_calc2 = IdealPinholeFpaLocalUtmPointCalc.init_from_local_params_and_roll_pitch_yaw(camera_x, camera_y, camera_z,
+                                                                                                     temp_point_calc.get_projection(),
+                                                                                                     omega, phi, kappa,
+                                                                                                     1000, 1000,
+                                                                                                     5, 5, 1)
 
         fpa_lon_1, fpa_lat_1 = fpa_point_calc1.pixel_x_y_alt_to_lon_lat(1000, 500, 0)
         fpa_lon_2, fpa_lat_2 = fpa_point_calc2.pixel_x_y_alt_to_lon_lat(1000, 500, 0)

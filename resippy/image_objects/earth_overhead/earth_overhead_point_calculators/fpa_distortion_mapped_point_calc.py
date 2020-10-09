@@ -6,6 +6,7 @@ from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.suppo
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.abstract_earth_overhead_point_calc import AbstractEarthOverheadPointCalc
 from resippy.photogrammetry import crs_defs
 from resippy.utils import proj_utils
+from resippy.utils.image_utils import image_utils
 from resippy.utils.units import ureg
 from pyproj import transform
 from pyproj import Proj
@@ -53,6 +54,22 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
                                                   z_units='meters',
                                                   focal_length_units='meters')
         return pinhole_camera.image_to_world_plane(undistorted_xs, undistorted_ys, alts)
+
+    @classmethod
+    def create_pinhole_model(cls,
+                             npix_x,  # type: ndarray
+                             npix_y,  # type: ndarray
+                             pixel_pitch_x,  # type: int
+                             pixel_pitch_y,  # type: int
+                             pixel_pitch_units='micrometers',  # type: str
+                             ):
+        model = cls()
+        x_spacing = (ureg.parse_units(pixel_pitch_units) * pixel_pitch_x).to('meters').magnitude
+        y_spacing = (ureg.parse_units(pixel_pitch_units) * pixel_pitch_y).to('meters').magnitude
+        image_plane_grid = image_utils.create_image_plane_grid(npix_x, npix_y, x_spacing=x_spacing, y_spacing=y_spacing)
+        model._undistorted_x_grid = image_plane_grid[0]
+        model._undistorted_y_grid = image_plane_grid[1]
+        return model
 
     def set_focal_length(self, focal_length, units='mm'):
         self._focal_length_meters = (focal_length * ureg.parse_units(units)).to('meters').magnitude
@@ -123,3 +140,7 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
                                                ):
         self._undistorted_x_grid = undistorted_x_grid
         self._undistorted_y_grid = undistorted_y_grid
+
+    def create_copy(self):
+        copy = self
+        return copy

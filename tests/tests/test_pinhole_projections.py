@@ -65,24 +65,24 @@ class TestCrsTools(unittest.TestCase):
         print("Successfully projected points from the image plane to the world and back, they match.")
 
     def test_pixel_to_world_and_back_for_fpa_pinhole_camera(self):
-        camera = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params(center_lon_dd,
-                                                                         center_lat_dd,
-                                                                         center_alt,
-                                                                         omega,
-                                                                         phi,
-                                                                         kappa,
-                                                                         npix_x=640,
-                                                                         npix_y=480,
-                                                                         pixel_pitch_x=5,
-                                                                         pixel_pitch_y=5,
-                                                                         focal_length=focal_length,
-                                                                         alt_units=linear_units,
-                                                                         omega_units=angle_units,
-                                                                         phi_units=angle_units,
-                                                                         kappa_units=angle_units,
-                                                                         pixel_pitch_x_units='micrometer',
-                                                                         pixel_pitch_y_units='micrometer',
-                                                                         focal_length_units=focal_length_units)
+        camera = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params_and_roll_pitch_yaw(center_lon_dd,
+                                                                                            center_lat_dd,
+                                                                                            center_alt,
+                                                                                            omega,
+                                                                                            phi,
+                                                                                            kappa,
+                                                                                            npix_x=640,
+                                                                                            npix_y=480,
+                                                                                            pixel_pitch_x=5,
+                                                                                            pixel_pitch_y=5,
+                                                                                            focal_length=focal_length,
+                                                                                            alt_units=linear_units,
+                                                                                            omega_units=angle_units,
+                                                                                            phi_units=angle_units,
+                                                                                            kappa_units=angle_units,
+                                                                                            pixel_pitch_x_units='micrometer',
+                                                                                            pixel_pitch_y_units='micrometer',
+                                                                                            focal_length_units=focal_length_units)
         world_z = 100
         pixel_grid = image_utils.create_pixel_grid(camera._npix_x, camera._npix_y)
         lons, lats = camera.pixel_x_y_alt_to_lon_lat(pixel_grid[0], pixel_grid[1], world_z)
@@ -114,24 +114,24 @@ class TestCrsTools(unittest.TestCase):
 
         lons, lats = distortion_camera._pixel_x_y_alt_to_lon_lat_native(pixel_grid[0], pixel_grid[1], world_z)
 
-        camera = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params(center_lon_dd,
-                                                                         center_lat_dd,
-                                                                         center_alt,
-                                                                         omega,
-                                                                         phi,
-                                                                         kappa,
-                                                                         npix_x=nx_pixels,
-                                                                         npix_y=ny_pixels,
-                                                                         pixel_pitch_x=pp_meters,
-                                                                         pixel_pitch_y=pp_meters,
-                                                                         focal_length=focal_length,
-                                                                         alt_units=linear_units,
-                                                                         omega_units=angle_units,
-                                                                         phi_units=angle_units,
-                                                                         kappa_units=angle_units,
-                                                                         pixel_pitch_x_units='meters',
-                                                                         pixel_pitch_y_units='meters',
-                                                                         focal_length_units=focal_length_units)
+        camera = IdealPinholeFpaLocalUtmPointCalc.init_from_wgs84_params_and_roll_pitch_yaw(center_lon_dd,
+                                                                                            center_lat_dd,
+                                                                                            center_alt,
+                                                                                            omega,
+                                                                                            phi,
+                                                                                            kappa,
+                                                                                            npix_x=nx_pixels,
+                                                                                            npix_y=ny_pixels,
+                                                                                            pixel_pitch_x=pp_meters,
+                                                                                            pixel_pitch_y=pp_meters,
+                                                                                            focal_length=focal_length,
+                                                                                            alt_units=linear_units,
+                                                                                            omega_units=angle_units,
+                                                                                            phi_units=angle_units,
+                                                                                            kappa_units=angle_units,
+                                                                                            pixel_pitch_x_units='meters',
+                                                                                            pixel_pitch_y_units='meters',
+                                                                                            focal_length_units=focal_length_units)
         lons_ideal, lats_ideal = camera.pixel_x_y_alt_to_lon_lat(pixel_grid[0], pixel_grid[1], world_z)
 
         assert numpy.isclose(lons, lons_ideal).all()
