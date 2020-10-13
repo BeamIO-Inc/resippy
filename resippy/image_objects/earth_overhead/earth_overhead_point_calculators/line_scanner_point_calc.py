@@ -15,8 +15,8 @@ from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fpa_d
 
 class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
     def __init__(self):
-        self._undistorted_x_grid = None     # type: ndarray
-        self._undistorted_y_grid = None     # type: ndarray
+        self._distorted_x_grid = None     # type: ndarray
+        self._distorted_y_grid = None     # type: ndarray
         self._focal_length = None        # type: ndarray
         self._focal_length_units = None     # type: ndarray
 
@@ -47,17 +47,17 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         self._npix_x = None
         self._npix_y = None
 
-    def set_camera_model_w_undistorted_image_plane_grid(self,
-                                                        undistorted_image_plane_x_grid,  # type: ndarray
-                                                        undistorted_image_plane_y_grid,  # type: ndarray
-                                                        focal_length,  # type: float
-                                                        focal_length_units  # type: str
-                                                        ):
-        self._undistorted_x_grid = undistorted_image_plane_x_grid
-        self._undistorted_y_grid = undistorted_image_plane_y_grid
+    def set_camera_model_w_distorted_image_plane_grid(self,
+                                                      distorted_image_plane_x_grid,  # type: ndarray
+                                                      distorted_image_plane_y_grid,  # type: ndarray
+                                                      focal_length,  # type: float
+                                                      focal_length_units  # type: str
+                                                      ):
+        self._distorted_x_grid = distorted_image_plane_x_grid
+        self._distorted_y_grid = distorted_image_plane_y_grid
         self._focal_length = focal_length
         self._focal_length_units = focal_length_units
-        self._npix_y = len(undistorted_image_plane_x_grid)
+        self._npix_y = len(distorted_image_plane_x_grid)
 
     def set_camera_model_w_ideal_pinhole_model(self,
                                                n_pixels,
@@ -70,8 +70,8 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         self._focal_length_units = focal_length_units
         pp_meters = (pixel_pitch * ureg(pixel_pitch_units)).to('meters').magnitude
         image_plane_grid = image_utils.create_image_plane_grid(1, n_pixels, pp_meters, pp_meters)
-        self._undistorted_x_grid = image_plane_grid[0]
-        self._undistorted_y_grid = image_plane_grid[1]
+        self._distorted_x_grid = image_plane_grid[0]
+        self._distorted_y_grid = image_plane_grid[1]
 
     def _lon_lat_alt_to_pixel_x_y_native(self, lons, lats, alts, band=None):
         pass
@@ -82,8 +82,8 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         lines_to_project = set(pixel_xs.ravel())
         for line in lines_to_project:
             single_line_point_calc = FpaDistortionMappedPointCalc()
-            single_line_point_calc.set_undistorted_fpa_image_plane_points(self._undistorted_x_grid,
-                                                                          self._undistorted_y_grid)
+            single_line_point_calc.set_distorted_fpa_image_plane_points(self._distorted_x_grid,
+                                                                        self._distorted_y_grid)
             single_line_point_calc.set_focal_length(self._focal_length, units=self._focal_length_units)
             single_line_point_calc.set_projection(self.get_projection())
             single_line_point_calc.set_xyz_using_local_coords(self.local_lons[line],

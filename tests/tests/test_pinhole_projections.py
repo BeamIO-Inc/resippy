@@ -5,7 +5,7 @@ from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.suppo
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.ideal_pinhole_fpa_local_utm_point_calc import IdealPinholeFpaLocalUtmPointCalc
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.fpa_distortion_mapped_point_calc import FpaDistortionMappedPointCalc
 from resippy.utils.image_utils import image_utils
-from resippy.utils.lens_distortion_utils.distortion_models.brown_conrady import BrownConradyDistortionModel
+from resippy.photogrammetry.lens_distortion_models import BrownConradyDistortionModel
 from resippy.utils.units import ureg
 from pyproj import transform
 from resippy.photogrammetry import crs_defs
@@ -103,11 +103,11 @@ class TestCrsTools(unittest.TestCase):
         distortion_camera.set_boresight_roll_pitch_yaw_offsets(0, 0, 0)
         distortion_camera.set_mounting_position_on_fixture(0, 0, 0.0000000)
 
-        dist_model = BrownConradyDistortionModel(0, 0, [0, 0], [0, 0])
+        dist_model = BrownConradyDistortionModel(0, 0, numpy.asarray([0, 0]), numpy.asarray([0, 0]))
         distorted_grid_x, distorted_grid_y = image_utils.create_image_plane_grid(nx_pixels, ny_pixels, pp_meters, pp_meters)
         undistorted_grid_x, undistorted_grid_y = dist_model.compute_undistorted_image_plane_locations(distorted_grid_x,
                                                                                                       distorted_grid_y)
-        distortion_camera.set_undistorted_fpa_image_plane_points(undistorted_grid_x, undistorted_grid_y)
+        distortion_camera.set_distorted_fpa_image_plane_points(undistorted_grid_x, undistorted_grid_y)
         distortion_camera.set_focal_length(focal_length, focal_length_units)
 
         pixel_grid = image_utils.create_pixel_grid(nx_pixels, ny_pixels)

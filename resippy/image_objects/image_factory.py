@@ -7,6 +7,7 @@ from resippy.image_objects.earth_overhead.digital_globe.DigitalGlobeImageFactory
 from resippy.image_objects.earth_overhead.physical_camera.physical_camera_image_factory import PhysicalCameraImageFactory
 from resippy.image_objects.earth_overhead.linescanner.linescanner_image_factory import LinescannerImageFactory
 
+
 class ImageFactory:
     """
     This is a factory class that provides convenience routines to create various types of image objects.

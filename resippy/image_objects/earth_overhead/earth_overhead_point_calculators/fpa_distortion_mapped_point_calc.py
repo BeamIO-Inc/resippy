@@ -1,5 +1,6 @@
 from __future__ import division
 
+from typing import Union
 import numpy
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.pinhole_camera import PinholeCamera
 from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.supporting_classes.fixtured_camera import FixturedCamera
@@ -14,13 +15,17 @@ from numpy import ndarray
 
 
 class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
+    """
+    Units for everything should be in meters, unless initializing from WGS84 parameters.  In that case the native
+    projection is determined and the local coordinates are converted into meters.
+    """
     def __init__(self):
         self._lon_lat_center_approximate = None     # type: tuple
         self._fixture = FixturedCamera()            # type: FixturedCamera
         self._focal_length_meters = None            # type: float
         self._native_proj = None        # type: Proj
-        self._undistorted_x_grid = None     # type: ndarray
-        self._undistorted_y_grid = None     # type: ndarray
+        self._distorted_x_grid = None     # type: ndarray
+        self._distorted_y_grid = None     # type: ndarray
 
     def _lon_lat_alt_to_pixel_x_y_native(self, lons, lats, alts, band=None):
         pass
@@ -28,18 +33,18 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
     def _pixel_x_y_alt_to_lon_lat_native(self,
                                          pixel_xs,  # type: ndarray
                                          pixel_ys,  # type: ndarray
-                                         alts,      # type: ndarray
+                                         alts,      # type: Union[ndarray, float]
                                          band=None,  # type: int
                                          ):
         if len(pixel_xs.shape) == 2:
             input_ny, input_nx = pixel_xs.shape
         x_ravel = pixel_xs.ravel()
         y_ravel = pixel_ys.ravel()
-        undistorted_xs = self._undistorted_x_grid[[y_ravel], [x_ravel]]
-        undistorted_ys = self._undistorted_y_grid[[y_ravel], [x_ravel]]
+        distorted_xs = self._distorted_x_grid[[y_ravel], [x_ravel]]
+        distorted_ys = self._distorted_y_grid[[y_ravel], [x_ravel]]
         if len(pixel_xs.shape) == 2:
-            undistorted_xs = numpy.reshape(undistorted_xs, (input_ny, input_nx))
-            undistorted_ys = numpy.reshape(undistorted_ys, (input_ny, input_nx))
+            distorted_xs = numpy.reshape(distorted_xs, (input_ny, input_nx))
+            distorted_ys = numpy.reshape(distorted_ys, (input_ny, input_nx))
 
         camera_x, camera_y, camera_z = self._fixture.get_camera_absolute_xyz()
         camera_m_matrix = self._fixture.get_camera_absolute_M_matrix()
@@ -53,7 +58,7 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
                                                   y_units='meters',
                                                   z_units='meters',
                                                   focal_length_units='meters')
-        return pinhole_camera.image_to_world_plane(undistorted_xs, undistorted_ys, alts)
+        return pinhole_camera.image_to_world_plane(distorted_xs, distorted_ys, alts)
 
     @classmethod
     def create_pinhole_model(cls,
@@ -67,8 +72,8 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
         x_spacing = (ureg.parse_units(pixel_pitch_units) * pixel_pitch_x).to('meters').magnitude
         y_spacing = (ureg.parse_units(pixel_pitch_units) * pixel_pitch_y).to('meters').magnitude
         image_plane_grid = image_utils.create_image_plane_grid(npix_x, npix_y, x_spacing=x_spacing, y_spacing=y_spacing)
-        model._undistorted_x_grid = image_plane_grid[0]
-        model._undistorted_y_grid = image_plane_grid[1]
+        model._distorted_x_grid = image_plane_grid[0]
+        model._distorted_y_grid = image_plane_grid[1]
         return model
 
     def set_focal_length(self, focal_length, units='mm'):
@@ -134,13 +139,9 @@ class FpaDistortionMappedPointCalc(AbstractEarthOverheadPointCalc):
     def set_mounting_position_on_fixture(self, x, y, z, units='meters'):
         self._fixture.set_relative_camera_xyz(x, y, z, x_units=units, y_units=units, z_units=units)
 
-    def set_undistorted_fpa_image_plane_points(self,
-                                               undistorted_x_grid,  # type: ndarray
-                                               undistorted_y_grid,  # type: ndarray
-                                               ):
-        self._undistorted_x_grid = undistorted_x_grid
-        self._undistorted_y_grid = undistorted_y_grid
-
-    def create_copy(self):
-        copy = self
-        return copy
+    def set_distorted_fpa_image_plane_points(self,
+                                             distorted_x_grid,  # type: ndarray
+                                             distorted_y_grid,  # type: ndarray
+                                             ):
+        self._distorted_x_grid = distorted_x_grid
+        self._distorted_y_grid = distorted_y_grid

@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 from numpy import ndarray
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
+from resippy.image_objects.earth_overhead.earth_overhead_point_calculators.line_scanner_point_calc import LineScannerPointCalc
 
 
 class LinescannerImage(AbstractEarthOverheadImage):
@@ -32,3 +33,7 @@ class LinescannerImage(AbstractEarthOverheadImage):
             if self.read_with_gdal:
                 band = self._dset.GetRasterBand(band_number + 1)
             return band.ReadAsArray()
+
+    @property
+    def pointcalc(self):  # type: (...) -> LineScannerPointCalc
+        return self._point_calc

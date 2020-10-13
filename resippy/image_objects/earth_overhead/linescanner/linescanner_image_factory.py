@@ -11,7 +11,7 @@ class LinescannerImageFactory:
     def from_numpy_array_metadata_and_point_calc(image_data,  # type: ndarray
                                                  metadata,    # type: LinescannerMetadata
                                                  point_calc,  # type: LineScannerPointCalc
-                                                 ):  # type: (...) -> PhysicalCameraImage
+                                                 ):  # type: (...) -> LinescannerImage
         linescanner = LinescannerImage()
         linescanner.set_image_data(image_data)
         linescanner.set_metadata(metadata)
