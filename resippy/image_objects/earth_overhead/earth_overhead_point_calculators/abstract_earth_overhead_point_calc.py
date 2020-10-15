@@ -164,8 +164,9 @@ class AbstractEarthOverheadPointCalc:
         """
         if world_proj is None:
             world_proj = self.get_projection()
-        if self._pixel_x_y_alt_to_lon_lat_native(pixel_xs, pixel_ys, alts, band) is not None:
-            native_lons, native_lats = self._pixel_x_y_alt_to_lon_lat_native(pixel_xs, pixel_ys, alts, band=band)
+        native_lon_lats = self._pixel_x_y_alt_to_lon_lat_native(pixel_xs, pixel_ys, alts, band)
+        if native_lon_lats is not None:
+            return native_lon_lats[0], native_lon_lats[1]
         else:
             native_lons, native_lats = \
                 self._pixel_x_y_alt_to_lon_lat_native_solver(pixel_xs,
@@ -318,38 +319,40 @@ class AbstractEarthOverheadPointCalc:
 
         # TODO put stuff in here to make sure nx and ny are same size
         # TODO put something here to check that the DEM projection and image projection are the same
-        ny = None
-        nx = None
-        is2d = np.ndim(pixels_x) == 2
-        if is2d:
-            ny, nx = np.shape(pixels_x)
-            pixels_x = image_utils.flatten_image_band(pixels_x)
-            pixels_y = image_utils.flatten_image_band(pixels_y)
-
-        n_pixels_to_project = len(pixels_x)
-
-        max_alt = dem_highest_alt
-        min_alt = dem_lowest_alt
-
-        if max_alt is None:
-            max_alt = dem.get_highest_alt()
-        if min_alt is None:
-            min_alt = dem.get_lowest_alt()
-        alt_range = max_alt - min_alt
-
-        # put the max and min alts at 1 percent above and below the maximum returned by the DEM
-        max_alt = max_alt + alt_range * 0.01
-        min_alt = min_alt - alt_range * 0.01
-
-        lons_max_alt, lats_max_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, max_alt, band=band)
-        lons_min_alt, lats_min_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, min_alt, band=band)
 
         if type(dem) == ConstantElevationDem:
-            intersected_lons = lons_max_alt
-            intersected_lats = lats_max_alt
-            intersected_alts = dem.get_elevations(intersected_lons, intersected_lats)
+            lons, lats = self.pixel_x_y_alt_to_lon_lat(pixels_x,
+                                                       pixels_y,
+                                                       dem.get_highest_alt(),
+                                                       band=band)
+            return lons, lats, np.zeros_like(lons) + dem.get_highest_alt()
 
         else:
+            ny = None
+            nx = None
+            is2d = np.ndim(pixels_x) == 2
+            if is2d:
+                ny, nx = np.shape(pixels_x)
+                pixels_x = image_utils.flatten_image_band(pixels_x)
+                pixels_y = image_utils.flatten_image_band(pixels_y)
+
+            n_pixels_to_project = len(pixels_x)
+
+            max_alt = dem_highest_alt
+            min_alt = dem_lowest_alt
+
+            if max_alt is None:
+                max_alt = dem.get_highest_alt()
+            if min_alt is None:
+                min_alt = dem.get_lowest_alt()
+            alt_range = max_alt - min_alt
+
+            # put the max and min alts at 1 percent above and below the maximum returned by the DEM
+            max_alt = max_alt + alt_range * 0.01
+            min_alt = min_alt - alt_range * 0.01
+
+            lons_max_alt, lats_max_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, max_alt, band=band)
+            lons_min_alt, lats_min_alt = self.pixel_x_y_alt_to_lon_lat(pixels_x, pixels_y, min_alt, band=band)
 
             # TODO this operation becomes very expensive at very fine DEM resolutions
             # TODO create implementation for a raster DEM that works faster

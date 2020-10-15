@@ -47,6 +47,13 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         self._npix_x = None
         self._npix_y = None
 
+    def set_focal_length(self,
+                         focal_length,  # type: float
+                         focal_length_units,  # type: str
+                         ):
+        self._focal_length = focal_length
+        self._focal_length_units = focal_length_units
+
     def set_camera_model_w_distorted_image_plane_grid(self,
                                                       distorted_image_plane_x_grid,  # type: ndarray
                                                       distorted_image_plane_y_grid,  # type: ndarray
@@ -80,6 +87,7 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         lons_native = numpy.zeros_like(pixel_xs)
         lats_native = numpy.zeros_like(pixel_xs)
         lines_to_project = set(pixel_xs.ravel())
+        # TODO: at some point we'll need to address non integer x values
         for line in lines_to_project:
             single_line_point_calc = FpaDistortionMappedPointCalc()
             single_line_point_calc.set_distorted_fpa_image_plane_points(self._distorted_x_grid,
@@ -114,28 +122,37 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
             else:
                 line_pixels_to_project_y = pixel_ys[indices]
                 line_alts = alts[indices]
-            line_lons, line_lats = single_line_point_calc._pixel_x_y_alt_to_lon_lat_native(numpy.zeros_like(line_pixels_to_project_y),
+            x_pixels_to_project = numpy.zeros_like(line_pixels_to_project_y)
+            line_lons, line_lats = single_line_point_calc._pixel_x_y_alt_to_lon_lat_native(x_pixels_to_project,
                                                                                            line_pixels_to_project_y,
                                                                                            line_alts)
             lons_native[indices] = line_lons
             lats_native[indices] = line_lats
         return lons_native, lats_native
 
-    def set_xyz_with_wgs84_coords(self, lons, lats, alts, alt_units):
-        native_proj = proj_utils.decimal_degrees_to_local_utm_proj(lons[0],
-                                                                   lats[0])
-        self.set_projection(native_proj)
-        local_lons, local_lats = transform(crs_defs.PROJ_4326,
-                                           native_proj,
-                                           lons,
-                                           lats)
-        self.local_lons = local_lons
-        self.local_lats = local_lats
+    def set_xyz_with_local_coords(self, lons, lats, alts, alt_units, local_proj):
+        self.set_projection(local_proj)
+        self.local_lons = lons
+        self.local_lats = lats
         self.alts = alts
         self.alt_units = alt_units
         self._npix_x = len(lons)
 
-    def set_roll_pitch_yaws(self, rolls, pitches, yaws, units, order='rpy'):
+    def set_xyz_with_wgs84_coords(self, lons, lats, alts, alt_units):
+        local_proj = proj_utils.decimal_degrees_to_local_utm_proj(lons[0],
+                                                                   lats[0])
+        local_lons, local_lats = transform(crs_defs.PROJ_4326,
+                                           local_proj,
+                                           lons,
+                                           lats)
+        self.set_xyz_with_local_coords(local_lons, local_lats, alts, alt_units, local_proj)
+
+    def set_roll_pitch_yaws(self,
+                            rolls,  # type: ndarray
+                            pitches,  # type: ndarray
+                            yaws,   # type: ndarray
+                            units,  # type: str
+                            order='rpy'):
         self._rolls = rolls
         self._pitches = pitches
         self._yaws = yaws
@@ -153,3 +170,17 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         self._boresight_yaw = yaw
         self._boresight_units = units
         self._boresight_rpy_order = order
+
+    def get_gsd_at_nadir(self,
+                     line=None,  # type: int
+                     ):
+        center_pixel = int(self._npix_y / 2)
+        if line is not None:
+            alt = self.alts[line]
+        else:
+            alt = numpy.mean(self.alts)
+        pixel_pitch = numpy.abs(self._distorted_y_grid[center_pixel] - self._distorted_y_grid[center_pixel - 1])
+        pixel_pitch = pixel_pitch[0] * ureg.parse_units('meters')
+        gsd = pixel_pitch * (alt * ureg.parse_units(self.alt_units)) / \
+              (self._focal_length * ureg.parse_units(self._focal_length_units))
+        return gsd.to('meters').magnitude

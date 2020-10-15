@@ -48,7 +48,7 @@ class IGMPointCalc(AbstractEarthOverheadPointCalc):
     def _pixel_x_y_alt_to_lon_lat_native(self, pixel_xs, pixel_ys, alts=None, band=None):
         return self._lons[pixel_ys, pixel_xs], self._lats[pixel_ys, pixel_xs]
 
-    def _lon_lat_alt_to_pixel_x_y_native(self, lons, lats, alts, band=None):
+    def _lon_lat_alt_to_pixel_x_y_native(self, lons, lats, alts=None, band=None):
         if self._lons_1d is None:
             self._lons_1d = numpy.ravel(self._lons)
         if self._lats_1d is None:

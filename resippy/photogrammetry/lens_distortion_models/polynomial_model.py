@@ -13,7 +13,7 @@ class PolynomialDistortionModel(AbstractLensDistortionModel):
     def __init__(self,
                  polynomial_coefficients,  # type: ndarray
                  focal_length,  # type: float
-                 focal_length_units,  # type: float
+                 focal_length_units,  # type: str
                  ):
         self._polynomial_coefficients = polynomial_coefficients
         self._focal_length = focal_length
