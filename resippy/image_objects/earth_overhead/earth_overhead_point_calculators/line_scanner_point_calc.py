@@ -84,6 +84,11 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         pass
 
     def _pixel_x_y_alt_to_lon_lat_native(self, pixel_xs, pixel_ys, alts=None, band=None):
+        input_type = "array"
+        if isinstance(pixel_xs, numbers.Number):
+            input_type = "number"
+            pixel_xs = numpy.asarray([pixel_xs])
+            pixel_ys = numpy.asarray([pixel_ys])
         lons_native = numpy.zeros_like(pixel_xs)
         lats_native = numpy.zeros_like(pixel_xs)
         lines_to_project = set(pixel_xs.ravel())
@@ -128,6 +133,9 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
                                                                                            line_alts)
             lons_native[indices] = line_lons
             lats_native[indices] = line_lats
+        if input_type == "number":
+            lons_native = lons_native[0]
+            lats_native = lats_native[0]
         return lons_native, lats_native
 
     def set_xyz_with_local_coords(self, lons, lats, alts, alt_units, local_proj):
@@ -184,3 +192,15 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
         gsd = pixel_pitch * (alt * ureg.parse_units(self.alt_units)) / \
               (self._focal_length * ureg.parse_units(self._focal_length_units))
         return gsd.to('meters').magnitude
+
+    def get_ifov_at_optical_center(self, units="radians"):
+        n_pixels = self._distorted_y_grid.shape[0]
+        pixel_1 = self._distorted_y_grid[int(n_pixels/2)]
+        pixel_2 = self._distorted_y_grid[int(n_pixels/2 + 1)]
+        pp = numpy.abs(pixel_2 - pixel_1)
+        flen_meters = (self._focal_length * ureg.parse_units(self._focal_length_units)).to('meters').magnitude
+        ifov = numpy.arctan(pp / flen_meters)
+        if units == "degrees":
+            return numpy.rad2deg(ifov)
+        else:
+            return ifov
