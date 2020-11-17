@@ -51,6 +51,14 @@ class LineScannerPointCalc(AbstractEarthOverheadPointCalc):
     def n_crosstrack_pixels(self):
         return self._npix_y
 
+    @property
+    def focal_length(self):
+        return self._focal_length
+
+    @property
+    def focal_length_units(self):
+        return self._focal_length_units
+
     def set_focal_length(self,
                          focal_length,  # type: float
                          focal_length_units,  # type: str
