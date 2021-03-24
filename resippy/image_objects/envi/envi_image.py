@@ -45,7 +45,7 @@ class EnviImage(AbstractImage):
         for bandnum in range(self.get_metadata().get_n_bands()):
             band = self._dset.GetRasterBand(bandnum + 1)
             numpy_arr.append(band.ReadAsArray())
-        return np.stack(numpy_arr, axis=2)
+        return numpy.stack(numpy_arr, axis=2)
 
     def set_dset(self,
                  dset  # type: gdal.Dataset

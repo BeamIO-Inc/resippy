@@ -18,8 +18,7 @@ def create_hemisphere_quads_by_equal_areas():
     return hemisphere
 
 
-def main():
-    # TODO leave this out until more documentation can be provided on how to reliably install gdal2tiles
+def create_hemispheres():
     equal_spacing_hemisphere = create_hemisphere_quads_by_equal_spacings()
     equal_spacing_hemisphere.center_xyz = numpy.array([0, 0, 0])
     az_el_quads_degrees = equal_spacing_hemisphere.all_quad_az_els_degrees
@@ -33,7 +32,16 @@ def main():
 
     equal_area_hemisphere = create_hemisphere_quads_by_equal_areas()
 
-    stop = 1
+
+def visualize_hemisphere():
+    hemisphere = HemisphereQuadsModel.create_from_equal_areas(4, 5, 80)
+    hemisphere.center_xyz = [0, 0, 0]
+    quads = hemisphere.all_quad_xyzs
+    hemisphere = hemisphere.create_trimesh_model()
+
+
+def main():
+    visualize_hemisphere()
 
 
 if __name__ == '__main__':

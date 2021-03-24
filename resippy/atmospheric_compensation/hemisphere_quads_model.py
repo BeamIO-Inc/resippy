@@ -3,6 +3,7 @@ import math
 import numpy
 from numpy import ndarray
 from shapely.geometry import Polygon
+import trimesh
 
 
 class HemisphereQuadsModel:
@@ -11,6 +12,7 @@ class HemisphereQuadsModel:
         self.elevation_angles = None  # type: ndarray
         self._quad_polygons = None
         self.center_xyz = None  # type: ndarray
+        self._trimesh_model = None
         self._radius = 1
 
     @staticmethod
@@ -20,6 +22,14 @@ class HemisphereQuadsModel:
                             r * math.cos(zenith)
                             ]
         return cartesian_coords
+
+    def az_els_to_xyz(self, azimuths_angles, elevation_angles):
+        zeniths = numpy.pi/2 - elevation_angles
+        xyzs = numpy.zeros((len(azimuths_angles), 3))
+        xyzs[:, 0] = self._radius * numpy.sin(zeniths) * numpy.cos(azimuths_angles)
+        xyzs[:, 1] = self._radius * numpy.sin(zeniths) * numpy.sin(azimuths_angles)
+        xyzs[:, 2] = self._radius * numpy.cos(zeniths)
+        return xyzs
 
     @staticmethod
     def equal_area_elevation_angles(n_elevation_quads,  # type: int
@@ -163,3 +173,66 @@ class HemisphereQuadsModel:
         cap_radians = self.cap_az_els_radians
         cap_xyzs = self.az_el_polygon_to_xyz_polygon(cap_radians)
         return cap_xyzs
+
+    @property
+    def quad_az_el_vertices(self):
+        az_vertices = numpy.tile(self.azimuth_angles[:-1], self.n_elevation_quads+1)
+        el_vertices = numpy.repeat(self.elevation_angles, self.n_azimuth_quads)
+        return numpy.stack([az_vertices, el_vertices], axis=1)
+
+    @property
+    def quad_xyz_vertices(self):
+        az_els = self.quad_az_el_vertices
+        xyzs = self.az_els_to_xyz(az_els[:, 0], az_els[:, 1])
+        return xyzs
+
+
+    @property
+    def quad_faces(self):
+        quad_faces = []
+        quad_face = numpy.array([0, 1, self.n_azimuth_quads+1, self.n_azimuth_quads])
+        face_indices = numpy.tile(quad_face, self.n_azimuth_quads)
+        face_indices = numpy.repeat(range(self.n_azimuth_quads), 4) + face_indices
+        face_indices[-3] = quad_face[0]
+        face_indices[-2] = quad_face[3]
+        for elevation_index in range(self.n_elevation_quads):
+            new_face_indices = face_indices + elevation_index * self.n_azimuth_quads
+            quad_faces = quad_faces + list(new_face_indices)
+        trimesh_quad_faces = numpy.reshape(numpy.array(quad_faces), (int(len(quad_faces) / 4), 4))
+        return trimesh_quad_faces
+
+    @property
+    def n_azimuth_quads(self):
+        return len(self.azimuth_angles) - 1
+
+    @property
+    def n_elevation_quads(self):
+        return len(self.elevation_angles) - 1
+
+    def create_trimesh_model(self):
+        quad_xyz_vertices = self.quad_xyz_vertices
+        quad_faces = self.quad_faces
+
+
+        # get cap vertex and faces
+        cap_vertex = self.az_els_to_xyz(numpy.array([0]), numpy.array([numpy.pi / 2]))
+        all_xyz_vertices = numpy.append(quad_xyz_vertices, cap_vertex, axis=0)
+        cap_vertex_index = len(all_xyz_vertices) - 1
+        quad_xyz_vertices[-self.n_azimuth_quads:, :]
+        top_index_end = len(quad_xyz_vertices)
+        top_index_start = len(quad_xyz_vertices) - self.n_azimuth_quads
+
+        tri_faces = trimesh.geometry.triangulate_quads(quad_faces)
+        tri_faces = list(tri_faces)
+
+        for i in numpy.arange(top_index_start, top_index_end-1):
+            cap_face = [i, i+1, cap_vertex_index]
+            tri_faces.append(cap_face)
+        tri_faces.append([top_index_end-1, top_index_start, cap_vertex_index])
+
+        hemisphere_trimesh = trimesh.Trimesh()
+
+        hemisphere_trimesh.vertices = all_xyz_vertices
+        hemisphere_trimesh.faces = tri_faces
+
+        return hemisphere_trimesh
