@@ -3,6 +3,7 @@
 import pyglet
 import numpy
 import trimesh
+import matplotlib.pyplot as plt
 from resippy.atmospheric_compensation.hemisphere_quads_model import HemisphereQuadsModel
 
 from pyrender import PerspectiveCamera,\
@@ -26,23 +27,42 @@ wood_mesh = Mesh.from_trimesh(wood_trimesh)
 
 texture_visual = trimesh.visual.TextureVisuals()
 
-hemisphere = HemisphereQuadsModel.create_from_equal_az_el_spacings(10, 10, 60)
+hemisphere = HemisphereQuadsModel.create_from_equal_areas(10, 10, 60)
 hemisphere.center_xyz = [0, 0, 0]
 hemisphere._radius = 0.1
 quads = hemisphere.all_quad_xyzs
-hemisphere = hemisphere.create_trimesh_model()
+hemisphere.create_trimesh_model()
 
-hemisphere_mesh = Mesh.from_trimesh(hemisphere)
+hemisphere.initialize_uv_image()
+hemisphere.color_quad(0, 0, [255, 0, 0])
+hemisphere.color_quad(0, 1, [0, 255, 0])
+hemisphere.color_quad(0, 2, [255, 255, 0])
+hemisphere.color_quad(0, 3, [255, 0, 255])
+hemisphere.color_quad(0, 4, [0, 255, 255])
+hemisphere.color_quad(0, 5, [255, 0, 0])
+hemisphere.color_quad(0, 6, [0, 255, 0])
+hemisphere.color_quad(0, 7, [255, 255, 0])
+hemisphere.color_quad(0, 8, [255, 0, 255])
+hemisphere.color_quad(0, 9, [0, 255, 255])
+
+hemisphere.color_cap([255, 255, 255])
+
+hemisphere.apply_uv_image()
+hemisphere_mesh = Mesh.from_trimesh(hemisphere.trimesh_model)
 
 
 #==============================================================================
 # Light creation
 #==============================================================================
 
-direc_l = DirectionalLight(color=numpy.ones(3), intensity=1.0)
-spot_l = SpotLight(color=numpy.ones(3), intensity=1.0,
-                   innerConeAngle=numpy.pi/16, outerConeAngle=numpy.pi/6)
-point_l = PointLight(color=numpy.ones(3), intensity=10.0)
+direc_l = DirectionalLight(color=numpy.ones(3),
+                           intensity=1.0)
+spot_l = SpotLight(color=numpy.ones(3),
+                   intensity=1.0,
+                   innerConeAngle=numpy.pi/16,
+                   outerConeAngle=numpy.pi/6)
+point_l = PointLight(color=numpy.ones(3),
+                     intensity=10.0)
 
 #==============================================================================
 # Camera creation
@@ -86,26 +106,15 @@ v = Viewer(scene, shadows=True)
 cam_node = scene.add(cam, pose=cam_pose)
 v = Viewer(scene, central_node=hemisphere_node)
 
-#==============================================================================
-# Rendering offscreen from that camera
-#==============================================================================
-
-r = OffscreenRenderer(viewport_width=640*2, viewport_height=480*2)
-color, depth = r.render(scene)
-
-import matplotlib.pyplot as plt
-plt.figure()
-plt.imshow(color)
-plt.show()
-
-#==============================================================================
-# Segmask rendering
-#==============================================================================
-
-# nm = {node: 20*(i + 1) for i, node in enumerate(scene.mesh_nodes)}
-# seg = r.render(scene, RenderFlags.SEG, nm)[0]
+# #==============================================================================
+# # Rendering offscreen from that camera
+# #==============================================================================
+#
+# r = OffscreenRenderer(viewport_width=640*2, viewport_height=480*2)
+# color, depth = r.render(scene)
+#
 # plt.figure()
-# plt.imshow(seg)
+# plt.imshow(color)
 # plt.show()
-
-r.delete()
+#
+# r.delete()

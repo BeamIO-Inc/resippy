@@ -4,6 +4,9 @@ import numpy
 from numpy import ndarray
 from shapely.geometry import Polygon
 import trimesh
+import matplotlib.pyplot as plt
+from PIL import Image
+from skimage.draw import polygon as skimage_polygon
 
 
 class HemisphereQuadsModel:
@@ -14,6 +17,7 @@ class HemisphereQuadsModel:
         self.center_xyz = None  # type: ndarray
         self._trimesh_model = None
         self._radius = 1
+        self._uv_image = None  # type: ndarray
 
     @staticmethod
     def polar2cart(r, zenith, azimuth):
@@ -23,7 +27,7 @@ class HemisphereQuadsModel:
                             ]
         return cartesian_coords
 
-    def az_els_to_xyz(self, azimuths_angles, elevation_angles):
+    def _az_els_to_xyz(self, azimuths_angles, elevation_angles):
         zeniths = numpy.pi/2 - elevation_angles
         xyzs = numpy.zeros((len(azimuths_angles), 3))
         xyzs[:, 0] = self._radius * numpy.sin(zeniths) * numpy.cos(azimuths_angles)
@@ -158,7 +162,7 @@ class HemisphereQuadsModel:
         return cap
 
     @property
-    def cap_az_els_radians(self):
+    def cap_polygon_radians(self):
         cap_azimuths = self.azimuth_angles
         cap_azimuths[-1] = cap_azimuths[0]
         cap_elevations = numpy.zeros_like(cap_azimuths) + self.elevation_angles[-1]
@@ -169,8 +173,8 @@ class HemisphereQuadsModel:
         return cap
 
     @property
-    def cap_xyzs(self):
-        cap_radians = self.cap_az_els_radians
+    def cap_xyz_polygon(self):
+        cap_radians = self.cap_polygon_radians
         cap_xyzs = self.az_el_polygon_to_xyz_polygon(cap_radians)
         return cap_xyzs
 
@@ -178,14 +182,18 @@ class HemisphereQuadsModel:
     def quad_az_el_vertices(self):
         az_vertices = numpy.tile(self.azimuth_angles[:-1], self.n_elevation_quads+1)
         el_vertices = numpy.repeat(self.elevation_angles, self.n_azimuth_quads)
-        return numpy.stack([az_vertices, el_vertices], axis=1)
+        return az_vertices, el_vertices
+
+    @property
+    def all_az_el_vertices(self):
+        az_vertices, el_vertices = self.quad_az_el_vertices
+        return numpy.append(az_vertices, 0), numpy.append(el_vertices, numpy.pi/2)
 
     @property
     def quad_xyz_vertices(self):
-        az_els = self.quad_az_el_vertices
-        xyzs = self.az_els_to_xyz(az_els[:, 0], az_els[:, 1])
+        az, el = self.quad_az_el_vertices
+        xyzs = self._az_els_to_xyz(az, el)
         return xyzs
-
 
     @property
     def quad_faces(self):
@@ -213,9 +221,8 @@ class HemisphereQuadsModel:
         quad_xyz_vertices = self.quad_xyz_vertices
         quad_faces = self.quad_faces
 
-
         # get cap vertex and faces
-        cap_vertex = self.az_els_to_xyz(numpy.array([0]), numpy.array([numpy.pi / 2]))
+        cap_vertex = self._az_els_to_xyz(numpy.array([0]), numpy.array([numpy.pi / 2]))
         all_xyz_vertices = numpy.append(quad_xyz_vertices, cap_vertex, axis=0)
         cap_vertex_index = len(all_xyz_vertices) - 1
         quad_xyz_vertices[-self.n_azimuth_quads:, :]
@@ -235,4 +242,83 @@ class HemisphereQuadsModel:
         hemisphere_trimesh.vertices = all_xyz_vertices
         hemisphere_trimesh.faces = tri_faces
 
-        return hemisphere_trimesh
+        self._trimesh_model = hemisphere_trimesh
+
+    @property
+    def trimesh_model(self):
+        return self._trimesh_model
+
+    def az_el_to_uv_coords(self,
+                           azimuths,
+                           elevations):
+        u0 = numpy.cos(azimuths)
+        v0 = numpy.sin(azimuths)
+        u = u0 * (numpy.pi/2 - elevations)/(numpy.pi/2)
+        v = v0 * (numpy.pi/2 - elevations)/(numpy.pi/2)
+        u = (1+u)/2.0
+        v = (1+v)/2.0
+        return u, v
+
+    def uv_coords_to_pixel_yx_coords(self, u_coords, v_coords):
+        nx, ny = self.uv_nx_ny
+        x = u_coords * nx
+        y = (1 - v_coords) * ny
+        return y, x
+
+    def color_quad(self,
+                   az_index,  # type: int
+                   el_index,  # type: int
+                   rgb_color,  # type: [int, int, int]
+                   ):
+        az_el_polygon = self.get_quad_az_els_by_az_el_indices([az_index], [el_index])[0]
+        az_coords, el_coords = az_el_polygon.boundary.coords.xy
+        az_coords = numpy.array(az_coords)
+        el_coords = numpy.array(el_coords)
+        uv_coords = self.az_el_to_uv_coords(az_coords, el_coords)
+        pixel_coords = self.uv_coords_to_pixel_yx_coords(uv_coords[0], uv_coords[1])
+        rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
+        self._uv_image[rr, cc, 0] = rgb_color[0]
+        self._uv_image[rr, cc, 1] = rgb_color[1]
+        self._uv_image[rr, cc, 2] = rgb_color[2]
+
+    def color_cap(self,
+                  rgb_color,  # type: [int, int, int]
+                  ):
+        cap_polygon = self.cap_polygon_radians
+        az_coords, el_coords = cap_polygon.boundary.coords.xy
+        az_coords = numpy.array(az_coords)
+        el_coords = numpy.array(el_coords)
+        uv_coords = self.az_el_to_uv_coords(az_coords, el_coords)
+        pixel_coords = self.uv_coords_to_pixel_yx_coords(uv_coords[0], uv_coords[1])
+        rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
+        self._uv_image[rr, cc, 0] = rgb_color[0]
+        self._uv_image[rr, cc, 1] = rgb_color[1]
+        self._uv_image[rr, cc, 2] = rgb_color[2]
+
+    @property
+    def uv_nx_ny(self):
+        ny, nx, bands = self._uv_image.shape
+        return nx, ny
+
+    def initialize_uv_image(self,
+                            nx=1024,  # type: int
+                            ny=1024,  # type; int
+                            uv_base_color=[0, 0, 255]
+                            ):
+        self._uv_image = numpy.zeros((ny, nx, 3), dtype=numpy.uint8)
+        self._uv_image[:, :, 0] = uv_base_color[0]
+        self._uv_image[:, :, 1] = uv_base_color[1]
+        self._uv_image[:, :, 2] = uv_base_color[2]
+
+    def apply_uv_image(self):
+        texture_image_data = numpy.array(self._uv_image)
+        texture_pil_image = Image.fromarray(texture_image_data, 'RGB')
+
+        texture_visual = trimesh.visual.TextureVisuals()
+        texture_visual.material.image = texture_pil_image
+        self.trimesh_model.visual = texture_visual
+        az_vertices, el_vertices = self.all_az_el_vertices
+        u_coords, v_coords = self.az_el_to_uv_coords(az_vertices, el_vertices)
+        uv_coords = numpy.stack((u_coords, v_coords)).transpose()
+        texture_visual.uv = uv_coords
+        stop = 1

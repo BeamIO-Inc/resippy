@@ -25,8 +25,8 @@ def create_hemispheres():
     az_el_quads_radians = equal_spacing_hemisphere.all_quad_az_els_radians
     xyz_quads = equal_spacing_hemisphere.all_quad_xyzs
     cap_degrees = equal_spacing_hemisphere.cap_az_els_degrees
-    cap_radians = equal_spacing_hemisphere.cap_az_els_radians
-    cap_xyzs = equal_spacing_hemisphere.cap_xyzs
+    cap_radians = equal_spacing_hemisphere.cap_polygon_radians
+    cap_xyzs = equal_spacing_hemisphere.cap_xyz_polygon
 
     elevation_spacings = equal_spacing_hemisphere.equal_area_elevation_angles(3, 80, max_elevation_units='degrees')
 

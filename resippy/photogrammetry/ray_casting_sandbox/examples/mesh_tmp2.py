@@ -8,7 +8,7 @@ from PIL import Image
 
 from pyrender import PerspectiveCamera,\
                      DirectionalLight, SpotLight, PointLight,\
-                     OffscreenRenderer, Mesh, Scene, Node
+                     OffscreenRenderer, Mesh, Scene, Node, Viewer
 
 pyglet.options['shadow_window'] = False
 
@@ -36,12 +36,18 @@ fuze2_trimesh.faces = fuze_trimesh.faces
 
 texture_pil_image_jpg = Image.open(fuze_texture_path)
 texture_image_data = numpy.array(texture_pil_image_jpg)
+texture_image_data[:, :, 0] = 0
+texture_image_data[:, :, 1] = 0
+texture_image_data[:, :, 2] = 255
 texture_pil_image = Image.fromarray(texture_image_data, 'RGB')
 
 texture_visual = trimesh.visual.TextureVisuals()
 texture_visual.material.image = texture_pil_image
 fuze2_trimesh.visual = texture_visual
-texture_visual.uv = fuze_trimesh.visual.uv
+
+uv_points = numpy.asarray(fuze_trimesh.visual.uv)
+texture_visual.uv = uv_points
+# texture_visual.uv = fuze_trimesh.visual.uv
 
 fuze2_mesh = Mesh.from_trimesh(fuze2_trimesh)
 
@@ -90,13 +96,13 @@ spot_l_node = scene.add(spot_l, pose=cam_pose)
 # Using the viewer with a default camera
 #==============================================================================
 
-# v = Viewer(scene, shadows=True)
+v = Viewer(scene, shadows=True)
 
 #==============================================================================
 # Using the viewer with a pre-specified camera
 #==============================================================================
 cam_node = scene.add(cam, pose=cam_pose)
-# v = Viewer(scene, central_node=fuze2_node)
+v = Viewer(scene, central_node=fuze2_node)
 
 #==============================================================================
 # Rendering offscreen from that camera
