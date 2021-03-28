@@ -6,7 +6,6 @@ from shapely.geometry import Polygon
 import trimesh
 from resippy.utils import coordinate_conversions
 from resippy.utils import photogrammetry_utils
-import matplotlib.pyplot as plt
 from PIL import Image
 from skimage.draw import polygon as skimage_polygon
 
@@ -38,15 +37,15 @@ class HemisphereQuadsModel:
                                     ):
         if max_elevation_units == 'degrees':
             max_elevation = numpy.deg2rad(max_elevation)
-        zenith_min = numpy.pi/2 - max_elevation
-        total_area = (-numpy.cos(numpy.pi/2.0) + numpy.cos(zenith_min))
+        zenith_min = numpy.pi / 2 - max_elevation
+        total_area = (-numpy.cos(numpy.pi / 2.0) + numpy.cos(zenith_min))
         each_area = total_area / n_elevation_quads
         zenith_angles = [zenith_min]
         for quad_num in range(n_elevation_quads):
             theta_n = zenith_angles[-1]
             theta_n_plus_one = numpy.arccos(numpy.cos(theta_n) - each_area)
             zenith_angles.append(theta_n_plus_one)
-        elevation_angles = numpy.pi/2 - numpy.asarray(zenith_angles)
+        elevation_angles = numpy.pi / 2 - numpy.asarray(zenith_angles)
         elevation_angles = numpy.flip(elevation_angles)
         return elevation_angles
 
@@ -176,14 +175,14 @@ class HemisphereQuadsModel:
 
     @property
     def quad_az_el_vertices(self):
-        az_vertices = numpy.tile(self.azimuth_angles[:-1], self.n_elevation_quads+1)
+        az_vertices = numpy.tile(self.azimuth_angles[:-1], self.n_elevation_quads + 1)
         el_vertices = numpy.repeat(self.elevation_angles, self.n_azimuth_quads)
         return az_vertices, el_vertices
 
     @property
     def all_az_el_vertices(self):
         az_vertices, el_vertices = self.quad_az_el_vertices
-        return numpy.append(az_vertices, 0), numpy.append(el_vertices, numpy.pi/2)
+        return numpy.append(az_vertices, 0), numpy.append(el_vertices, numpy.pi / 2)
 
     @property
     def quad_xyz_vertices(self):
@@ -194,7 +193,7 @@ class HemisphereQuadsModel:
     @property
     def quad_faces(self):
         quad_faces = []
-        quad_face = numpy.array([0, 1, self.n_azimuth_quads+1, self.n_azimuth_quads])
+        quad_face = numpy.array([0, 1, self.n_azimuth_quads + 1, self.n_azimuth_quads])
         face_indices = numpy.tile(quad_face, self.n_azimuth_quads)
         face_indices = numpy.repeat(range(self.n_azimuth_quads), 4) + face_indices
         face_indices[-3] = quad_face[0]
@@ -218,7 +217,7 @@ class HemisphereQuadsModel:
         quad_faces = self.quad_faces
 
         # get cap vertex and faces
-        cap_xyzs = coordinate_conversions.az_el_r_to_xyz(0, numpy.pi/2, combine_arrays=True)
+        cap_xyzs = coordinate_conversions.az_el_r_to_xyz(0, numpy.pi / 2, combine_arrays=True)
         # self._az_els_to_xyz(numpy.array([0]), numpy.array([numpy.pi / 2]))
         all_xyz_vertices = numpy.append(quad_xyz_vertices, cap_xyzs, axis=0)
         cap_vertex_index = len(all_xyz_vertices) - 1
@@ -229,10 +228,10 @@ class HemisphereQuadsModel:
         tri_faces = trimesh.geometry.triangulate_quads(quad_faces)
         tri_faces = list(tri_faces)
 
-        for i in numpy.arange(top_index_start, top_index_end-1):
-            cap_face = [i, i+1, cap_vertex_index]
+        for i in numpy.arange(top_index_start, top_index_end - 1):
+            cap_face = [i, i + 1, cap_vertex_index]
             tri_faces.append(cap_face)
-        tri_faces.append([top_index_end-1, top_index_start, cap_vertex_index])
+        tri_faces.append([top_index_end - 1, top_index_start, cap_vertex_index])
 
         hemisphere_trimesh = trimesh.Trimesh()
 
@@ -250,10 +249,10 @@ class HemisphereQuadsModel:
                            elevations):
         u0 = numpy.cos(azimuths)
         v0 = numpy.sin(azimuths)
-        u = u0 * (numpy.pi/2 - elevations)/(numpy.pi/2)
-        v = v0 * (numpy.pi/2 - elevations)/(numpy.pi/2)
-        u = (1+u)/2.0
-        v = (1+v)/2.0
+        u = u0 * (numpy.pi / 2 - elevations) / (numpy.pi / 2)
+        v = v0 * (numpy.pi / 2 - elevations) / (numpy.pi / 2)
+        u = (1 + u) / 2.0
+        v = (1 + v) / 2.0
         return u, v
 
     def uv_coords_to_pixel_yx_coords(self, u_coords, v_coords):
@@ -307,21 +306,20 @@ class HemisphereQuadsModel:
         self._uv_image[:, :, 1] = uv_base_color[1]
         self._uv_image[:, :, 2] = uv_base_color[2]
 
-    # TODO: there is coordinate rotation weirdness going on here, need to figure it out
-    def add_sun_to_uv_image(self, solar_elevation, solar_azimuth, n_sun_polygon_sizes=50):
-        disk_elevation_at_vertical = numpy.pi/2 - numpy.deg2rad(self._sun_size_degrees/2 * self._sun_magnification)
+    def add_sun_to_uv_image(self, solar_azimuth, solar_elevation, n_sun_polygon_sizes=50):
+        disk_elevation_at_vertical = numpy.pi / 2 - numpy.deg2rad(self._sun_size_degrees / 2 * self._sun_magnification)
 
-        disk_elevations_at_vertical = numpy.zeros(n_sun_polygon_sizes+1) + disk_elevation_at_vertical
-        disk_azimuths_at_vertical = numpy.linspace(0, numpy.pi*2)
+        disk_elevations_at_vertical = numpy.zeros(n_sun_polygon_sizes + 1) + disk_elevation_at_vertical
+        disk_azimuths_at_vertical = numpy.linspace(0, numpy.pi * 2)
         disk_azimuths_at_vertical = numpy.append(disk_azimuths_at_vertical, 0)
 
         disk_xyzs = coordinate_conversions.az_el_r_to_xyz(disk_azimuths_at_vertical,
-                                                                          disk_elevations_at_vertical,
-                                                                          combine_arrays=True)
+                                                          disk_elevations_at_vertical,
+                                                          combine_arrays=True)
 
-        solar_zenith = numpy.pi / 2 - solar_azimuth
+        solar_zenith = numpy.pi / 2 - solar_elevation
 
-        m_matrix = photogrammetry_utils.create_M_matrix(solar_elevation, 0, solar_zenith, order='ypr')
+        m_matrix = photogrammetry_utils.create_M_matrix(0, solar_zenith, solar_azimuth, order='yrp')
 
         rotated_xyzs = disk_xyzs @ m_matrix
 
@@ -333,7 +331,7 @@ class HemisphereQuadsModel:
         pixel_y_coords, pixel_x_coords = self.uv_coords_to_pixel_yx_coords(rotated_u_coords, rotated_v_coords)
 
         rr, cc = skimage_polygon(pixel_y_coords, pixel_x_coords)
-        cc[numpy.where(cc >= self.uv_nx_ny[0])] = self.uv_nx_ny[0]-1
+        cc[numpy.where(cc >= self.uv_nx_ny[0])] = self.uv_nx_ny[0] - 1
         self._uv_image[rr, cc, 0] = 255
         self._uv_image[rr, cc, 1] = 215
         self._uv_image[rr, cc, 2] = 0

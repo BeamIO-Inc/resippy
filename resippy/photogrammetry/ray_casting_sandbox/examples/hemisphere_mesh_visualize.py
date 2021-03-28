@@ -47,7 +47,7 @@ hemisphere.color_quad_uv(0, 9, [0, 255, 255])
 
 hemisphere.color_cap_uv([255, 255, 255])
 
-hemisphere.add_sun_to_uv_image(numpy.deg2rad(10), numpy.deg2rad(180))
+hemisphere.add_sun_to_uv_image(numpy.deg2rad(90), numpy.deg2rad(80))
 
 
 hemisphere.apply_uv_image()
