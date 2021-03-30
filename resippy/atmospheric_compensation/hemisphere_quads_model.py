@@ -96,6 +96,7 @@ class HemisphereQuadsModel:
             polygons.append(poly)
         return polygons
 
+    # TODO: allow polygon to be an ndarray or a shapely polygon
     def az_el_polygon_to_xyz_polygon(self,
                                      polygon,  # type: Polygon
                                      ):
@@ -104,11 +105,44 @@ class HemisphereQuadsModel:
         az_el_coords = [a for a in angles]
         xyzs = []
         for az_el in az_el_coords:
-            xyz = self.polar2cart(self._radius, numpy.pi / 2 - az_el[1], az_el[0])
+            xyz = coordinate_conversions.az_el_r_to_xyz(self._radius, numpy.pi / 2 - az_el[1], az_el[0])
             xyz = numpy.array(xyz) + numpy.array(self.center_xyz)
             xyzs.append(list(xyz))
         poly = Polygon(xyzs)
         return poly
+
+    # TODO: allow polygon to be an ndarray or a shapely polygon
+    # TODO: investigate not using shapely at all, their support for 3D polygons isn't great
+    def xyz_polygon_to_az_el_polygon(self,
+                                     x_arr,  # type: ndarray
+                                     y_arr,  # type: ndarray
+                                     z_arr,  # type: ndarray
+                                     ):
+        x_local = x_arr - self.center_xyz[0]
+        y_local = y_arr - self.center_xyz[1]
+        z_local = z_arr - self.center_xyz[2]
+
+        az, el, r = coordinate_conversions.xyz_to_az_el_radius(x_local, y_local, z_local)
+
+        az_el_poly_coords = []
+        for a, e in zip(az, el):
+            az_el_poly_coords.append((a, e))
+        az_el_poly = Polygon(az_el_poly_coords)
+        return az_el_poly
+
+    def burn_az_el_poly_onto_uv_image(self,
+                                      az_el_poly,  # type: Polygon
+                                      rgb_color,  # type: [int, int, int]
+                                      ):
+        az_coords, el_coords = az_el_poly.boundary.coords.xy
+        az_coords = numpy.array(az_coords)
+        el_coords = numpy.array(el_coords)
+        uv_coords = self.az_el_to_uv_coords(az_coords, el_coords)
+        pixel_coords = self.uv_coords_to_pixel_yx_coords(uv_coords[0], uv_coords[1])
+        rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
+        self._uv_image[rr, cc, 0] = rgb_color[0]
+        self._uv_image[rr, cc, 1] = rgb_color[1]
+        self._uv_image[rr, cc, 2] = rgb_color[2]
 
     def get_quad_xyzs_by_az_el_indices(self,
                                        azimuth_indices,  # type: [int]
@@ -267,15 +301,7 @@ class HemisphereQuadsModel:
                       rgb_color,  # type: [int, int, int]
                       ):
         az_el_polygon = self.get_quad_az_els_by_az_el_indices([az_index], [el_index])[0]
-        az_coords, el_coords = az_el_polygon.boundary.coords.xy
-        az_coords = numpy.array(az_coords)
-        el_coords = numpy.array(el_coords)
-        uv_coords = self.az_el_to_uv_coords(az_coords, el_coords)
-        pixel_coords = self.uv_coords_to_pixel_yx_coords(uv_coords[0], uv_coords[1])
-        rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
-        self._uv_image[rr, cc, 0] = rgb_color[0]
-        self._uv_image[rr, cc, 1] = rgb_color[1]
-        self._uv_image[rr, cc, 2] = rgb_color[2]
+        self.burn_az_el_poly_onto_uv_image(az_el_polygon, rgb_color)
 
     def color_cap_uv(self,
                      rgb_color,  # type: [int, int, int]
@@ -297,14 +323,37 @@ class HemisphereQuadsModel:
         return nx, ny
 
     def initialize_uv_image(self,
-                            nx=1024,  # type: int
-                            ny=1024,  # type; int
-                            uv_base_color=[0, 0, 255]
+                            n_pixels=1024,
+                            uv_base_color=(0, 0, 255)
                             ):
-        self._uv_image = numpy.zeros((ny, nx, 3), dtype=numpy.uint8)
+        # TODO: ensure n_pixels is a power of 2
+        self._uv_image = numpy.zeros((n_pixels, n_pixels, 3), dtype=numpy.uint8)
         self._uv_image[:, :, 0] = uv_base_color[0]
         self._uv_image[:, :, 1] = uv_base_color[1]
         self._uv_image[:, :, 2] = uv_base_color[2]
+
+    def create_solid_pattern_hemisphere_checkerboard_uv_image(self,
+                                                              base_color,  # type: [int, int, int]
+                                                              dark_level,  # type: float
+                                                              n_pixels=1024,  # type: int
+                                                              ):
+        # TODO: ensure n_pixels is a power of 2
+        self._uv_image = numpy.zeros((n_pixels, n_pixels, 3), dtype=numpy.uint8)
+        self._uv_image[:, :, 0] = base_color[0]
+        self._uv_image[:, :, 1] = base_color[1]
+        self._uv_image[:, :, 2] = base_color[2]
+
+        dark_color = [int(base_color[0]*dark_level),
+                      int(base_color[1]*dark_level),
+                      int(base_color[2]*dark_level)]
+
+        for el in range(0, self.n_elevation_quads):
+            if numpy.mod(el, 2) == 0:
+                azimuths = range(0, self.n_azimuth_quads, 2)
+            else:
+                azimuths = range(1, self.n_elevation_quads, 2)
+            for az in azimuths:
+                self.color_quad_uv(az, el, dark_color)
 
     def add_sun_to_uv_image(self, solar_azimuth, solar_elevation, n_sun_polygon_sizes=50):
         disk_elevation_at_vertical = numpy.pi / 2 - numpy.deg2rad(self._sun_size_degrees / 2 * self._sun_magnification)

@@ -3,6 +3,7 @@
 import pyglet
 import numpy
 import trimesh
+from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
 from resippy.atmospheric_compensation.hemisphere_quads_model import HemisphereQuadsModel
 
@@ -27,25 +28,24 @@ wood_mesh = Mesh.from_trimesh(wood_trimesh)
 
 texture_visual = trimesh.visual.TextureVisuals()
 
-hemisphere = HemisphereQuadsModel.create_from_equal_areas(30, 30, 80)
-hemisphere.center_xyz = [0, 0, 0]
+hemisphere = HemisphereQuadsModel.create_from_equal_areas(50, 50, 80)
+hemisphere.center_xyz = [-50, 0, 0]
 hemisphere._radius = 0.1
 quads = hemisphere.all_quad_xyzs
 hemisphere.create_trimesh_model()
 
-hemisphere.initialize_uv_image()
-hemisphere.color_quad_uv(0, 0, [255, 0, 0])
-hemisphere.color_quad_uv(0, 1, [0, 255, 0])
-hemisphere.color_quad_uv(0, 2, [255, 255, 0])
-hemisphere.color_quad_uv(0, 3, [255, 0, 255])
-hemisphere.color_quad_uv(0, 4, [0, 255, 255])
-hemisphere.color_quad_uv(0, 5, [255, 0, 0])
-hemisphere.color_quad_uv(0, 6, [0, 255, 0])
-hemisphere.color_quad_uv(0, 7, [255, 255, 0])
-hemisphere.color_quad_uv(0, 8, [255, 0, 255])
-hemisphere.color_quad_uv(0, 9, [0, 255, 255])
+hemisphere.create_solid_pattern_hemisphere_checkerboard_uv_image([0, 0, 255], 0.5, n_pixels=2048)
+hemisphere.color_cap_uv([0, 0, 200])
 
-hemisphere.color_cap_uv([255, 255, 255])
+# add clouds (just boxes for now)
+cloud_alt = 100
+
+cloud_1_xs = numpy.array([-20, 20, 20, -20, -20])
+cloud_1_ys = numpy.array([-20, -20, 20, 20, -20])
+cloud_1_zs = numpy.array([100, 100, 100, 100, 100])
+
+cloud_1_az_el_polygon = hemisphere.xyz_polygon_to_az_el_polygon(cloud_1_xs, cloud_1_ys, cloud_1_zs)
+hemisphere.burn_az_el_poly_onto_uv_image(cloud_1_az_el_polygon, [255, 255, 255])
 
 hemisphere.add_sun_to_uv_image(numpy.deg2rad(90), numpy.deg2rad(80))
 
@@ -106,8 +106,7 @@ spot_l_node = scene.add(spot_l, pose=cam_pose)
 #==============================================================================
 # Using the viewer with a pre-specified camera
 #==============================================================================
-# v = Viewer(scene, central_node=hemisphere_node)
-v = Viewer(scene, run_in_thread=False)
+v = Viewer(scene, central_node=hemisphere_node)
 
 # cam_node = scene.add(cam, pose=cam_pose)
 
