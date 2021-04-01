@@ -18,14 +18,6 @@ pyglet.options['shadow_window'] = False
 # Mesh creation
 #==============================================================================
 
-#------------------------------------------------------------------------------
-# Creating textured meshes from trimeshes
-#------------------------------------------------------------------------------
-
-# Wood trimesh
-wood_trimesh = trimesh.load('/Users/jasoncasey/Downloads/pyrender-master/examples/models/wood.obj')
-wood_mesh = Mesh.from_trimesh(wood_trimesh)
-
 texture_visual = trimesh.visual.TextureVisuals()
 
 hemisphere = HemisphereQuadsModel.create_from_equal_areas(50, 50, 80)
@@ -94,7 +86,6 @@ scene.add_node(hemisphere_node)
 #------------------------------------------------------------------------------
 # By using the add() utility function
 #------------------------------------------------------------------------------
-wood_node = scene.add(wood_mesh)
 direc_l_node = scene.add(direc_l, pose=cam_pose)
 spot_l_node = scene.add(spot_l, pose=cam_pose)
 
