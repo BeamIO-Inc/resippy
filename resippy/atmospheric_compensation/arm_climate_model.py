@@ -27,6 +27,7 @@ class ArmClimateModel:
 
         return cls.from_numpy_array(image_subsection)
 
+    # TODO: improve azimuth functionality
     @classmethod
     def from_numpy_array(cls,
                          array,
@@ -35,4 +36,16 @@ class ArmClimateModel:
         center_y, center_x = ny/2, nx/2
         y_pixel_locs = numpy.repeat(numpy.arange(0, ny), nx).reshape(ny, nx)
         x_pixel_locs = numpy.tile(numpy.arange(0, nx), ny).reshape(ny, nx)
-        stop = 1
+        x_pixel_distances = x_pixel_locs - center_x
+        y_pixel_distances = y_pixel_locs - center_y
+        zero_elevation_distance = numpy.max((nx, ny)) / 2
+        pixel_distances_from_center = numpy.sqrt(numpy.power(x_pixel_distances, 2) + numpy.power(y_pixel_distances, 2))
+
+        m = (numpy.pi/2)/(-zero_elevation_distance)
+        b = numpy.pi/2
+
+        pixel_elevations = m*pixel_distances_from_center + b
+        pixel_elevations[numpy.where(pixel_elevations <= 0)] = 0
+        pixel_azimuths = numpy.arctan(y_pixel_distances / x_pixel_distances
+
+        return pixel_azimuths, pixel_elevations
