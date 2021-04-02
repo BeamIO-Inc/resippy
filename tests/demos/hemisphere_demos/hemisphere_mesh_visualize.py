@@ -3,7 +3,6 @@
 import pyglet
 import numpy
 import trimesh
-from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
 from resippy.atmospheric_compensation.hemisphere_quads_model import HemisphereQuadsModel
 

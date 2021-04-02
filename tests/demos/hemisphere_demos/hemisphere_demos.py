@@ -1,3 +1,4 @@
+import os
 import numpy
 from resippy.atmospheric_compensation.hemisphere_quads_model import HemisphereQuadsModel
 
@@ -40,8 +41,23 @@ def visualize_hemisphere():
     hemisphere = hemisphere.create_trimesh_model()
 
 
+def quad_center_az_els_to_csv(n_azimuths,
+                              n_elevations,
+                              max_elevation,
+                              output_csv_fname,
+                              equal_area=True,
+                              units='radians'):
+    if equal_area:
+        hemisphere = HemisphereQuadsModel.create_from_equal_areas(n_azimuths, n_elevations, max_elevation)
+    else:
+        hemisphere = HemisphereQuadsModel.create_from_equal_az_el_spacings(n_azimuths, n_elevations, max_elevation)
+    hemisphere.quad_center_az_els_to_csv(output_csv_fname, units=units)
+
+
 def main():
-    visualize_hemisphere()
+    # visualize_hemisphere()
+    output_fname = os.path.expanduser("~/Downloads/hemisphere_az_els.csv")
+    quad_center_az_els_to_csv(12, 10, 80, output_fname, equal_area=True, units='degrees')
 
 
 if __name__ == '__main__':

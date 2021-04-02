@@ -23,14 +23,6 @@ class HemisphereQuadsModel:
         self._sun_magnification = 10  # type: float
 
     @staticmethod
-    def polar2cart(r, zenith, azimuth):
-        cartesian_coords = [r * math.sin(zenith) * math.cos(azimuth),
-                            r * math.sin(zenith) * math.sin(azimuth),
-                            r * math.cos(zenith)
-                            ]
-        return cartesian_coords
-
-    @staticmethod
     def equal_area_elevation_angles(n_elevation_quads,  # type: int
                                     max_elevation,  # type: float
                                     max_elevation_units='radians',  # type: str
@@ -156,6 +148,16 @@ class HemisphereQuadsModel:
             xyz_poly = self.az_el_polygon_to_xyz_polygon(poly)
             xyz_polys.append(xyz_poly)
         return xyz_polys
+
+    def all_quad_center_az_els(self, units='radians'):
+        azimuth_centers = (self.azimuth_angles[0:-1] +self.azimuth_angles[1:])/2
+        elevation_centers = (self.elevation_angles[0:-1] +self.elevation_angles[1:])/2
+        azimuths = numpy.tile(azimuth_centers, self.n_elevation_quads)
+        elevations = numpy.repeat(elevation_centers, self.n_azimuth_quads)
+        if units.lower() == 'degrees':
+            azimuths = numpy.rad2deg(azimuths)
+            elevations = numpy.rad2deg(elevations)
+        return azimuths, elevations
 
     @property
     def all_quad_az_els_degrees(self):
@@ -396,3 +398,8 @@ class HemisphereQuadsModel:
         u_coords, v_coords = self.az_el_to_uv_coords(az_vertices, el_vertices)
         uv_coords = numpy.stack((u_coords, v_coords)).transpose()
         texture_visual.uv = uv_coords
+
+    def quad_center_az_els_to_csv(self, output_csv_fname, units='radians'):
+        az, el = self.all_quad_center_az_els(units=units)
+        az_el_arr = numpy.array((az, el)).transpose()
+        numpy.savetxt(output_csv_fname, az_el_arr, delimiter=',', fmt='%1.8f')
