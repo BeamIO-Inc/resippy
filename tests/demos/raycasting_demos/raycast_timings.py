@@ -65,7 +65,7 @@ def run_dem_ray_timings(dem_nx,
 
 
 def dem_100x100_n_rays_1000_timings():
-    run_dem_ray_timings(1000, 1000, 1000000)
+    run_dem_ray_timings(1000, 200, 100000)
 
 
 def main():

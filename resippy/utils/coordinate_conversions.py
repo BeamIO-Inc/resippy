@@ -6,7 +6,7 @@ import numbers
 
 def az_el_r_to_xyz(azimuths_angles,  # type: Union[ndarray, float]
                    elevation_angles,  # type: Union[ndarray, float]
-                   radius=1.0,  # type: Union[ndarray, float
+                   radius=1.0,  # type: Union[ndarray, float]
                    combine_arrays=False,  # type: bool
                    ):
     zeniths = numpy.pi / 2 - elevation_angles

@@ -1,5 +1,3 @@
-import math
-
 import numpy
 from numpy import ndarray
 from shapely.geometry import Polygon
@@ -8,6 +6,7 @@ from resippy.utils import coordinate_conversions
 from resippy.utils import photogrammetry_utils
 from PIL import Image
 from skimage.draw import polygon as skimage_polygon
+from resippy.atmospheric_compensation.utils import hemisphere_coordinate_conversions
 
 
 class HemisphereQuadsModel:
@@ -129,8 +128,8 @@ class HemisphereQuadsModel:
         az_coords, el_coords = az_el_poly.boundary.coords.xy
         az_coords = numpy.array(az_coords)
         el_coords = numpy.array(el_coords)
-        uv_coords = self.az_el_to_uv_coords(az_coords, el_coords)
-        pixel_coords = self.uv_coords_to_pixel_yx_coords(uv_coords[0], uv_coords[1])
+        pixel_coords = \
+            hemisphere_coordinate_conversions.az_el_to_uv_image_pixel_yx_coords(self.uv_npixels, az_coords, el_coords)
         rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
         self._uv_image[rr, cc, 0] = rgb_color[0]
         self._uv_image[rr, cc, 1] = rgb_color[1]
@@ -150,8 +149,8 @@ class HemisphereQuadsModel:
         return xyz_polys
 
     def all_quad_center_az_els(self, units='radians'):
-        azimuth_centers = (self.azimuth_angles[0:-1] +self.azimuth_angles[1:])/2
-        elevation_centers = (self.elevation_angles[0:-1] +self.elevation_angles[1:])/2
+        azimuth_centers = (self.azimuth_angles[0:-1] + self.azimuth_angles[1:]) / 2
+        elevation_centers = (self.elevation_angles[0:-1] + self.elevation_angles[1:]) / 2
         azimuths = numpy.tile(azimuth_centers, self.n_elevation_quads)
         elevations = numpy.repeat(elevation_centers, self.n_azimuth_quads)
         if units.lower() == 'degrees':
@@ -280,23 +279,6 @@ class HemisphereQuadsModel:
     def trimesh_model(self):
         return self._trimesh_model
 
-    def az_el_to_uv_coords(self,
-                           azimuths,
-                           elevations):
-        u0 = numpy.cos(azimuths)
-        v0 = numpy.sin(azimuths)
-        u = u0 * (numpy.pi / 2 - elevations) / (numpy.pi / 2)
-        v = v0 * (numpy.pi / 2 - elevations) / (numpy.pi / 2)
-        u = (1 + u) / 2.0
-        v = (1 + v) / 2.0
-        return u, v
-
-    def uv_coords_to_pixel_yx_coords(self, u_coords, v_coords):
-        nx, ny = self.uv_nx_ny
-        x = u_coords * nx
-        y = (1 - v_coords) * ny
-        return y, x
-
     def color_quad_uv(self,
                       az_index,  # type: int
                       el_index,  # type: int
@@ -312,17 +294,19 @@ class HemisphereQuadsModel:
         az_coords, el_coords = cap_polygon.boundary.coords.xy
         az_coords = numpy.array(az_coords)
         el_coords = numpy.array(el_coords)
-        uv_coords = self.az_el_to_uv_coords(az_coords, el_coords)
-        pixel_coords = self.uv_coords_to_pixel_yx_coords(uv_coords[0], uv_coords[1])
+        pixel_coords = \
+            hemisphere_coordinate_conversions.uv_coords_to_uv_image_pixel_yx_coords(self.uv_npixels,
+                                                                                    az_coords,
+                                                                                    el_coords)
         rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
         self._uv_image[rr, cc, 0] = rgb_color[0]
         self._uv_image[rr, cc, 1] = rgb_color[1]
         self._uv_image[rr, cc, 2] = rgb_color[2]
 
     @property
-    def uv_nx_ny(self):
+    def uv_npixels(self):
         ny, nx, bands = self._uv_image.shape
-        return nx, ny
+        return nx
 
     def initialize_uv_image(self,
                             n_pixels=1024,
@@ -333,6 +317,16 @@ class HemisphereQuadsModel:
         self._uv_image[:, :, 0] = uv_base_color[0]
         self._uv_image[:, :, 1] = uv_base_color[1]
         self._uv_image[:, :, 2] = uv_base_color[2]
+
+    @property
+    def uv_image(self):
+        return self._uv_image
+
+    @uv_image.setter
+    def uv_image(self,
+                 val,  # type: ndarray
+                 ):
+        self._uv_image = val
 
     def create_solid_pattern_hemisphere_checkerboard_uv_image(self,
                                                               base_color,  # type: [int, int, int]
@@ -345,9 +339,9 @@ class HemisphereQuadsModel:
         self._uv_image[:, :, 1] = base_color[1]
         self._uv_image[:, :, 2] = base_color[2]
 
-        dark_color = [int(base_color[0]*dark_level),
-                      int(base_color[1]*dark_level),
-                      int(base_color[2]*dark_level)]
+        dark_color = [int(base_color[0] * dark_level),
+                      int(base_color[1] * dark_level),
+                      int(base_color[2] * dark_level)]
 
         for el in range(0, self.n_elevation_quads):
             if numpy.mod(el, 2) == 0:
@@ -378,24 +372,25 @@ class HemisphereQuadsModel:
                                                                            rotated_xyzs[:, 1],
                                                                            rotated_xyzs[:, 2])
 
-        rotated_u_coords, rotated_v_coords = self.az_el_to_uv_coords(new_az, new_el)
-        pixel_y_coords, pixel_x_coords = self.uv_coords_to_pixel_yx_coords(rotated_u_coords, rotated_v_coords)
+        pixel_y_coords, pixel_x_coords = \
+            hemisphere_coordinate_conversions.az_el_to_uv_image_pixel_yx_coords(self.uv_npixels, new_az, new_el)
 
         rr, cc = skimage_polygon(pixel_y_coords, pixel_x_coords)
-        cc[numpy.where(cc >= self.uv_nx_ny[0])] = self.uv_nx_ny[0] - 1
+        cc[numpy.where(cc >= self.uv_npixels)] = self.uv_npixels - 1
         self._uv_image[rr, cc, 0] = 255
         self._uv_image[rr, cc, 1] = 215
         self._uv_image[rr, cc, 2] = 0
 
     def apply_uv_image(self):
-        texture_image_data = numpy.array(self._uv_image)
+        texture_image_data = numpy.array(self._uv_image, dtype=numpy.uint8)
         texture_pil_image = Image.fromarray(texture_image_data, 'RGB')
 
         texture_visual = trimesh.visual.TextureVisuals()
         texture_visual.material.image = texture_pil_image
         self.trimesh_model.visual = texture_visual
         az_vertices, el_vertices = self.all_az_el_vertices
-        u_coords, v_coords = self.az_el_to_uv_coords(az_vertices, el_vertices)
+        u_coords, v_coords = hemisphere_coordinate_conversions.az_el_to_uv_coords(az_vertices,
+                                                                                  el_vertices)
         uv_coords = numpy.stack((u_coords, v_coords)).transpose()
         texture_visual.uv = uv_coords
 
