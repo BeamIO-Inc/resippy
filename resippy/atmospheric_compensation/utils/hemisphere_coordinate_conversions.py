@@ -13,11 +13,15 @@ def az_el_to_uv_coords(azimuths,  # type: ndarray
     return u, v
 
 
-# TODO: implement this
 def uv_coords_to_az_el_coords(u,  # type: ndarray
                               v,  # type: ndarray
                               ):
-    stop = 1
+    u1 = 2*u-1
+    v1 = 2*v-1
+    az = numpy.arctan2(v1, u1)
+    az[numpy.where(az < 0)] = az[numpy.where(az < 0)] + 2 * numpy.pi
+    el = numpy.pi/2.0 * (1 - u1/numpy.cos(az))
+    return az, el
 
 
 def uv_coords_to_uv_image_pixel_yx_coords(uv_npixels,  # type: int
