@@ -12,8 +12,7 @@ class ArmClimateModel:
         self._cloud_mask = None  # type: ndarray
         self._arm_center_xyz = None  # type: (float, float, float)
         self._uv_image = None  # type: ndarray
-
-        self._n_uv_pixels = 2048
+        self._default_uv_image_size = 2048
 
     @classmethod
     def from_image_file(cls, image_path):
@@ -36,9 +35,12 @@ class ArmClimateModel:
     # TODO: improve azimuth functionality
     @classmethod
     def from_numpy_array(cls,
-                         array,
+                         array,  # type: ndarray
+                         uv_npixels=None,  # type: int
                          ):
-        ny, nx, nbands = numpy.shape(array)
+        uv_shape = numpy.shape(array)
+        ny = uv_shape[0]
+        nx = uv_shape[1]
 
         # TODO: do stuff here to center image, create accurate UV image map.  For now this does nothing and
         # TODO: we just resize the image to create a UV image
@@ -58,12 +60,18 @@ class ArmClimateModel:
 
         arm_model = cls()
         arm_model._cloud_mask = array
-        arm_model.uv_image = arm_model.cloud_mask_to_uv_image(arm_model._n_uv_pixels)
+        if uv_npixels is None:
+            uv_npixels = arm_model._default_uv_image_size
+        arm_model.uv_image = arm_model.cloud_mask_to_uv_image(uv_npixels)
         return arm_model
 
     def cloud_mask_to_uv_image(self, n_uv_pixels):
         uv_image = image_utils.resize_image(self._cloud_mask, n_uv_pixels, n_uv_pixels)
         return uv_image
+
+    @property
+    def n_uv_pixels(self):
+        return self.uv_image.shape[0]
 
     @property
     def uv_image(self):
@@ -73,11 +81,24 @@ class ArmClimateModel:
     def uv_image(self, val):
         self._uv_image = val
 
-    def project_uv_image_to_cloud_deck(self,
-                                       cloud_deck_height,
-                                       ):
-        x, y, z = coordinate_conversions.az_el_r_to_xyz(self.pixel_azimuths, self._pixel_elevations, 1.0)
-        new_x = x / z * cloud_deck_height
-        new_y = y / z * cloud_deck_height
-        z = numpy.zeros_like(z) + cloud_deck_height
-        return new_x, new_y, z
+    @property
+    def center_xyz_location(self):
+        return self._arm_center_xyz
+
+    @center_xyz_location.setter
+    def center_xyz_location(self,
+                            val,  # type: (float, float, float)
+                            ):
+        self._arm_center_xyz = val
+
+    def project_uv_image_pixels_to_cloud_deck(self,
+                                              cloud_deck_height,
+                                              ):
+        y_arr, x_arr = numpy.mgrid[0:self.n_uv_pixels, 0:self.n_uv_pixels]
+        az, el = hemisphere_coordinate_conversions.uv_pixel_yx_coords_to_az_el(self.n_uv_pixels, y_arr, x_arr)
+        cloud_x, cloud_y, cloud_z = coordinate_conversions.az_el_to_xy_plane(az,
+                                                                             el,
+                                                                             cloud_deck_height,
+                                                                             self.center_xyz_location)
+        return cloud_x, cloud_y, cloud_z
+

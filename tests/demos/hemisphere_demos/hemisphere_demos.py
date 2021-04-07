@@ -7,7 +7,7 @@ def create_hemisphere_quads_by_equal_spacings():
     n_azimuths = 20
     n_elevations = 10
     max_elevation_degrees = 80
-    hemisphere = HemisphereQuadsModel.create_from_equal_az_el_spacings(n_azimuths, n_elevations, max_elevation_degrees)
+    hemisphere = HemisphereQuadsModel.create_with_equal_az_el_spacings(n_azimuths, n_elevations, max_elevation_degrees)
     return hemisphere
 
 
@@ -15,7 +15,7 @@ def create_hemisphere_quads_by_equal_areas():
     n_azimuths = 20
     n_elevations = 10
     max_elevation_degrees = 80
-    hemisphere = HemisphereQuadsModel.create_from_equal_areas(n_azimuths, n_elevations, max_elevation_degrees)
+    hemisphere = HemisphereQuadsModel.create_with_equal_areas(n_azimuths, n_elevations, max_elevation_degrees)
     return hemisphere
 
 
@@ -35,7 +35,7 @@ def create_hemispheres():
 
 
 def visualize_hemisphere():
-    hemisphere = HemisphereQuadsModel.create_from_equal_areas(4, 5, 80)
+    hemisphere = HemisphereQuadsModel.create_with_equal_areas(4, 5, 80)
     hemisphere.center_xyz = [0, 0, 0]
     quads = hemisphere.all_quad_xyzs
     hemisphere = hemisphere.create_trimesh_model()
@@ -48,9 +48,9 @@ def quad_center_az_els_to_csv(n_azimuths,
                               equal_area=True,
                               units='radians'):
     if equal_area:
-        hemisphere = HemisphereQuadsModel.create_from_equal_areas(n_azimuths, n_elevations, max_elevation)
+        hemisphere = HemisphereQuadsModel.create_with_equal_areas(n_azimuths, n_elevations, max_elevation)
     else:
-        hemisphere = HemisphereQuadsModel.create_from_equal_az_el_spacings(n_azimuths, n_elevations, max_elevation)
+        hemisphere = HemisphereQuadsModel.create_with_equal_az_el_spacings(n_azimuths, n_elevations, max_elevation)
     hemisphere.quad_center_az_els_to_csv(output_csv_fname, units=units)
 
 

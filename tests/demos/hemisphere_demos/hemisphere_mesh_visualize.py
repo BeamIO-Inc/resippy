@@ -19,7 +19,7 @@ pyglet.options['shadow_window'] = False
 
 texture_visual = trimesh.visual.TextureVisuals()
 
-hemisphere = HemisphereQuadsModel.create_from_equal_areas(50, 50, 80)
+hemisphere = HemisphereQuadsModel.create_with_equal_areas(50, 50, 80)
 hemisphere.center_xyz = [-50, 0, 0]
 hemisphere._radius = 0.1
 quads = hemisphere.all_quad_xyzs

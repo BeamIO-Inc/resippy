@@ -27,6 +27,19 @@ def az_el_r_to_xyz(azimuths_angles,  # type: Union[ndarray, float]
         return x, y, z
 
 
+def az_el_to_xy_plane(azimuth_angles,
+                      elevation_angles,
+                      z_location,
+                      hemisphere_xyz_loc=[0, 0, 0]
+                      ):
+    height = z_location - hemisphere_xyz_loc[2]
+    x, y, z = az_el_r_to_xyz(azimuth_angles, elevation_angles, 1.0)
+    new_x = x / z * height + hemisphere_xyz_loc[0]
+    new_y = y / z * height + hemisphere_xyz_loc[1]
+    z = numpy.zeros_like(z) + z_location
+    return new_x, new_y, z
+
+
 def xyz_to_az_el_radius(x,  # type: Union[ndarray, float]
                         y,  # type: Union[ndarray, float]
                         z,  # type: Union[ndarray, float]
@@ -35,6 +48,7 @@ def xyz_to_az_el_radius(x,  # type: Union[ndarray, float]
     xy = numpy.power(x, 2) + numpy.power(y, 2)
     el = numpy.arctan2(z, numpy.sqrt(xy))
     az = numpy.arctan2(y, x)
+    az[numpy.where(az < 0)] = az[numpy.where(az < 0)] + 2 * numpy.pi
     radius = numpy.sqrt(xy + numpy.power(z, 2))
     if combine_arrays:
         if isinstance(x, numbers.Number):

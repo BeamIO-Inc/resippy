@@ -41,7 +41,7 @@ class HemisphereQuadsModel:
         return elevation_angles
 
     @classmethod
-    def create_from_equal_az_el_spacings(cls,
+    def create_with_equal_az_el_spacings(cls,
                                          n_azimuths,  # type: int
                                          n_elevations,  # type: int
                                          max_elevation_degrees,  # type: int
@@ -52,7 +52,7 @@ class HemisphereQuadsModel:
         return hemisphere
 
     @classmethod
-    def create_from_equal_areas(cls,
+    def create_with_equal_areas(cls,
                                 n_azimuths,  # type: int
                                 n_elevations,  # type: int
                                 max_elevation_degrees,  # type: int
@@ -129,7 +129,7 @@ class HemisphereQuadsModel:
         az_coords = numpy.array(az_coords)
         el_coords = numpy.array(el_coords)
         pixel_coords = \
-            hemisphere_coordinate_conversions.az_el_to_uv_image_pixel_yx_coords(self.uv_npixels, az_coords, el_coords)
+            hemisphere_coordinate_conversions.az_el_to_uv_pixel_yx_coords(self.uv_npixels, az_coords, el_coords)
         rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
         self._uv_image[rr, cc, 0] = rgb_color[0]
         self._uv_image[rr, cc, 1] = rgb_color[1]
@@ -295,9 +295,9 @@ class HemisphereQuadsModel:
         az_coords = numpy.array(az_coords)
         el_coords = numpy.array(el_coords)
         pixel_coords = \
-            hemisphere_coordinate_conversions.uv_coords_to_uv_image_pixel_yx_coords(self.uv_npixels,
-                                                                                    az_coords,
-                                                                                    el_coords)
+            hemisphere_coordinate_conversions.uv_coords_to_uv_pixel_yx_coords(self.uv_npixels,
+                                                                              az_coords,
+                                                                              el_coords)
         rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
         self._uv_image[rr, cc, 0] = rgb_color[0]
         self._uv_image[rr, cc, 1] = rgb_color[1]
@@ -373,7 +373,7 @@ class HemisphereQuadsModel:
                                                                            rotated_xyzs[:, 2])
 
         pixel_y_coords, pixel_x_coords = \
-            hemisphere_coordinate_conversions.az_el_to_uv_image_pixel_yx_coords(self.uv_npixels, new_az, new_el)
+            hemisphere_coordinate_conversions.az_el_to_uv_pixel_yx_coords(self.uv_npixels, new_az, new_el)
 
         rr, cc = skimage_polygon(pixel_y_coords, pixel_x_coords)
         cc[numpy.where(cc >= self.uv_npixels)] = self.uv_npixels - 1
