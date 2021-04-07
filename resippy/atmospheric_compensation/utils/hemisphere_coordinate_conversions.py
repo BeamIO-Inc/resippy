@@ -21,6 +21,7 @@ def uv_coords_to_az_el_coords(u,  # type: ndarray
     az = numpy.arctan2(v1, u1)
     az[numpy.where(az < 0)] = az[numpy.where(az < 0)] + 2 * numpy.pi
     el = numpy.pi / 2.0 * (1 - u1 / numpy.cos(az))
+    el[numpy.where(el < 0)] = 0
     return az, el
 
 

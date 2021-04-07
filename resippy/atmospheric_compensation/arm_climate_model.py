@@ -4,6 +4,8 @@ from PIL import Image
 from resippy.utils import coordinate_conversions
 from resippy.utils.image_utils import image_utils
 from resippy.atmospheric_compensation.utils import hemisphere_coordinate_conversions
+from scipy.ndimage import map_coordinates
+
 import matplotlib.pyplot as plt
 
 
@@ -102,3 +104,50 @@ class ArmClimateModel:
                                                                              self.center_xyz_location)
         return cloud_x, cloud_y, cloud_z
 
+    @classmethod
+    def translated_arm_model(cls,
+                             original_model,  # type: ArmClimateModel
+                             cloud_deck_height,  # type: float
+                             translated_xyz,  # type: (float, float, float)
+                             ):
+        x_0, y_0, z_0 = original_model.project_uv_image_pixels_to_cloud_deck(cloud_deck_height)
+        x_1 = x_0 - translated_xyz[0]
+        y_1 = y_0 - translated_xyz[1]
+        z_1 = z_0 - translated_xyz[2]
+        new_az, new_el, new_r = coordinate_conversions.xyz_to_az_el_radius(x_1, y_1, z_1)
+        new_uv_ypix, new_uv_xpix = \
+            hemisphere_coordinate_conversions.az_el_to_uv_pixel_yx_coords(original_model.n_uv_pixels, new_az, new_el)
+
+        warped_uv_image = numpy.zeros_like(original_model.uv_image)
+        uv_image_shape = original_model.uv_image.shape
+        if len(uv_image_shape) == 3:
+            band_1 = map_coordinates(original_model.uv_image[:, :, 0],
+                                     [image_utils.flatten_image_band(new_uv_ypix),
+                                      image_utils.flatten_image_band(new_uv_xpix)])
+            band_1 = numpy.reshape(band_1,
+                                   (original_model.n_uv_pixels, original_model.n_uv_pixels))
+
+            band_2 = map_coordinates(original_model.uv_image[:, :, 1],
+                                     [image_utils.flatten_image_band(new_uv_ypix),
+                                      image_utils.flatten_image_band(new_uv_xpix)])
+            band_2 = numpy.reshape(band_2,
+                                   (original_model.n_uv_pixels, original_model.n_uv_pixels))
+
+            band_3 = map_coordinates(original_model.uv_image[:, :, 2],
+                                     [image_utils.flatten_image_band(new_uv_ypix),
+                                      image_utils.flatten_image_band(new_uv_xpix)])
+            band_3 = numpy.reshape(band_3,
+                                   (original_model.n_uv_pixels, original_model.n_uv_pixels))
+
+            warped_uv_image[:, :, 0] = band_1
+            warped_uv_image[:, :, 1] = band_2
+            warped_uv_image[:, :, 2] = band_3
+        else:
+            band_1 = map_coordinates(original_model.uv_image,
+                                     [image_utils.flatten_image_band(new_uv_ypix),
+                                      image_utils.flatten_image_band(new_uv_xpix)])
+            warped_uv_image = numpy.reshape(band_1,
+                                            (original_model.n_uv_pixels, original_model.n_uv_pixels))
+
+        new_model = cls.from_numpy_array(warped_uv_image, original_model.n_uv_pixels)
+        return new_model

@@ -9,6 +9,7 @@ from resippy.atmospheric_compensation.arm_climate_model import ArmClimateModel
 
 class TestHemisphereProjections(unittest.TestCase):
 
+    # TODO: complete this, figure out a way to deal with negative elevation values and UV coordinates out of range
     def test_projection_to_cloud_deck_and_back(self):
         n_uv_pixels = 2048
         arm_image = numpy.zeros((n_uv_pixels, n_uv_pixels))

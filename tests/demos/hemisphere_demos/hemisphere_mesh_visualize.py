@@ -38,7 +38,7 @@ cloud_1_zs = numpy.array([100, 100, 100, 100, 100])
 cloud_1_az_el_polygon = hemisphere.xyz_polygon_to_az_el_polygon(cloud_1_xs, cloud_1_ys, cloud_1_zs)
 hemisphere.burn_az_el_poly_onto_uv_image(cloud_1_az_el_polygon, [255, 255, 255])
 
-hemisphere.add_sun_to_uv_image(numpy.deg2rad(90), numpy.deg2rad(80))
+hemisphere.add_sun_to_uv_image(numpy.deg2rad(90), numpy.deg2rad(10))
 
 
 hemisphere.apply_uv_image()
