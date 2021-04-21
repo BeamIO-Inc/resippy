@@ -38,7 +38,7 @@ class ArmClimateModel:
     @classmethod
     def from_numpy_array(cls,
                          array,  # type: ndarray
-                         uv_npixels=None,  # type: int
+                         n_uv_pixels=None,  # type: int
                          ):
         uv_shape = numpy.shape(array)
         ny = uv_shape[0]
@@ -62,14 +62,10 @@ class ArmClimateModel:
 
         arm_model = cls()
         arm_model._cloud_mask = array
-        if uv_npixels is None:
-            uv_npixels = arm_model._default_uv_image_size
-        arm_model.uv_image = arm_model.cloud_mask_to_uv_image(uv_npixels)
+        if n_uv_pixels is None:
+            n_uv_pixels = arm_model._default_uv_image_size
+        arm_model.uv_image = image_utils.resize_image(array, n_uv_pixels, n_uv_pixels)
         return arm_model
-
-    def cloud_mask_to_uv_image(self, n_uv_pixels):
-        uv_image = image_utils.resize_image(self._cloud_mask, n_uv_pixels, n_uv_pixels)
-        return uv_image
 
     @property
     def n_uv_pixels(self):

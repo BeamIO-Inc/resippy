@@ -45,11 +45,11 @@ def ray_intersects_box_timings(nx_pixels, ny_pixels):
     tic = time.time()
     inersects = raycaster.rays_intersect_boxes(box_x_min, box_x_max, box_y_min, box_y_max, box_z_min, box_z_max)
     toc = time.time()
-    print(str(toc-tic) + " seconds to process " + str(nx_pixels*ny_pixels*3) + " rays")
+    print(str(toc-tic) + " seconds to process " + str(nx_pixels*ny_pixels) + " rays")
 
 
 def main():
-    ray_plane_intersect_timings(1000, 1000)
+    ray_plane_intersect_timings(10000, 1000)
     ray_intersects_box_timings(1000, 1000)
 
 

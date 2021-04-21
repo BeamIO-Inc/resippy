@@ -2,6 +2,7 @@ import numpy
 from numpy import ndarray
 from shapely.geometry import Polygon
 import trimesh
+from pyproj import Proj
 from resippy.utils import coordinate_conversions
 from resippy.utils import photogrammetry_utils
 from PIL import Image
@@ -18,8 +19,30 @@ class HemisphereQuadsModel:
         self._trimesh_model = None
         self._radius = 1
         self._uv_image = None  # type: ndarray
+        self._uv_grayscale_image = None  # type: ndarray
         self._sun_size_degrees = 0.5  # type: float
         self._sun_magnification = 10  # type: float
+        self._crs = None  # type: Proj
+        self.quad_radiances = None  # type: []
+
+    def set_quad_radiance(self,
+                          az_index,  # type: int
+                          el_index,  # type: int
+                          spectral_radiance,  # type: ndarray
+                          ):
+        self.quad_radiances[az_index, el_index] = spectral_radiance
+
+    def get_quad_radiance(self, az_index, el_index):
+        return numpy.array(self.quad_radiances[az_index, el_index])
+
+    def create_quad_radiance_uv_image(self,
+                                      spectral_bandpass,  # type: ndarray
+                                      ):
+        for az_index in range(self.n_azimuth_quads):
+            for el_index in range(self.n_elevation_quads):
+                az_el_polygon = self.get_quad_az_els_by_az_el_indices([az_index], [el_index])[0]
+                radiance = numpy.sum(spectral_bandpass * self.get_quad_radiance(az_index, el_index))
+                self.burn_az_el_poly_onto_uv_grayscale_image(az_el_polygon, radiance)
 
     @staticmethod
     def equal_area_elevation_angles(n_elevation_quads,  # type: int
@@ -49,6 +72,7 @@ class HemisphereQuadsModel:
         hemisphere = cls()
         hemisphere.azimuth_angles = numpy.linspace(0, 2 * numpy.pi, n_azimuths + 1)
         hemisphere.elevation_angles = numpy.linspace(0, numpy.deg2rad(max_elevation_degrees), n_elevations + 1)
+        hemisphere.quad_radiances = numpy.zeros((n_azimuths, n_elevations), dtype=list)
         return hemisphere
 
     @classmethod
@@ -63,6 +87,7 @@ class HemisphereQuadsModel:
                                                            max_elevation_units='degrees')
         hemisphere.azimuth_angles = numpy.linspace(0, 2 * numpy.pi, n_azimuths + 1)
         hemisphere.elevation_angles = elevation_angles
+        hemisphere.quad_radiances = numpy.zeros((n_azimuths, n_elevations), dtype=list)
         return hemisphere
 
     def get_quad_az_els_by_az_el_indices(self,
@@ -121,10 +146,10 @@ class HemisphereQuadsModel:
         az_el_poly = Polygon(az_el_poly_coords)
         return az_el_poly
 
-    def burn_az_el_poly_onto_uv_image(self,
-                                      az_el_poly,  # type: Polygon
-                                      rgb_color,  # type: [int, int, int]
-                                      ):
+    def burn_az_el_poly_onto_uv_rgb_image(self,
+                                          az_el_poly,  # type: Polygon
+                                          rgb_color,  # type: Union[[int, int, int], float]
+                                          ):
         az_coords, el_coords = az_el_poly.boundary.coords.xy
         az_coords = numpy.array(az_coords)
         el_coords = numpy.array(el_coords)
@@ -134,6 +159,20 @@ class HemisphereQuadsModel:
         self._uv_image[rr, cc, 0] = rgb_color[0]
         self._uv_image[rr, cc, 1] = rgb_color[1]
         self._uv_image[rr, cc, 2] = rgb_color[2]
+
+    def burn_az_el_poly_onto_uv_grayscale_image(self,
+                                                az_el_poly,  # type: Polygon
+                                                color_val,  # type: float
+                                                ):
+        az_coords, el_coords = az_el_poly.boundary.coords.xy
+        az_coords = numpy.array(az_coords)
+        el_coords = numpy.array(el_coords)
+        pixel_coords = \
+            hemisphere_coordinate_conversions.az_el_to_uv_pixel_yx_coords(self.uv_grayscale_npixels,
+                                                                          az_coords,
+                                                                          el_coords)
+        rr, cc = skimage_polygon(pixel_coords[0], pixel_coords[1])
+        self._uv_grayscale_image[rr, cc] = color_val
 
     def get_quad_xyzs_by_az_el_indices(self,
                                        azimuth_indices,  # type: [int]
@@ -285,7 +324,7 @@ class HemisphereQuadsModel:
                       rgb_color,  # type: [int, int, int]
                       ):
         az_el_polygon = self.get_quad_az_els_by_az_el_indices([az_index], [el_index])[0]
-        self.burn_az_el_poly_onto_uv_image(az_el_polygon, rgb_color)
+        self.burn_az_el_poly_onto_uv_rgb_image(az_el_polygon, rgb_color)
 
     def color_cap_uv(self,
                      rgb_color,  # type: [int, int, int]
@@ -308,6 +347,11 @@ class HemisphereQuadsModel:
         ny, nx, bands = self._uv_image.shape
         return nx
 
+    @property
+    def uv_grayscale_npixels(self):
+        ny, nx = self._uv_grayscale_image.shape
+        return nx
+
     def initialize_uv_image(self,
                             n_pixels=1024,
                             uv_base_color=(0, 0, 255)
@@ -317,6 +361,14 @@ class HemisphereQuadsModel:
         self._uv_image[:, :, 0] = uv_base_color[0]
         self._uv_image[:, :, 1] = uv_base_color[1]
         self._uv_image[:, :, 2] = uv_base_color[2]
+
+    def initialize_uv_grayscale_image(self,
+                                      n_pixels=1024,
+                                      base_val=numpy.nan,
+                                      ):
+        # TODO: ensure n_pixels is a power of 2
+        self._uv_grayscale_image = numpy.zeros((n_pixels, n_pixels), dtype=numpy.float)
+        self._uv_grayscale_image[:, :] = base_val
 
     @property
     def uv_image(self):
@@ -398,3 +450,9 @@ class HemisphereQuadsModel:
         az, el = self.all_quad_center_az_els(units=units)
         az_el_arr = numpy.array((az, el)).transpose()
         numpy.savetxt(output_csv_fname, az_el_arr, delimiter=',', fmt='%1.8f')
+
+    # TODO: lots of decisions to make here.  How to handle different CRS values.  How to handle z reference, etc.
+    def map_quad_centers_to_plane(self, plane_height):
+        az, el = self.all_quad_center_az_els(units='radians')
+        x, y = coordinate_conversions.az_el_to_xy_plane(az, el, plane_height, self.center_xyz)
+        return x, y
