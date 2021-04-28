@@ -124,7 +124,7 @@ def read_envi_header(header_fname,      # type: str
 
         if is_bracket_entry(header_text):
             right_brace_index = header_text.find('}')
-            entry_text = header_text[0:right_brace_index]
+            entry_text = header_text[0:right_brace_index+1]
             key, val = str.split(entry_text, '=', 1)
             header_text = header_text[right_brace_index + 1:]
 
