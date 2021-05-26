@@ -1,5 +1,6 @@
 from resippy.utils import string_utils
 import numpy as np
+import matplotlib.pyplot as plt
 
 import os
 
@@ -256,4 +257,8 @@ def construct_image_cube_from_raw_data(raw_envi_data,       # type: np.ndarray
                 data_chunk = raw_envi_data[raw_data_counter:raw_data_counter+nx]
                 image_cube[l, :, b] = data_chunk
                 raw_data_counter = raw_data_counter+nx
+    if interleave == 'bsq':
+        for i, band in enumerate(range(nbands)):
+            data_chunk = raw_envi_data[ny*nx*i:ny*nx*(i+1)].reshape((ny, nx))
+            image_cube[:, :, i] = data_chunk
     return image_cube
