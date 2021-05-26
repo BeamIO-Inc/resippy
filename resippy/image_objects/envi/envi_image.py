@@ -3,9 +3,9 @@ from __future__ import division
 from resippy.image_objects.abstract_image import AbstractImage
 from resippy.image_objects.envi.envi_metadata import EnviMetadata
 
-import gdal
+from osgeo import gdal
 from numpy import ndarray
-import numpy as np
+import numpy
 import os
 
 
@@ -14,6 +14,7 @@ class EnviImage(AbstractImage):
         super(EnviImage, self).__init__()
         self._dset = None
 
+    # TODO: raise error if the image file does not exist
     @classmethod
     def init_from_file(cls,
                        image_file_path,         # type: str

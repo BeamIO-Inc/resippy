@@ -4,7 +4,7 @@ import gdal
 import numpy as np
 import osr
 from numpy import ndarray
-# from osgeo import gdal_array
+from osgeo import gdal_array
 from pyproj import Proj
 
 from resippy.image_objects.earth_overhead.abstract_earth_overhead_image import AbstractEarthOverheadImage
