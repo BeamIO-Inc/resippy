@@ -34,6 +34,7 @@ def numpy_dtype_to_envi_dtype(envi_dtype,       # type: int
             return int(key)
 
 
+# TODO: there's a bug that won't read the last line if there's no newline character at the end of the header file.
 def read_envi_header(header_fname,      # type: str
                      ):                 # type:(...)-> dict
     valid_entries = ['acquisition time',
