@@ -55,28 +55,41 @@ igm_image_obj = IgmImage.from_params(raw_rgb_8_bit, igm_lons, igm_lats, igm_alts
 
 # TODO: here we would do keypoint matching on the ortho'd image, then get the lat/lon coordinates for the keypoint matches, and do the step below to get the pixel coordinates from the raw frames.
 
+# found inspecting the image in qgis and selecting a point on the center of a car in the parking lot.
 test_car_coord_lon = -71.6003424
 test_car_coord_lat = 42.4285518
 
 dem = ConstantElevationDem()
-raw_x_y_pixel_coord = igm_image_obj.point_calc.lon_lat_alt_to_pixel_x_y(test_car_coord_lon, test_car_coord_lat, 0)
-reprojected_test_car_lon_lat_coord = igm_image_obj.point_calc.pixel_x_y_to_lon_lat_alt(int(raw_x_y_pixel_coord[0]), int(raw_x_y_pixel_coord[1]), dem)
 
-stop = 1
+envi_ortho_image_data = read_envi_image(envi_ortho_fname, envi_ortho_header_fname)
+envi_ortho_header = read_envi_header(envi_ortho_header_fname)
+mapinfo_fields = envi_ortho_header['map info'].split(',')
+lon_ul = float(mapinfo_fields[3])
+lat_ul = float(mapinfo_fields[4])
+lon_gsd = float(mapinfo_fields[5])
+lat_gsd = float(mapinfo_fields[6])
+
+geot = (lon_ul, lon_gsd, 0, lat_ul, 0, -lat_gsd)
+geot_image = ImageFactory.geotiff.from_numpy_array(envi_ortho_image_data, geot, crs_defs.PROJ_4326)
+
+# taken by viewing the ortho'd image using matplotlib and selecting a pixel on the center of a car in the parking lot
+geot_pixel_x = 311
+geot_pixel_y = 780
+
+lon_lat_from_ortho = geot_image.pointcalc.pixel_x_y_alt_to_lon_lat(geot_pixel_x, geot_pixel_y, 0, crs_defs.PROJ_4326)
+
+raw_x_y_pixel_coord_from_known_lon_lat = igm_image_obj.point_calc.lon_lat_alt_to_pixel_x_y(test_car_coord_lon, test_car_coord_lat, 0)
+reprojected_test_car_lon_lat_coord = igm_image_obj.point_calc.pixel_x_y_to_lon_lat_alt(int(raw_x_y_pixel_coord_from_known_lon_lat[0]), int(raw_x_y_pixel_coord_from_known_lon_lat[1]), dem)
+
+raw_x_y_pixel_coord_from_geotiff_kp = igm_image_obj.pointcalc.lon_lat_alt_to_pixel_x_y(lon_lat_from_ortho[0], lon_lat_from_ortho[1], 0, crs_defs.PROJ_4326)
+
+
+
 #
-# envi_ortho_header = read_envi_header(envi_ortho_header_fname)
-# mapinfo_fields = envi_ortho_header['map info'].split(',')
-# lon_ul = float(mapinfo_fields[3])
-# lat_ul = float(mapinfo_fields[4])
-# lon_gsd = float(mapinfo_fields[5])
-# lat_gsd = float(mapinfo_fields[6])
+
 #
-# geot = (lon_ul, lon_gsd, 0, lat_ul, 0, -lat_gsd)
-#
-# envi_ortho_image_data = read_envi_image(envi_ortho_fname, envi_ortho_header_fname)
-#
-# geot_image = ImageFactory.geotiff.from_numpy_array(envi_ortho_image_data, geot, crs_defs.PROJ_4326)
 # geot_image.write_to_disk(os.path.join(output_dir, "tmp_geotiff.tif"))
+
 #
 # ul_ortho_kp_match = (0, 0)
 # br_ortho_kp_match = (envi_ortho_header['lines']-1, envi_ortho_header['samples']-1)
