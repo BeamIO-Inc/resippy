@@ -30,7 +30,7 @@ def animate_arm_site_translation_uv_image():
 
 
 def main():
-    # animate_arm_site_translation_uv_image()
+    animate_arm_site_translation_uv_image()
     output_fname = os.path.expanduser("~/Downloads/arm_animation.mp4")
     video_utils.directory_of_images_to_mp4(output_dir, 10, output_fname)
 
